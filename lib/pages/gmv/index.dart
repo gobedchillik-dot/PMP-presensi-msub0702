@@ -39,25 +39,7 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
 
   // --- WIDGET KOMPONEN ---
 
-  Widget _buildActionButton(
-      IconData icon, String text, Color color, BorderRadius borderRadius) {
-    return Expanded(
-      child: ElevatedButton.icon(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: borderRadius),
-        ),
-        icon: Icon(icon, color: Colors.white, size: 18),
-        label: Text(
-          text,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
+  
 
   Widget _buildSummaryCard(Map<String, dynamic> data) {
     final bool isUp = data['isUp'];

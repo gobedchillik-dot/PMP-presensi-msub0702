@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../pages/keuangan/index.dart';
 import '../pages/karyawan/index.dart'; // pastikan path ini sesuai struktur project kamu
 import '../pages/gmv/index.dart'; // pastikan path ini sesuai struktur project kamu
 import '../pages/absen/index.dart'; // pastikan path ini sesuai struktur project kamu
@@ -142,7 +143,15 @@ class _SideBarState extends State<SideBar> {
                         child: const Icon(LucideIcons.dollarSign, color: Colors.green),
                       ),
                       title: const Text('Keuangan', style: TextStyle(color: Colors.white)),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const KeuanganIndexPage(),
+                          ),
+                        );
+                        widget.onClose();
+                      },
                     ),
                     ListTile(
                       leading: Container(

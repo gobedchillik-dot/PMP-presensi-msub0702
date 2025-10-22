@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconsax/iconsax.dart';
 import 'base_page.dart';
 import 'karyawan/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 import 'gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
+// IMPORT BARU: Impor widget animasi yang telah Anda buat
+import '../widget/animated_fade_slide.dart'; // Pastikan path ini benar
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
+
+
   @override
   Widget build(BuildContext context) {
+
+
     return BasePage(
       title: 'Beranda',
       child: SingleChildScrollView(
@@ -17,101 +22,204 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== Header =====
-            Text(
-              "Dashboard",
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.3),
-
+            // ===== Header (Delay: 0.1s, Mulai dari Y=0.3) =====
+            AnimatedFadeSlide(
+              delay: 0.1,
+              beginY: 0.3,
+              child: Text(
+                "Dashboard",
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
             const SizedBox(height: 16),
 
-            // ===== Statistik Cards (Vertikal - Fleksibel) =====
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // ===== Statistik Cards (Vertikal - Staggered) =====
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _StatCard(
-                  title: "Pendapatan",
-                  subtitle: "Rp 1.234.567,89",
-                  color: Colors.greenAccent.shade400,
-                  icon: Iconsax.money_4,
+                // StatCard 1 (Delay: 0.25s)
+                AnimatedFadeSlide(
+                  delay: 0.2,
+                  child: _StatCard(
+                    title: "Pendapatan",
+                    subtitle: "Rp 1.234.567,89",
+                    color: Colors.greenAccent.shade400,
+                    icon: Iconsax.money_4,
                     onTap: () {
-                        Navigator.of(context).push(createRoute(const GmvIndexPage()));
-                      },
+                      Navigator.of(context).push(createRoute(const GmvIndexPage()));
+                    },
+                  ),
                 ),
                 const SizedBox(height: 12),
-                _StatCard(
-                  title: "Validasi Kehadiran",
-                  subtitle: "1.234 data",
-                  color: Colors.blueAccent.shade400,
-                  icon: Iconsax.user_tick,
+
+                // **Increment Delay**
+                Builder(builder: (context) {
+                  return const SizedBox.shrink();
+                }),
+
+                // StatCard 2 (Delay: 0.40s)
+                AnimatedFadeSlide(
+                  delay: 0.3,
+                  child: _StatCard(
+                    title: "Validasi Kehadiran",
+                    subtitle: "1.234 data",
+                    color: Colors.blueAccent.shade400,
+                    icon: Iconsax.user_tick,
+                  ),
                 ),
                 const SizedBox(height: 12),
-                _StatCard(
-                  title: "Data Karyawan",
-                  subtitle: "123 Pekerja",
-                  color: Colors.amberAccent.shade400,
-                  icon: Iconsax.people,
-                  onTap: () {
-                    Navigator.of(context).push(createRoute(const KaryawanIndexPage()));
-                  },
+
+                // **Increment Delay**
+                Builder(builder: (context) {
+                  return const SizedBox.shrink();
+                }),
+
+                // StatCard 3 (Delay: 0.55s)
+                AnimatedFadeSlide(
+                  delay: 0.4,
+                  child: _StatCard(
+                    title: "Data Karyawan",
+                    subtitle: "123 Pekerja",
+                    color: Colors.amberAccent.shade400,
+                    icon: Iconsax.people,
+                    onTap: () {
+                      Navigator.of(context).push(createRoute(const KaryawanIndexPage()));
+                    },
+                  ),
                 ),
               ],
-            ).animate().fadeIn(duration: 800.ms).slideY(begin: 0.2),
+            ),
 
             const SizedBox(height: 24),
 
-            // ===== Rekap Penjualan =====
-            Text(
-              "Rekap Penjualan",
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // ===== Rekap Penjualan Judul (Delay: 0.70s) =====
+            AnimatedFadeSlide(
+              delay: 0.5,
+              child: Text(
+                "Rekap Penjualan",
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
             ),
             const SizedBox(height: 4),
-            Text(
-              "Periode: 1 Oktober – 31 Oktober 2025",
-              style: TextStyle(color: Colors.grey.shade400),
+
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // ===== Rekap Penjualan Subtitle (Delay: 0.75s) =====
+            AnimatedFadeSlide(
+              delay: 0.6,
+              child: Text(
+                "Periode: 1 Oktober – 31 Oktober 2025",
+                style: TextStyle(color: Colors.grey.shade400),
+              ),
             ),
 
             const SizedBox(height: 12),
 
-            _FilterBar(),
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // ===== Filter Bar (Delay: 0.90s) =====
+            AnimatedFadeSlide(
+              delay: 0.7,
+              child: _FilterBar(),
+            ),
 
             const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              height: 150,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C2A3A),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Center(
-                child: Text(
-                  "Belum ada data",
-                  style: TextStyle(color: Colors.white54),
+
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // ===== Chart Placeholder (Delay: 1.05s) =====
+            AnimatedFadeSlide(
+              delay: 0.8,
+              child: Container(
+                width: double.infinity,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1C2A3A),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Belum ada data",
+                    style: TextStyle(color: Colors.white54),
+                  ),
                 ),
               ),
-            ).animate().fadeIn(duration: 1000.ms),
+            ),
 
             const SizedBox(height: 24),
 
-            // ===== Absen Tracker =====
-            Text(
-              "Absen Tracker",
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // ===== Absen Tracker Judul (Delay: 1.20s) =====
+            AnimatedFadeSlide(
+              delay: 0.9,
+              child: Text(
+                "Absen Tracker",
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
             ),
             const SizedBox(height: 12),
 
-            _ProgressItem(name: "Karyawan 1", value: 0.5),
-            _ProgressItem(name: "Karyawan 2", value: 0.75),
-            _ProgressItem(name: "Karyawan 3", value: 1.0),
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+            
+            // Item Absen Tracker 1 (Delay: 1.25s)
+            AnimatedFadeSlide(
+                delay: 1,
+                child: _ProgressItem(name: "Karyawan 1", value: 0.5)),
+
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // Item Absen Tracker 2 (Delay: 1.40s)
+            AnimatedFadeSlide(
+                delay: 1.1,
+                child: _ProgressItem(name: "Karyawan 2", value: 0.75)),
+
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // Item Absen Tracker 3 (Delay: 1.55s)
+            AnimatedFadeSlide(
+                delay: 1.2,
+                child: _ProgressItem(name: "Karyawan 3", value: 1.0)),
           ],
         ),
       ),
@@ -119,7 +227,7 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// ===== Widget Card Statistik =====
+// ===== Widget Card Statistik (Tidak ada perubahan) =====
 class _StatCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -181,7 +289,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ===== Filter Bar (Semua | Hari ini | 7 Hari | 1 Bulan) =====
+// ===== Filter Bar (Tidak ada perubahan) =====
 class _FilterBar extends StatefulWidget {
   @override
   State<_FilterBar> createState() => _FilterBarState();
@@ -194,6 +302,9 @@ class _FilterBarState extends State<_FilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    // Kami menggunakan Builder di HomePage untuk mengemas _FilterBar,
+    // jadi animasi keseluruhan sudah dikerjakan di sana.
+    // Animasi internal untuk tombol-tombol di sini dapat dipertahankan.
     return Row(
       children: filters.asMap().entries.map((entry) {
         final i = entry.key;
@@ -229,7 +340,7 @@ class _FilterBarState extends State<_FilterBar> {
   }
 }
 
-// ===== Progress Tracker Item =====
+// ===== Progress Tracker Item (Tidak ada perubahan) =====
 class _ProgressItem extends StatelessWidget {
   final String name;
   final double value;
@@ -274,7 +385,7 @@ class _ProgressItem extends StatelessWidget {
   }
 }
 
-// ===== Fungsi Route Fleksibel =====
+// ===== Fungsi Route Fleksibel (Tidak diubah) =====
 Route createRoute(Widget page) {
   return PageRouteBuilder(
     transitionDuration: const Duration(milliseconds: 400),
@@ -298,4 +409,3 @@ Route createRoute(Widget page) {
     },
   );
 }
-
