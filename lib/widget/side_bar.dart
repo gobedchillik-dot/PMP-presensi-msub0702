@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../pages/karyawan/index.dart'; // pastikan path ini sesuai struktur project kamu
+import '../pages/gmv/index.dart'; // pastikan path ini sesuai struktur project kamu
 
 class SideBar extends StatefulWidget {
   final bool isOpen;
@@ -110,7 +111,13 @@ class _SideBarState extends State<SideBar> {
                             "Data GMV",
                             LucideIcons.barChart3,
                             () {
-                              // Aksi submenu GMV
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const GmvIndexPage(),
+                                ),
+                              );
+                              widget.onClose();
                             },
                           ),
                         ],
