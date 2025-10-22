@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../pages/karyawan/index.dart'; // pastikan path ini sesuai struktur project kamu
 import '../pages/gmv/index.dart'; // pastikan path ini sesuai struktur project kamu
+import '../pages/absen/index.dart'; // pastikan path ini sesuai struktur project kamu
 
 class SideBar extends StatefulWidget {
   final bool isOpen;
@@ -104,7 +105,13 @@ class _SideBarState extends State<SideBar> {
                             "Data Absen",
                             LucideIcons.calendarCheck,
                             () {
-                              // Aksi submenu absen
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AbsenIndexPage(),
+                                ),
+                              );
+                              widget.onClose();
                             },
                           ),
                           _buildSubmenuItem(

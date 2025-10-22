@@ -153,27 +153,45 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
             ),
             const SizedBox(height: 20),
 
-            // ===== 2. ACTION BUTTONS (Delay 0.2) =====
+            // ===== TOMBOL EDIT & TAMBAH DATA =====
             AnimatedFadeSlide(
               delay: 0.2,
               child: Row(
                 children: [
-                  _buildActionButton(
-                    Icons.edit_outlined,
-                    "Edit data",
-                    const Color(0xFF00BCD4), 
-                    const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.edit, color: Colors.black),
+                      label: const Text("Edit data"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00BCD4),
+                        foregroundColor: Colors.black,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(12),
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
                     ),
                   ),
-                  _buildActionButton(
-                    Icons.add_circle_outline,
-                    "Tambah data",
-                    const Color(0xFF00E676), 
-                    const BorderRadius.only(
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.add_circle, color: Colors.black),
+                      label: const Text("Tambah data"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00E676),
+                        foregroundColor: Colors.black,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
                     ),
                   ),
                 ],
