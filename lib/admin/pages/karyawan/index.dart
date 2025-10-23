@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../widget/animated_fade_slide.dart';
-import '../base_page.dart';
-import '../home_page.dart';
+import '../../../base_page.dart';
+import '../../home_page.dart';
 
 class KaryawanIndexPage extends StatefulWidget {
   const KaryawanIndexPage({super.key});
@@ -29,7 +29,7 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                       Navigator.pushReplacement(
                         context,
                         PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const HomePage(),
+                          pageBuilder: (_, __, ___) => const adminHomePage(),
                           transitionsBuilder: (context, animation, secondaryAnimation, child) {
                             final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
                             final slide = Tween<Offset>(

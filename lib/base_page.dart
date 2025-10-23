@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widget/top_bar.dart';
-import '../widget/bottom_bar.dart';
-import '../widget/side_bar.dart';
+import 'admin/widget/top_bar.dart';
+import 'admin/widget/bottom_bar.dart';
+import 'admin/widget/side_bar.dart';
 
 class BasePage extends StatefulWidget {
   final Widget child; // konten unik setiap halaman

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import '../base_page.dart';
-import '../../widget/animated_fade_slide.dart';
-import '../../pages/home_page.dart';
 
-// Data dan Konstanta Global (Boleh tetap di sini, karena ini hanya data dan konstanta)
+// IMPORT BARU: Impor widget animasi yang telah Anda buat
+import 'package:tes_flutter/admin/widget/animated_fade_slide.dart'; // Pastikan path ini benar
+
 final List<String> employeeNames = [
   'Karyawan A',
   'Karyawan B',
@@ -24,19 +25,19 @@ const int totalDays = 30;
 const double rowHeight = 35.0;
 const double boxWidth = 24.0; // Dibuat const
 
-class AbsenIndexPage extends StatefulWidget {
-  const AbsenIndexPage({super.key});
+class karyawanHomePage extends StatefulWidget {
+  const karyawanHomePage({super.key});
 
   @override
-  State<AbsenIndexPage> createState() => _AbsenIndexPageState();
+  State<karyawanHomePage> createState() => _karyawanHomePageState();
 }
 
-class _AbsenIndexPageState extends State<AbsenIndexPage> {
+class _karyawanHomePageState extends State<karyawanHomePage> {
   // DEKLARASI ScrollController DI DALAM STATE
   late ScrollController _headerScrollController;
   late ScrollController _dataScrollController;
 
-  @override
+   @override
   void initState() {
     super.initState();
     // INISIALISASI DI DALAM initState()
@@ -73,99 +74,101 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return BasePage(
-      title: "Data Absen",
+      title: 'Hi, karyawan',
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // === Tombol Kembali dan Judul ===
+            // ===== Header (Delay: 0.1s, Mulai dari Y=0.3) =====
             AnimatedFadeSlide(
               delay: 0.1,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const HomePage(),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
-                            final slide = Tween<Offset>(
-                              begin: const Offset(-0.2, 0),
-                              end: Offset.zero,
-                            ).animate(animation);
-                            return FadeTransition(
-                              opacity: fade,
-                              child: SlideTransition(position: slide, child: child),
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 300),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  ),
-                  const Text(
-                    "Data absensi karyawan",
-                    style: TextStyle(
+              beginY: 0.3,
+              child: Text(
+                "Dashboard",
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                       color: Colors.white,
-                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ],
               ),
             ),
-            const SizedBox(height: 20),
-            // === Tombol Edit & Tambah ===
+            const SizedBox(height: 16),
+
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // ===== Statistik Cards (Vertikal - Staggered) =====
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // StatCard 1 (Delay: 0.25s)
+                AnimatedFadeSlide(
+                  delay: 0.2,
+                  child: _StatCard(
+                    title: "Estimasi penghasilan",
+                    subtitle: "Rp 1.234.567,89",
+                    color: Colors.greenAccent.shade400,
+                    icon: Iconsax.money_4,
+                    onTap: () {
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // **Increment Delay**
+                Builder(builder: (context) {
+                  return const SizedBox.shrink();
+                }),
+
+                // StatCard 2 (Delay: 0.40s)
+                AnimatedFadeSlide(
+                  delay: 0.3,
+                  child: _StatCard(
+                    title: "Absensi Kehadiran",
+                    subtitle: " ",
+                    color: Colors.blueAccent.shade400,
+                    icon: Iconsax.user_tick,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // **Increment Delay**
+                Builder(builder: (context) {
+                  return const SizedBox.shrink();
+                }),
+
+                // StatCard 3 (Delay: 0.55s)
+                AnimatedFadeSlide(
+                  delay: 0.4,
+                  child: _StatCard(
+                    title: "Riwayat absen",
+                    subtitle: " ",
+                    color: Colors.amberAccent.shade400,
+                    icon: Iconsax.video_tick,
+                    onTap: () {
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
             AnimatedFadeSlide(
-              delay: 0.2,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.edit, color: Colors.black),
-                      label: const Text("Edit data"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00BCD4),
-                        foregroundColor: Colors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            bottomLeft: Radius.circular(12),
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
+              delay: 0.9,
+              child: Text(
+                "Rekap kehadiran anda",
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.add_circle, color: Colors.black),
-                      label: const Text("Tambah data"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00E676),
-                        foregroundColor: Colors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(12),
-                            bottomRight: Radius.circular(12),
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
             // ----------------------------------------------------------------
             // === TABEL DATA ABSEN (Bagian Sinkronisasi Scroll) ===
@@ -304,35 +307,97 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
                 ),
               ),
             ),
-            
-            // ----------------------------------------------------------------
-            // === Absen Tracker ===
-            // ----------------------------------------------------------------
 
             const SizedBox(height: 24),
+
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+
+            // ===== Absen Tracker Judul (Delay: 1.20s) =====
             AnimatedFadeSlide(
-              delay: 0.6,
-              child: const Text(
-                "Absen tracker",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              delay: 0.9,
+              child: Text(
+                "Absen Tracker anda",
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ),
             const SizedBox(height: 12),
+
+            // **Increment Delay**
+            Builder(builder: (context) {
+              return const SizedBox.shrink();
+            }),
+            
+            // Item Absen Tracker 1 (Delay: 1.25s)
             AnimatedFadeSlide(
-              delay: 0.8,
-              child: const _AbsenProgress(name: "Karyawan 1", value: 0.5),
+                delay: 1,
+                child: _ProgressItem(name: "50/100", value: 0.5)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ===== Widget Card Statistik (Tidak ada perubahan) =====
+class _StatCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback? onTap;
+
+  const _StatCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C2A3A),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 28),
             ),
-            AnimatedFadeSlide(
-              delay: 1.0,
-              child: const _AbsenProgress(name: "Karyawan 2", value: 0.75),
-            ),
-            AnimatedFadeSlide(
-              delay: 1.2,
-              child: const _AbsenProgress(name: "Karyawan 3", value: 1.0),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -341,11 +406,66 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
   }
 }
 
-class _AbsenProgress extends StatelessWidget {
+// ===== Filter Bar (Tidak ada perubahan) =====
+class _FilterBar extends StatefulWidget {
+  @override
+  State<_FilterBar> createState() => _FilterBarState();
+}
+
+class _FilterBarState extends State<_FilterBar> {
+  int selected = 3; // default: 1 Bulan
+
+  final filters = ["Semua", "Hari ini", "7 Hari", "1 Bulan"];
+
+  @override
+  Widget build(BuildContext context) {
+    // Kami menggunakan Builder di HomePage untuk mengemas _FilterBar,
+    // jadi animasi keseluruhan sudah dikerjakan di sana.
+    // Animasi internal untuk tombol-tombol di sini dapat dipertahankan.
+    return Row(
+      children: filters.asMap().entries.map((entry) {
+        final i = entry.key;
+        final text = entry.value;
+        final active = selected == i;
+
+        return Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: GestureDetector(
+            onTap: () => setState(() => selected = i),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: active
+                    ? Colors.blueAccent.shade400
+                    : Colors.transparent,
+                border: Border.all(color: Colors.blueAccent.shade400),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: active ? Colors.white : Colors.blueAccent.shade200,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ===== Progress Tracker Item (Tidak ada perubahan) =====
+class _ProgressItem extends StatelessWidget {
   final String name;
   final double value;
 
-  const _AbsenProgress({required this.name, required this.value});
+  const _ProgressItem({
+    required this.name,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -359,15 +479,10 @@ class _AbsenProgress extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(name,
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500)),
-              Text("${(value * 100).toInt()}/100",
-                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
-            ],
+          Text(
+            name,
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 6),
           ClipRRect(
@@ -377,7 +492,7 @@ class _AbsenProgress extends StatelessWidget {
               minHeight: 8,
               backgroundColor: Colors.white10,
               valueColor: AlwaysStoppedAnimation<Color>(
-                Colors.lightBlueAccent.shade400,
+                Colors.blueAccent.shade400,
               ),
             ),
           ),
@@ -385,4 +500,29 @@ class _AbsenProgress extends StatelessWidget {
       ),
     );
   }
+}
+
+// ===== Fungsi Route Fleksibel (Tidak diubah) =====
+Route createRoute(Widget page) {
+  return PageRouteBuilder(
+    transitionDuration: const Duration(milliseconds: 400),
+    reverseTransitionDuration: const Duration(milliseconds: 400),
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0); // slide dari kanan
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
+
+      final tween =
+          Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+      );
+    },
+  );
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../home_page.dart';
+import '../../home_page.dart';
 // Import BasePage (asumsi path ini benar dari pages/profil/index.dart)
-import '../base_page.dart'; 
+import '../../../base_page.dart'; 
 // Import AnimatedFadeSlide
 import '../../widget/animated_fade_slide.dart'; 
 
@@ -32,7 +32,7 @@ class ProfilIndexPage extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const HomePage(),
+                          pageBuilder: (_, __, ___) => const adminHomePage(),
                           transitionsBuilder: (context, animation, secondaryAnimation, child) {
                             final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
                             final slide = Tween<Offset>(

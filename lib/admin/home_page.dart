@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'base_page.dart';
-import 'karyawan/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
-import 'gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
+import '../base_page.dart';
+import 'pages/karyawan/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
+import 'pages/gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 // IMPORT BARU: Impor widget animasi yang telah Anda buat
-import '../widget/animated_fade_slide.dart'; // Pastikan path ini benar
+import '../admin/widget/animated_fade_slide.dart'; // Pastikan path ini benar
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class adminHomePage extends StatelessWidget {
+  const adminHomePage({super.key});
 
 
 
@@ -16,7 +16,7 @@ class HomePage extends StatelessWidget {
 
 
     return BasePage(
-      title: 'Beranda',
+      title: 'Dashboard',
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -54,7 +54,12 @@ class HomePage extends StatelessWidget {
                     color: Colors.greenAccent.shade400,
                     icon: Iconsax.money_4,
                     onTap: () {
-                      Navigator.of(context).push(createRoute(const GmvIndexPage()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GmvIndexPage(),
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -91,7 +96,12 @@ class HomePage extends StatelessWidget {
                     color: Colors.amberAccent.shade400,
                     icon: Iconsax.people,
                     onTap: () {
-                      Navigator.of(context).push(createRoute(const KaryawanIndexPage()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const KaryawanIndexPage(),
+                        ),
+                      );
                     },
                   ),
                 ),
