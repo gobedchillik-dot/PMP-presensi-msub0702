@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../base_page.dart';
+import '../../base_page.dart';
 import '../../widget/animated_fade_slide.dart';
 import '../../home_page.dart';
 

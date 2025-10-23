@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../home_page.dart';
 // Import BasePage (asumsi path ini benar dari pages/profil/index.dart)
-import '../../../base_page.dart'; 
+import '../../base_page.dart'; 
 // Import AnimatedFadeSlide
 import '../../widget/animated_fade_slide.dart'; 
 

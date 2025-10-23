@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../widget/animated_fade_slide.dart';
-import '../../../base_page.dart';
+import '../../base_page.dart';
 import '../../home_page.dart';
 
 class KaryawanIndexPage extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import '../base_page.dart';
+import 'base_page.dart';
 import 'pages/karyawan/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 import 'pages/gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 // IMPORT BARU: Impor widget animasi yang telah Anda buat

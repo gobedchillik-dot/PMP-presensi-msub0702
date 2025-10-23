@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 // Import wajib untuk animasi:
 import '../../widget/animated_fade_slide.dart'; 
-import '../../../base_page.dart'; 
+import '../../base_page.dart'; 
 // Import wajib untuk navigasi tombol back:
 import '../../home_page.dart'; 
 

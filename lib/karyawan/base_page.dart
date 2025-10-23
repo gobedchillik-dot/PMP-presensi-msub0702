@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'admin/widget/top_bar.dart';
-import 'admin/widget/bottom_bar.dart';
-import 'admin/widget/side_bar.dart';
+import 'widget/top_bar.dart';
+import 'widget/bottom_bar.dart';
 
 class BasePage extends StatefulWidget {
   final Widget child; // konten unik setiap halaman
@@ -43,14 +42,7 @@ class _BasePageState extends State<BasePage>
     });
   }
 
-  void _closeSidebar() {
-    if (_isSidebarVisible) {
-      setState(() {
-        _isSidebarVisible = false;
-        _sidebarController.reverse();
-      });
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -85,34 +77,6 @@ class _BasePageState extends State<BasePage>
               );
             },
           ),
-        ),
-
-        // === SIDEBAR OVERLAY ===
-        AnimatedBuilder(
-          animation: _sidebarController,
-          builder: (context, child) {
-            double slide = 250 * _sidebarController.value;
-            double opacity = _sidebarController.value * 0.5;
-            return Stack(
-              children: [
-                if (_isSidebarVisible)
-                  GestureDetector(
-                    onTap: _closeSidebar,
-                    child: Opacity(
-                      opacity: opacity,
-                      child: Container(color: Colors.black54),
-                    ),
-                  ),
-                Transform.translate(
-                  offset: Offset(slide - 250, 0),
-                  child: SideBar(
-                    isOpen: _isSidebarVisible,
-                    onClose: _toggleSidebar,
-                  ),
-                ),
-              ],
-            );
-          },
         ),
       ],
     );

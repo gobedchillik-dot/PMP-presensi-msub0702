@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import '../base_page.dart';
+import '../admin/base_page.dart';
 
 // IMPORT BARU: Impor widget animasi yang telah Anda buat
 import 'package:tes_flutter/admin/widget/animated_fade_slide.dart';
