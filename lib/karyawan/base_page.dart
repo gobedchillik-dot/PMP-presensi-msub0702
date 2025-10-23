@@ -4,8 +4,14 @@ import 'widget/bottom_bar.dart';
 
 class BasePage extends StatefulWidget {
   final Widget child; // konten unik setiap halaman
-  final String title; // judul halaman (opsional)
-  const BasePage({super.key, required this.child, this.title = ''});
+  final String title; // nama karyawan
+  final bool isPresentToday; // status kehadiran
+  const BasePage({
+    super.key,
+    required this.child,
+    required this.title,
+    required this.isPresentToday,
+  });
 
   @override
   State<BasePage> createState() => _BasePageState();
@@ -42,15 +48,20 @@ class _BasePageState extends State<BasePage>
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         Scaffold(
           backgroundColor: const Color(0xFF0E1A2A),
-          appBar: TopBar(onMenuTap: _toggleSidebar, title: widget.title),
+          
+          // ✅ TopBar versi baru
+          appBar: TopBar(
+            employeeName: widget.title,
+            isPresentToday: widget.isPresentToday,
+            onAvatarTap: _toggleSidebar, // aksi ketika avatar ditekan
+          ),
+          
           body: LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(

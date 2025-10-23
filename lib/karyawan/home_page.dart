@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import '../admin/base_page.dart';
+import '../karyawan/base_page.dart';
 
 // IMPORT BARU: Impor widget animasi yang telah Anda buat
 import 'package:tes_flutter/admin/widget/animated_fade_slide.dart';
@@ -51,8 +51,10 @@ class _karyawanHomePageState extends State<karyawanHomePage> {
     // Ganti "karyawan" dengan nama karyawan yang login (sesuai diskusi sebelumnya)
     const String userName = "Budi"; 
 
+
     return BasePage(
-      title: 'Hi, $userName', // Menggunakan nama pengguna yang login
+      title: '$userName', // Menggunakan nama pengguna yang login
+      isPresentToday: false,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -177,7 +179,7 @@ class _AttendanceCalendar extends StatelessWidget {
   // Fungsi pembantu untuk membuat kotak tanggal
   Widget _buildDateBox(int day, bool isAttended) {
     return Container(
-      width: 40,
+      width: 50,
       height: 40,
       margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -205,7 +207,7 @@ class _AttendanceCalendar extends StatelessWidget {
     // Buat daftar kotak kosong (padding) sebelum tanggal 1
     final List<Widget> calendarBoxes = List.generate(
       startDayOfWeek - 1,
-      (index) => const SizedBox(width: 40, height: 40),
+      (index) => const SizedBox(width: 50, height: 40),
     );
 
     // Tambahkan kotak tanggal
