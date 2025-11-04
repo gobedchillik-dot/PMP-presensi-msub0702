@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "37505999127",
+    "project_id": "praktikharian",
+    "storage_bucket": "praktikharian.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:37505999127:android:83f0385d6593a4d858d752",
+        "android_client_info": {
+          "package_name": "com.example.latihan_harian"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuLpL0x4lGN5VUZ7qw3QlCwtblsQaLeMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:37505999127:android:f34fef0340fbf7f658d752",
+        "android_client_info": {
+          "package_name": "com.example.tes_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuLpL0x4lGN5VUZ7qw3QlCwtblsQaLeMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

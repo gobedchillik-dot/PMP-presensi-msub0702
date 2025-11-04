@@ -11,10 +11,10 @@ class SideBar extends StatefulWidget {
   final VoidCallback onClose;
 
   const SideBar({
-    Key? key,
+    super.key,
     required this.isOpen,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   State<SideBar> createState() => _SideBarState();

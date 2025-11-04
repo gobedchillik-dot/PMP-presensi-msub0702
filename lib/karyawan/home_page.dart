@@ -53,8 +53,8 @@ class _karyawanHomePageState extends State<karyawanHomePage> {
 
 
     return BasePage(
-      title: '$userName', // Menggunakan nama pengguna yang login
-      isPresentToday: false,
+      title: userName, // Menggunakan nama pengguna yang login
+      isPresentToday: true,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
