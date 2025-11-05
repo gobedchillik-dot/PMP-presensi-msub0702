@@ -5,6 +5,9 @@ import '../pages/keuangan/index.dart';
 import '../pages/karyawan/index.dart'; // pastikan path ini sesuai struktur project kamu
 import '../pages/gmv/index.dart'; // pastikan path ini sesuai struktur project kamu
 import '../pages/absen/index.dart'; // pastikan path ini sesuai struktur project kamu
+import 'package:tes_flutter/auth/auth_service.dart';
+import 'package:tes_flutter/auth/login_page.dart';
+
 
 class SideBar extends StatefulWidget {
   final bool isOpen;
@@ -196,7 +199,47 @@ class _SideBarState extends State<SideBar> {
               ListTile(
                 leading: const Icon(LucideIcons.logOut, color: Colors.red),
                 title: const Text('Keluar', style: TextStyle(color: Colors.red)),
-                onTap: widget.onClose,
+                onTap: () async {
+
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: const Color(0xFF1F3B5B),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      title: const Text(
+                        'Konfirmasi Logout',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      content: const Text(
+                        'Apakah Anda yakin ingin keluar?',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Batal', style: TextStyle(color: Colors.white70)),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Keluar', style: TextStyle(color: Colors.redAccent)),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm == true) {
+                    widget.onClose(); // tutup sidebar dulu
+                    await AuthService.signOut(); // ✅ Logout dari Firebase
+
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (route) => false,
+                      );
+                    }
+                  }
+                },
               ),
 
               const Padding(

@@ -1,28 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tes_flutter/auth/auth_service.dart'; // ✅ Tambahkan ini
 import '../karyawan/base_page.dart';
-
-// IMPORT BARU: Impor widget animasi yang telah Anda buat
 import 'package:tes_flutter/admin/widget/animated_fade_slide.dart';
 
-// Data statis yang tidak lagi digunakan untuk tabel banyak karyawan, 
-// tetapi kita pertahankan 'attendanceData[0]' sebagai simulasi data karyawan login
-final List<String> employeeNames = [
-  'Karyawan A',
-  'Karyawan B',
-  'Karyawan C',
-  'Karyawan D',
-  'Karyawan E',
-];
+final List<bool> currentUserAttendance = List.generate(31, (day) => day < 30 ? day % 3 != 0 : true); // Data simulasi 31 hari const int totalDaysInMonth = 31; const double rowHeight = 35.0; const double boxWidth = 24.0;
 
-// Kita akan asumsikan data absensi karyawan yang login adalah baris pertama (index 0)
-final List<bool> currentUserAttendance = List.generate(31, (day) => day < 30 ? day % 3 != 0 : true); // Data simulasi 31 hari
-
-const int totalDaysInMonth = 31;
-const double rowHeight = 35.0;
-const double boxWidth = 24.0;
-
-// ✅ PERBAIKAN: Mengubah StatelessWidget menjadi StatefulWidget (dari perbaikan sebelumnya)
 class karyawanHomePage extends StatefulWidget {
   const karyawanHomePage({super.key});
 
@@ -31,50 +15,65 @@ class karyawanHomePage extends StatefulWidget {
 }
 
 class _karyawanHomePageState extends State<karyawanHomePage> {
-  // ScrollController tidak diperlukan lagi karena kita tidak menyinkronkan 2 tabel horizontal.
-  // ScrollController yang lama dihapus.
+  String? userName; // ✅ nama user yang akan ditampilkan
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // initState kini kosong karena ScrollController dihapus.
+    _loadCurrentUser();
   }
 
-  @override
-  void dispose() {
-    // dispose kini kosong karena ScrollController dihapus.
-    super.dispose();
+  Future<void> _loadCurrentUser() async {
+    try {
+      // ✅ Ambil current user dari AuthService (FirebaseAuth)
+      final user = AuthService.currentUser;
+      if (user != null) {
+        // ✅ Ambil data user dari Firestore
+        final doc = await FirebaseFirestore.instance
+            .collection('tbl_user') // pastikan nama koleksi sesuai
+            .doc(user.uid)
+            .get();
+
+        setState(() {
+          userName = doc.data()?['name'] ?? user.email ?? 'Pengguna';
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          userName = 'Tidak ada pengguna aktif';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        userName = 'Gagal memuat user';
+        isLoading = false;
+      });
+      debugPrint('Error load current user: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Ganti "karyawan" dengan nama karyawan yang login (sesuai diskusi sebelumnya)
-    const String userName = "Budi"; 
-
+    if (isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF0F1E33),
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
 
     return BasePage(
-      title: userName, // Menggunakan nama pengguna yang login
+      title: userName ?? "Tidak Diketahui", // ✅ tampilkan nama login
       isPresentToday: true,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== Header =====
-            AnimatedFadeSlide(
-              delay: 0.1,
-              beginY: 0.3,
-              child: Text(
-                "Dashboard Karyawan",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // ===== Statistik Cards (Tetap dipertahankan) =====
+            
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

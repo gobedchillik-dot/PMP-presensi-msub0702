@@ -50,20 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDiYAv8a8qzB4Qppb5KmjBMOvNwuE9CoHo',
-    appId: '1:37505999127:web:cd4cded3a85dad9958d752',
-    messagingSenderId: '37505999127',
-    projectId: 'praktikharian',
-    authDomain: 'praktikharian.firebaseapp.com',
-    storageBucket: 'praktikharian.firebasestorage.app',
-    measurementId: 'G-ZT61Q561G6',
+    apiKey: 'AIzaSyAsqU8Pem0Lh1rZ7AeZMcG-FjF_K1NVfLA',
+    appId: '1:816278424553:web:968dbbb8ed5dc7d2005978',
+    messagingSenderId: '816278424553',
+    projectId: 'absensimsub0702',
+    authDomain: 'absensimsub0702.firebaseapp.com',
+    storageBucket: 'absensimsub0702.firebasestorage.app',
+    measurementId: 'G-QE889VFBSC',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBuLpL0x4lGN5VUZ7qw3QlCwtblsQaLeMI',
-    appId: '1:37505999127:android:f34fef0340fbf7f658d752',
-    messagingSenderId: '37505999127',
-    projectId: 'praktikharian',
-    storageBucket: 'praktikharian.firebasestorage.app',
+    apiKey: 'AIzaSyD_qX2uhL66gkVPcVtpqOeifOo2hlsjNK0',
+    appId: '1:816278424553:android:79e20702838adef1005978',
+    messagingSenderId: '816278424553',
+    projectId: 'absensimsub0702',
+    storageBucket: 'absensimsub0702.firebasestorage.app',
   );
+
 }

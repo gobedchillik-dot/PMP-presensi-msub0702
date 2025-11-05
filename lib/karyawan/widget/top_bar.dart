@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../pages/profil/index.dart'; // Ganti 'your_app' dengan nama project kamu
+import '../pages/profil/index.dart';
+import 'package:tes_flutter/auth/auth_service.dart';
+import 'package:tes_flutter/auth/login_page.dart';
 
 class TopBar extends StatelessWidget implements PreferredSizeWidget {
   final String employeeName;
@@ -84,33 +86,27 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   );
                 } else if (value == 'keluar') {
-                  // Nanti diisi aksi logout
+                  _handleLogout(context);
                 }
               },
               itemBuilder: (context) => [
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'profil',
                   child: Row(
-                    children: const [
+                    children: [
                       Icon(Icons.account_circle, color: Colors.white),
                       SizedBox(width: 10),
-                      Text(
-                        'Profil',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      Text('Profil', style: TextStyle(color: Colors.white)),
                     ],
                   ),
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'keluar',
                   child: Row(
-                    children: const [
+                    children: [
                       Icon(Icons.logout, color: Colors.white),
                       SizedBox(width: 10),
-                      Text(
-                        'Keluar',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      Text('Keluar', style: TextStyle(color: Colors.white)),
                     ],
                   ),
                 ),
@@ -120,6 +116,45 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F3B5B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text(
+          'Konfirmasi Keluar',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Apakah Anda yakin ingin logout?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal', style: TextStyle(color: Colors.white70)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Keluar', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await AuthService.signOut();
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
+      }
+    }
   }
 
   @override
