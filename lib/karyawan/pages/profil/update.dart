@@ -102,7 +102,7 @@ class _ProfilUpdatePageState extends State<ProfilUpdatePage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const profilIndexPage()),
+        MaterialPageRoute(builder: (_) => const ProfilIndexPage()),
       );
     }
   }
@@ -125,7 +125,7 @@ class _ProfilUpdatePageState extends State<ProfilUpdatePage> {
                     IconButton(
                       onPressed: () => Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const profilIndexPage()),
+                        MaterialPageRoute(builder: (_) => const ProfilIndexPage()),
                       ),
                       icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                     ),
