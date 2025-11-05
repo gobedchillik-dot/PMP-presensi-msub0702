@@ -174,7 +174,7 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                                 Expanded(
                                   flex: 4,
                                   child: Text(
-                                    user.name,
+                                    user.email,
                                     style: const TextStyle(color: Colors.white),
                                     overflow: TextOverflow.ellipsis,
                                   ),

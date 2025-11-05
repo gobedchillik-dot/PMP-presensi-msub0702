@@ -82,7 +82,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ProfilIndexPage(),
+                      builder: (context) => const profilIndexPage(),
                     ),
                   );
                 } else if (value == 'keluar') {

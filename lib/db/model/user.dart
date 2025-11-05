@@ -4,16 +4,24 @@ class UserModel {
   final String uid;
   final String name;
   final String email;
-  final String phone;
+  final String nohp;
   final String role;
+  final String norek;
+  final String bank;
+  final String panggilan;
+  final String alamat;
   // Anda bisa menambahkan field lain yang dibutuhkan di sini, seperti 'imageUrl', 'jabatan', dll.
 
   UserModel({
     required this.uid,
     required this.name,
     required this.email,
-    required this.phone,
+    required this.nohp,
     required this.role,
+    required this.norek,
+    required this.bank,
+    required this.panggilan,
+    required this.alamat,
   });
 
   // Factory constructor untuk membuat objek dari data Firestore
@@ -22,8 +30,12 @@ class UserModel {
       uid: data['uid'] ?? '',
       name: data['name'] ?? '',
       email: data['email'] ?? '',
-      phone: data['phone'] ?? '',
-      role: data['role'] ?? 'pegawai', // Default role jika tidak ditemukan
+      nohp: data['nohp'] ?? '',
+      norek: data['norek'] ?? '',
+      bank: data['bank'] ?? '',
+      panggilan: data['panggilan'] ?? '',
+      alamat: data['alamat'] ?? '',
+      role: data['role'] ?? 'karyawan', // Default role jika tidak ditemukan
     );
   }
 
@@ -33,7 +45,7 @@ class UserModel {
       'uid': uid,
       'name': name,
       'email': email,
-      'phone': phone,
+      'nohp': nohp,
       'role': role,
       'createdAt': FieldValue.serverTimestamp(), // Timestamp untuk rekaman waktu
     };

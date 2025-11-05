@@ -22,6 +22,9 @@ class _karyawanHomePageState extends State<karyawanHomePage> {
   void initState() {
     super.initState();
     _loadCurrentUser();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+    AuthService.checkUserProfileCompleteness(context);
+  });
   }
 
   Future<void> _loadCurrentUser() async {

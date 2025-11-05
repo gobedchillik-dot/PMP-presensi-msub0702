@@ -60,12 +60,6 @@ class KaryawanController {
   Future<void> addKaryawan({
     required String email,
     required String password,
-    required String namaLengkap,
-    required String panggilan,
-    required String alamat,
-    required String norek,
-    required String bank,
-    required String noTelp,
   }) async {
     try {
       // 1️⃣ Buat akun di Firebase Authentication
@@ -80,19 +74,19 @@ class KaryawanController {
       Map<String, dynamic> data = {
         'uid': uid,
         'email': email,
-        'name': namaLengkap,
-        'panggilan': panggilan,
-        'alamat': alamat,
-        'norek': norek,
-        'bank': bank,
-        'nohp': noTelp,
+        'name': '',
+        'panggilan': '',
+        'alamat': '',
+        'norek': '',
+        'bank': '',
+        'nohp': '',
         'role': 'karyawan',
         'created_at': FieldValue.serverTimestamp(),
       };
 
       await _firestore.collection('tbl_user').doc(uid).set(data);
 
-      print('✅ Berhasil menambahkan karyawan baru: $namaLengkap');
+      print('✅ Berhasil menambahkan karyawan baru: $email');
     } on FirebaseAuthException catch (e) {
       // 3️⃣ Tangani error Firebase Auth
       if (e.code == 'email-already-in-use') {
