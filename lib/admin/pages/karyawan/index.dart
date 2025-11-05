@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../db/controller/karyawan_controller.dart';
+import '../../../db/model/user.dart';
 import '../../widget/animated_fade_slide.dart';
 import '../../base_page.dart';
 import '../../home_page.dart';
+import 'add.page.dart'; 
 
 class KaryawanIndexPage extends StatefulWidget {
   const KaryawanIndexPage({super.key});
@@ -11,6 +15,8 @@ class KaryawanIndexPage extends StatefulWidget {
 }
 
 class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
+  final KaryawanController _controller = KaryawanController();
+
   @override
   Widget build(BuildContext context) {
     return BasePage(
@@ -30,18 +36,22 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                         context,
                         PageRouteBuilder(
                           pageBuilder: (_, __, ___) => const adminHomePage(),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            final fade =
+                                Tween(begin: 0.0, end: 1.0).animate(animation);
                             final slide = Tween<Offset>(
                               begin: const Offset(-0.2, 0),
                               end: Offset.zero,
                             ).animate(animation);
                             return FadeTransition(
                               opacity: fade,
-                              child: SlideTransition(position: slide, child: child),
+                              child: SlideTransition(
+                                  position: slide, child: child),
                             );
                           },
-                          transitionDuration: const Duration(milliseconds: 300),
+                          transitionDuration:
+                              const Duration(milliseconds: 300),
                         ),
                       );
                     },
@@ -62,54 +72,40 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
 
             const SizedBox(height: 20),
 
-            // ===== TOMBOL EDIT & TAMBAH DATA =====
+            // ===== TOMBOL TAMBAH DATA SAJA =====
             AnimatedFadeSlide(
               delay: 0.2,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.edit, color: Colors.black),
-                      label: const Text("Edit data"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00BCD4),
-                        foregroundColor: Colors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            bottomLeft: Radius.circular(12),
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const KaryawanAddPage(),
                       ),
-                    ),
+                    );
+                  },
+                  icon: const Icon(Icons.add_circle, color: Colors.black),
+                  label: const Text(
+                    "Buatkan akun untuk karyawan",
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.add_circle, color: Colors.black),
-                      label: const Text("Tambah data"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00E676),
-                        foregroundColor: Colors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(12),
-                            bottomRight: Radius.circular(12),
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00E676),
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                ],
+                ),
               ),
             ),
 
             const SizedBox(height: 24),
 
-            // ===== CARD DATA KARYAWAN =====
+            // ===== CARD DATA KARYAWAN (REALTIME DARI FIREBASE) =====
             AnimatedFadeSlide(
               delay: 0.4,
               child: Container(
@@ -119,45 +115,100 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text("No", style: TextStyle(color: Colors.white)),
-                        Text("Nama lengkap", style: TextStyle(color: Colors.white)),
-                        Text("Detail", style: TextStyle(color: Colors.white)),
-                      ],
-                    ),
-                    const Divider(color: Colors.white30),
+                child: StreamBuilder<List<UserModel>>(
+                  stream: _controller.streamKaryawan(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      );
+                    }
 
-                    // === LIST KARYAWAN (DUMMY DATA) ===
-                    ...List.generate(5, (index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
+                    if (snapshot.hasError) {
+                      return const Text(
+                        'Terjadi kesalahan saat memuat data.',
+                        style: TextStyle(color: Colors.redAccent),
+                      );
+                    }
+
+                    final data = snapshot.data;
+
+                    if (data == null || data.isEmpty) {
+                      return const Text(
+                        'Belum ada data karyawan.',
+                        style: TextStyle(color: Colors.white),
+                      );
+                    }
+
+                    return Column(
+                      children: [
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("${index + 1}.",
-                                style: const TextStyle(color: Colors.white)),
-                            Text("Karyawan ${index + 1}",
-                                style: const TextStyle(color: Colors.white)),
-                            ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2E6AC9),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: const Text("Detail",
-                                  style: TextStyle(color: Colors.white)),
-                            ),
+                          children: const [
+                            Text("No", style: TextStyle(color: Colors.white)),
+                            Text("Nama lengkap",
+                                style: TextStyle(color: Colors.white)),
+                            Text("Detail",
+                                style: TextStyle(color: Colors.white)),
                           ],
                         ),
-                      );
-                    }),
-                  ],
+                        const Divider(color: Colors.white30),
+
+                        // === LIST DARI FIREBASE ===
+                        ...List.generate(data.length, (index) {
+                          final user = data[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6.0),
+                            child: Row(
+                              children: [
+                                // Kolom No
+                                Expanded(
+                                  flex: 1,
+                                  child: Text(
+                                    "${index + 1}",
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+
+                                // Kolom Nama
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    user.name,
+                                    style: const TextStyle(color: Colors.white),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+
+                                // Kolom Tombol Detail
+                                Expanded(
+                                  flex: 2,
+                                  child: ElevatedButton(
+                                    onPressed: () {},
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF2E6AC9),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 8),
+                                    ),
+                                    child: const Text(
+                                      "Detail",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
