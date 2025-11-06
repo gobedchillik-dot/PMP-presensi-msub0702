@@ -38,7 +38,7 @@ class UserModel {
       panggilan: data['panggilan'] ?? '',
       alamat: data['alamat'] ?? '',
       role: data['role'] ?? 'karyawan', // Default role jika tidak ditemukan
-      isActive: data['isActive'] ?? 'true', // Default role jika tidak ditemukan
+      isActive: data['isActive'] ?? true, 
     );
   }
 

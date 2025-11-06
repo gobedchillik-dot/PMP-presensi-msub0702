@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../base_page.dart';
-import '../../widget/animated_fade_slide.dart';
+import '../../../utils/animated_fade_slide.dart';
 import '../../home_page.dart';
 
 // Data dan Konstanta Global (Boleh tetap di sini, karena ini hanya data dan konstanta)

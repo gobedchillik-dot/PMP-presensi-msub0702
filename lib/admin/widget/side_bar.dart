@@ -7,6 +7,7 @@ import '../pages/gmv/index.dart'; // pastikan path ini sesuai struktur project k
 import '../pages/absen/index.dart'; // pastikan path ini sesuai struktur project kamu
 import 'package:tes_flutter/auth/auth_service.dart';
 import 'package:tes_flutter/auth/login_page.dart';
+import '../../utils/route_generator.dart';
 
 
 class SideBar extends StatefulWidget {
@@ -97,12 +98,10 @@ class _SideBarState extends State<SideBar> {
                             LucideIcons.user,
                             () {
                               // ✅ Navigasi ke halaman KaryawanIndexPage
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const KaryawanIndexPage(),
-                                ),
-                              );
+                    Navigator.push(
+                        context,
+                        createRoute(const KaryawanIndexPage()),
+                    );
                               widget.onClose(); // sidebar otomatis tertutup
                             },
                           ),
@@ -110,12 +109,10 @@ class _SideBarState extends State<SideBar> {
                             "Data Absen",
                             LucideIcons.calendarCheck,
                             () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AbsenIndexPage(),
-                                ),
-                              );
+                    Navigator.push(
+                        context,
+                        createRoute(const AbsenIndexPage()),
+                    );
                               widget.onClose();
                             },
                           ),
@@ -123,12 +120,10 @@ class _SideBarState extends State<SideBar> {
                             "Data GMV",
                             LucideIcons.barChart3,
                             () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const GmvIndexPage(),
-                                ),
-                              );
+                    Navigator.push(
+                        context,
+                        createRoute(const GmvIndexPage()),
+                    );
                               widget.onClose();
                             },
                           ),
@@ -148,12 +143,10 @@ class _SideBarState extends State<SideBar> {
                       ),
                       title: const Text('Keuangan', style: TextStyle(color: Colors.white)),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const KeuanganIndexPage(),
-                          ),
-                        );
+                    Navigator.push(
+                        context,
+                        createRoute(const KeuanganIndexPage()),
+                    );
                         widget.onClose();
                       },
                     ),
@@ -180,12 +173,10 @@ class _SideBarState extends State<SideBar> {
                       ),
                       title: const Text('Profil', style: TextStyle(color: Colors.white)),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ProfilIndexPage(),
-                          ),
-                        );
+                    Navigator.push(
+                        context,
+                        createRoute(const ProfilIndexPage()),
+                    );
                         widget.onClose();
                       },
                     ),
@@ -232,11 +223,10 @@ class _SideBarState extends State<SideBar> {
                     await AuthService.signOut(); // ✅ Logout dari Firebase
 
                     if (context.mounted) {
-                      Navigator.pushAndRemoveUntil(
+                    Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
-                        (route) => false,
-                      );
+                        reverseCreateRoute(const LoginPage()),
+                    );
                     }
                   }
                 },

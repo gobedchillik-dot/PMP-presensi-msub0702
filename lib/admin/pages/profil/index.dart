@@ -3,7 +3,7 @@ import '../../home_page.dart';
 // Import BasePage (asumsi path ini benar dari pages/profil/index.dart)
 import '../../base_page.dart'; 
 // Import AnimatedFadeSlide
-import '../../widget/animated_fade_slide.dart'; 
+import '../../../utils/animated_fade_slide.dart'; 
 
 class ProfilIndexPage extends StatelessWidget {
   const ProfilIndexPage({super.key});

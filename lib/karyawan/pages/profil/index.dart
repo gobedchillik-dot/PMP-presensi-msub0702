@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../home_page.dart';
 import '../../base_page.dart';
-import '../../widget/animated_fade_slide.dart';
+import '../../../utils/animated_fade_slide.dart'; // Pastikan path ini benar
 import '../../../db/controller/profil_controller.dart';
 import '../../../db/model/user.dart';
 import '../../../auth/auth_service.dart';

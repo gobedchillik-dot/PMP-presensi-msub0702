@@ -3,7 +3,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tes_flutter/auth/auth_service.dart'; // ✅ Tambahkan ini
 import '../karyawan/base_page.dart';
-import 'package:tes_flutter/admin/widget/animated_fade_slide.dart';
+import 'package:tes_flutter/utils/animated_fade_slide.dart';
 
 final List<bool> currentUserAttendance = List.generate(31, (day) => day < 30 ? day % 3 != 0 : true); // Data simulasi 31 hari const int totalDaysInMonth = 31; const double rowHeight = 35.0; const double boxWidth = 24.0;
 

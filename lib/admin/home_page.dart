@@ -4,7 +4,8 @@ import 'base_page.dart';
 import 'pages/karyawan/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 import 'pages/gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 // IMPORT BARU: Impor widget animasi yang telah Anda buat
-import '../admin/widget/animated_fade_slide.dart'; // Pastikan path ini benar
+import '../utils/animated_fade_slide.dart'; // Pastikan path ini benar
+import '../utils/route_generator.dart'; // Pastikan path ini benar
 
 class adminHomePage extends StatelessWidget {
   const adminHomePage({super.key});
@@ -96,12 +97,10 @@ class adminHomePage extends StatelessWidget {
                     color: Colors.amberAccent.shade400,
                     icon: Iconsax.people,
                     onTap: () {
-                      Navigator.push(
+                    Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const KaryawanIndexPage(),
-                        ),
-                      );
+                        createRoute(const KaryawanIndexPage()),
+                    );
                     },
                   ),
                 ),
@@ -393,29 +392,4 @@ class _ProgressItem extends StatelessWidget {
       ),
     );
   }
-}
-
-// ===== Fungsi Route Fleksibel (Tidak diubah) =====
-Route createRoute(Widget page) {
-  return PageRouteBuilder(
-    transitionDuration: const Duration(milliseconds: 400),
-    reverseTransitionDuration: const Duration(milliseconds: 400),
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(1.0, 0.0); // slide dari kanan
-      const end = Offset.zero;
-      const curve = Curves.easeInOut;
-
-      final tween =
-          Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-      return SlideTransition(
-        position: animation.drive(tween),
-        child: FadeTransition(
-          opacity: animation,
-          child: child,
-        ),
-      );
-    },
-  );
 }

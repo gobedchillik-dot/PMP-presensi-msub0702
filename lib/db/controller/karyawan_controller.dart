@@ -37,6 +37,16 @@ class KaryawanController {
   }
 }
 
+Future<void> deleteUserFirestore(String uid) async {
+  try {
+    await _firestore.collection('tbl_user').doc(uid).delete();
+    print("✅ Data user berhasil dihapus dari Firestore");
+  } catch (e) {
+    print("❌ Gagal menghapus user: $e");
+  }
+}
+
+
 
   // 🔹 Stream real-time data karyawan
   Stream<List<UserModel>> streamKaryawan() {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../db/controller/profil_controller.dart';
 import '../../base_page.dart';
-import '../../widget/animated_fade_slide.dart';
+import '../../../utils/animated_fade_slide.dart'; // Pastikan path ini benar
 import 'index.dart';
 import '../../../auth/auth_service.dart';
 

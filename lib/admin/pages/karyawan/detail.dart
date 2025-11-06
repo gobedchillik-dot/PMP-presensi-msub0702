@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/admin/pages/karyawan/index.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
 import '../../../admin/base_page.dart';
-import '../../widget/animated_fade_slide.dart';
+import '../../../utils/animated_fade_slide.dart';
 import '../../../db/controller/karyawan_controller.dart';
 import '../../../db/model/user.dart';
 
@@ -52,24 +53,10 @@ class _detailKaryawanPageState extends State<detailKaryawanPage> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (_, __, ___) => const KaryawanIndexPage(),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
-                                final slide = Tween<Offset>(
-                                  begin: const Offset(-0.2, 0),
-                                  end: Offset.zero,
-                                ).animate(animation);
-                                return FadeTransition(
-                                  opacity: fade,
-                                  child: SlideTransition(position: slide, child: child),
-                                );
-                              },
-                              transitionDuration: const Duration(milliseconds: 300),
-                            ),
-                          );
+                                              Navigator.push(
+                        context,
+                        reverseCreateRoute(const KaryawanIndexPage()),
+                    );
                         },
                         icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                       ),
@@ -172,113 +159,127 @@ class _detailKaryawanPageState extends State<detailKaryawanPage> {
 
                 // Tombol Keluar
                 AnimatedFadeSlide(
-  delay: 0.6,
-  child: SizedBox(
-    width: double.infinity,
-    child: widget.user.isActive == true
-        ? ElevatedButton(
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: const Color(0xFF1F3B5B),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  title: const Text('Konfirmasi', style: TextStyle(color: Colors.white)),
-                  content: const Text(
-                    'Non-aktifkan karyawan ini?',
-                    style: TextStyle(color: Colors.white70),
+                  delay: 0.6,
+                  child: Row(
+                    children: [
+                      // Tombol Aktif / Non-aktif
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                backgroundColor: const Color(0xFF1F3B5B),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                title: Text(
+                                  widget.user.isActive ? 'Non-aktifkan Karyawan?' : 'Aktifkan Karyawan?',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                content: Text(
+                                  widget.user.isActive
+                                      ? 'Karyawan tidak akan bisa login lagi.'
+                                      : 'Karyawan akan dapat login kembali.',
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, false),
+                                    child: const Text('Batal', style: TextStyle(color: Colors.white70)),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    child: Text(
+                                      widget.user.isActive ? 'Non-aktifkan' : 'Aktifkan',
+                                      style: TextStyle(
+                                        color: widget.user.isActive ? Colors.redAccent : Colors.greenAccent,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirm == true) {
+                              await profilController.updateStatus(widget.user.uid, !widget.user.isActive);
+
+                    Navigator.push(
+                        context,
+                        reverseCreateRoute(const KaryawanIndexPage()),
+                    );
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(widget.user.isActive
+                                      ? 'Karyawan dinon-aktifkan'
+                                      : 'Karyawan diaktifkan kembali'),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: widget.user.isActive ? Colors.red : Colors.green,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: Text(
+                            widget.user.isActive ? "Non-aktifkan" : "Aktifkan",
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      // Tombol Hapus (Icon)
+                      ElevatedButton(
+                        onPressed: () async {
+                          final confirmDelete = await showDialog<bool>(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              backgroundColor: const Color(0xFF1F3B5B),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              title: const Text('Hapus Karyawan?', style: TextStyle(color: Colors.white)),
+                              content: const Text(
+                                'Data karyawan ini akan dihapus dari daftar karyawan.',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Batal', style: TextStyle(color: Colors.white70)),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child:
+                                      const Text('Hapus', style: TextStyle(color: Colors.redAccent)),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirmDelete == true) {
+                            await profilController.deleteUserFirestore(widget.user.uid);
+
+                    Navigator.push(
+                        context,
+                        reverseCreateRoute(const KaryawanIndexPage()),
+                    );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Karyawan berhasil dihapus')),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade700,
+                          padding: const EdgeInsets.all(14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                    ],
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Batal', style: TextStyle(color: Colors.white70)),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Non-aktifkan', style: TextStyle(color: Colors.redAccent)),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirm == true) {
-                await profilController.updateStatus(widget.user.uid, false);
-
-                // ✅ Kembali ke halaman index setelah sukses
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const KaryawanIndexPage()),
-                  (route) => false,
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Karyawan berhasil dinon-aktifkan')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            child: const Text(
-              "Non-aktifkan Karyawan",
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          )
-        : ElevatedButton(
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: const Color(0xFF1F3B5B),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  title: const Text('Konfirmasi', style: TextStyle(color: Colors.white)),
-                  content: const Text(
-                    'Aktifkan kembali karyawan ini?',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Batal', style: TextStyle(color: Colors.white70)),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Aktifkan', style: TextStyle(color: Colors.greenAccent)),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirm == true) {
-                await profilController.updateStatus(widget.user.uid, true);
-
-                // ✅ Kembali ke halaman index setelah sukses
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const KaryawanIndexPage()),
-                  (route) => false,
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Karyawan berhasil diaktifkan kembali')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green.shade600,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            child: const Text(
-              "Aktifkan Kembali Karyawan",
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-  ),
-),
-
+                )
               ],
             ),
           );

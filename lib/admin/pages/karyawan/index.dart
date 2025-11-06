@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tes_flutter/admin/pages/karyawan/detail.dart';
 import '../../../db/controller/karyawan_controller.dart';
 import '../../../db/model/user.dart';
-import '../../widget/animated_fade_slide.dart';
+import '../../../utils/animated_fade_slide.dart';
+import '../../../utils/route_generator.dart';
 import '../../base_page.dart';
 import '../../home_page.dart';
 import 'add.page.dart'; 
@@ -32,28 +33,10 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
+                                          Navigator.push(
                         context,
-                        PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const adminHomePage(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            final fade =
-                                Tween(begin: 0.0, end: 1.0).animate(animation);
-                            final slide = Tween<Offset>(
-                              begin: const Offset(-0.2, 0),
-                              end: Offset.zero,
-                            ).animate(animation);
-                            return FadeTransition(
-                              opacity: fade,
-                              child: SlideTransition(
-                                  position: slide, child: child),
-                            );
-                          },
-                          transitionDuration:
-                              const Duration(milliseconds: 300),
-                        ),
-                      );
+                        reverseCreateRoute(const adminHomePage()),
+                    );
                     },
                     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                   ),
@@ -79,11 +62,9 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const KaryawanAddPage(),
-                      ),
+                                        Navigator.push(
+                        context,
+                        createRoute(const KaryawanAddPage()),
                     );
                   },
                   icon: const Icon(Icons.add_circle, color: Colors.black),
@@ -107,7 +88,7 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
 
             // ===== CARD DATA KARYAWAN (REALTIME DARI FIREBASE) =====
             AnimatedFadeSlide(
-              delay: 0.4,
+              delay: 0.3,
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -155,83 +136,86 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                           ],
                         ),
                         const Divider(color: Colors.white30),
-
-                        // === LIST DARI FIREBASE ===
-                        ...List.generate(data.length, (index) {
-                          final user = data[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // Kolom No
-                                Expanded(
-                                  flex: 1,
-                                    child: Text(
-                                      "${index + 1}",
-                                      style: const TextStyle(color: Colors.white),
-                                    ),
-                                ),
-
-                                // Kolom Email
-                                Expanded(
-                                  flex: 4,
-                                    child: Text(
-                                      user.name,
-                                      style: const TextStyle(color: Colors.white),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),                                  
-                                ),
-
-                                // Kolom Status Aktif
-                                Expanded(
-                                  flex: 4,
-                                  child: Center(
-                                    child: Text(
-                                      user.isActive.toString() == "true" ? "Aktif" : "Non-Aktif",
-                                      style: TextStyle(
-                                        color: user.isActive.toString() == "true" ? Colors.greenAccent : Colors.redAccent,
-                                        fontWeight: FontWeight.w600,
+                        AnimatedFadeSlide(
+                          delay: 0.4,
+                          child: Column( // ganti Container menjadi Column
+                            children: [
+                              ...List.generate(data.length, (index) {
+                                final user = data[index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      // Kolom No
+                                      Expanded(
+                                        flex: 1,
+                                        child: Text(
+                                          "${index + 1}",
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
 
-                                // Kolom Tombol Detail
-                                Expanded(
-                                  flex: 2,
-                                  child: Center(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => detailKaryawanPage(user: user),
+                                      // Kolom Email
+                                      Expanded(
+                                        flex: 4,
+                                        child: Text(
+                                          user.email,
+                                          style: const TextStyle(color: Colors.white),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+
+                                      // Kolom Status Aktif
+                                      Expanded(
+                                        flex: 4,
+                                        child: Center(
+                                          child: Text(
+                                            user.isActive ? "Aktif" : "Non-Aktif",
+                                            style: TextStyle(
+                                              color: user.isActive ? Colors.greenAccent : Colors.redAccent,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF2E6AC9),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                      ),
-                                      child: const Text(
-                                        "Detail",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 13,
                                         ),
                                       ),
-                                    ),
+
+                                      // Kolom Tombol Detail
+                                      Expanded(
+                                        flex: 2,
+                                        child: Center(
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                    Navigator.push(
+                        context,
+                        createRoute(detailKaryawanPage(user:user)),
+                    );
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: const Color(0xFF2E6AC9),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                            ),
+                                            child: const Text(
+                                              "Detail",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
                       ],
                     );
                   },

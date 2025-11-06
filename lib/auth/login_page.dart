@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../db/controller/login_auth_controller.dart';
 import '../admin/home_page.dart';
 import '../karyawan/home_page.dart';
+import '../utils/route_generator.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -47,18 +48,18 @@ class _LoginPageState extends State<LoginPage> {
     final isActive = result['isActive'];
 
     if (role == 'admin') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const adminHomePage()),
-      );
+                    Navigator.push(
+                        context,
+                        createRoute(const adminHomePage()),
+                    );
     } 
     
     else if (role == 'karyawan') {
       if (isActive == true) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const karyawanHomePage()),
-        );
+                    Navigator.push(
+                        context,
+                        createRoute(const karyawanHomePage()),
+                    );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Akun kamu sedang dinonaktifkan.")),
