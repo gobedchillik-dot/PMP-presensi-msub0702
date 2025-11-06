@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
 import '../../home_page.dart';
 import '../../base_page.dart';
 import '../../../utils/animated_fade_slide.dart'; // Pastikan path ini benar
@@ -68,25 +69,9 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
               children: [
                 IconButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (_, __, ___) => const karyawanHomePage(),
-                        transitionsBuilder: (context, animation,
-                            secondaryAnimation, child) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: SlideTransition(
-                              position: Tween<Offset>(
-                                      begin: const Offset(-0.2, 0),
-                                      end: Offset.zero)
-                                  .animate(animation),
-                              child: child,
-                            ),
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 300),
-                      ),
+                                        Navigator.push(
+                        context,
+                        reverseCreateRoute(const karyawanHomePage()),
                     );
                   },
                   icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -138,27 +123,10 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
 
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
+                                          Navigator.push(
                         context,
-                        PageRouteBuilder(
-                          pageBuilder: (_, __, ___) =>
-                              const ProfilUpdatePage(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                        begin: const Offset(0.2, 0),
-                                        end: Offset.zero)
-                                    .animate(animation),
-                                child: child,
-                              ),
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 300),
-                        ),
-                      );
+                        createRoute(const ProfilUpdatePage()),
+                    );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF00ADB5),
@@ -386,11 +354,10 @@ Future<void> _handleLogout(BuildContext context) async {
   if (confirm == true) {
     await AuthService.signOut();
     if (context.mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-        (route) => false,
-      );
+                    Navigator.push(
+                        context,
+                        reverseCreateRoute(const LoginPage()),
+                    );
     }
   }
 }

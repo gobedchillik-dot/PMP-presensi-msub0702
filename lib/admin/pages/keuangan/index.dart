@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
 // Import wajib untuk animasi:
 import '../../../utils/animated_fade_slide.dart'; 
 import '../../base_page.dart'; 
@@ -90,24 +91,10 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
+                                          Navigator.push(
                         context,
-                        PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const adminHomePage(),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
-                            final slide = Tween<Offset>(
-                              begin: const Offset(-0.2, 0),
-                              end: Offset.zero,
-                            ).animate(animation);
-                            return FadeTransition(
-                              opacity: fade,
-                              child: SlideTransition(position: slide, child: child),
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 300),
-                        ),
-                      );
+                        reverseCreateRoute(const adminHomePage()),
+                    );
                     },
                     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                   ),

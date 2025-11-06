@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
 import '../pages/profil/index.dart';
 import 'package:tes_flutter/auth/auth_service.dart';
 import 'package:tes_flutter/auth/login_page.dart';
@@ -79,12 +80,10 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               onSelected: (value) {
                 if (value == 'profil') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProfilIndexPage(),
-                    ),
-                  );
+                    Navigator.push(
+                        context,
+                        createRoute(const ProfilIndexPage()),
+                    );
                 } else if (value == 'keluar') {
                   _handleLogout(context);
                 }
@@ -148,11 +147,10 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
     if (confirm == true) {
       await AuthService.signOut();
       if (context.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false,
-        );
+                    Navigator.push(
+                        context,
+                        reverseCreateRoute(const LoginPage()),
+                    );
       }
     }
   }

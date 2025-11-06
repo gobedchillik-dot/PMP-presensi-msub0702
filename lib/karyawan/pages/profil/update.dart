@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
 import '../../../db/controller/profil_controller.dart';
 import '../../base_page.dart';
 import '../../../utils/animated_fade_slide.dart'; // Pastikan path ini benar
@@ -100,10 +101,10 @@ class _ProfilUpdatePageState extends State<ProfilUpdatePage> {
         ),
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const ProfilIndexPage()),
-      );
+                    Navigator.push(
+                        context,
+                        reverseCreateRoute(const ProfilIndexPage()),
+                    );
     }
   }
 
@@ -123,12 +124,14 @@ class _ProfilUpdatePageState extends State<ProfilUpdatePage> {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () => Navigator.pushReplacement(
+                  onPressed: () {
+                                        Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const ProfilIndexPage()),
-                      ),
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    ),
+                        reverseCreateRoute(const ProfilIndexPage()),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                ),
                     const SizedBox(width: 8),
                     const Text(
                       "Edit Profil",
