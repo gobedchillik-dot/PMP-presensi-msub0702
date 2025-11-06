@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tes_flutter/admin/pages/karyawan/detail.dart';
 import '../../../db/controller/karyawan_controller.dart';
 import '../../../db/model/user.dart';
 import '../../widget/animated_fade_slide.dart';
@@ -148,6 +148,8 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                             Text("No", style: TextStyle(color: Colors.white)),
                             Text("Nama lengkap",
                                 style: TextStyle(color: Colors.white)),
+                            Text("Status",
+                                style: TextStyle(color: Colors.white)),
                             Text("Detail",
                                 style: TextStyle(color: Colors.white)),
                           ],
@@ -160,44 +162,68 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6.0),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 // Kolom No
                                 Expanded(
                                   flex: 1,
-                                  child: Text(
-                                    "${index + 1}",
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
+                                    child: Text(
+                                      "${index + 1}",
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
                                 ),
 
-                                // Kolom Nama
+                                // Kolom Email
                                 Expanded(
                                   flex: 4,
-                                  child: Text(
-                                    user.email,
-                                    style: const TextStyle(color: Colors.white),
-                                    overflow: TextOverflow.ellipsis,
+                                    child: Text(
+                                      user.name,
+                                      style: const TextStyle(color: Colors.white),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),                                  
+                                ),
+
+                                // Kolom Status Aktif
+                                Expanded(
+                                  flex: 4,
+                                  child: Center(
+                                    child: Text(
+                                      user.isActive.toString() == "true" ? "Aktif" : "Non-Aktif",
+                                      style: TextStyle(
+                                        color: user.isActive.toString() == "true" ? Colors.greenAccent : Colors.redAccent,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ),
 
                                 // Kolom Tombol Detail
                                 Expanded(
                                   flex: 2,
-                                  child: ElevatedButton(
-                                    onPressed: () {},
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF2E6AC9),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
+                                  child: Center(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => detailKaryawanPage(user: user),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF2E6AC9),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 8),
-                                    ),
-                                    child: const Text(
-                                      "Detail",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
+                                      child: const Text(
+                                        "Detail",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                   ),

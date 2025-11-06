@@ -20,6 +20,9 @@ class ProfilController {
     });
   }
 
+
+
+
   Future<UserModel?> getCurrentUserProfileOnce() async {
   final user = AuthService.currentUser;
   if (user == null) return null;

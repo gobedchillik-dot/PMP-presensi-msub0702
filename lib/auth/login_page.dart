@@ -27,47 +27,54 @@ class _LoginPageState extends State<LoginPage> {
 
   /// 🔹 Fungsi login utama
   Future<void> _handleLogin() async {
-    if (_emailController.text.trim().isEmpty ||
-        _passwordController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email dan Password tidak boleh kosong.")),
+  if (_emailController.text.trim().isEmpty ||
+      _passwordController.text.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Email dan Password tidak boleh kosong.")),
+    );
+    return;
+  }
+
+  setState(() => _isLoading = true);
+
+  try {
+    final result = await _authController.login(
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    final role = result['role'];
+    final isActive = result['isActive'];
+
+    if (role == 'admin') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const adminHomePage()),
       );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      String role = await _authController.login(
-        _emailController.text,
-        _passwordController.text,
-      );
-
-      if (role == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const adminHomePage()),
-        );
-      } else if (role == 'karyawan') {
+    } 
+    
+    else if (role == 'karyawan') {
+      if (isActive == true) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const karyawanHomePage()),
         );
       } else {
-        throw Exception("Role tidak dikenal: $role");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Akun kamu sedang dinonaktifkan.")),
+        );
       }
-    } catch (e) {
-      String message = e.toString().contains(']')
-          ? e.toString().split(']').last.trim()
-          : e.toString().replaceFirst('Exception: ', '').trim();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login gagal: $message")),
-      );
-    } finally {
-      setState(() => _isLoading = false);
     }
+
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Login gagal: $e")),
+    );
+  } finally {
+    setState(() => _isLoading = false);
   }
+}
+
 
   @override
   void dispose() {

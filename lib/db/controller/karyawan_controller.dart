@@ -26,6 +26,18 @@ class KaryawanController {
     }
   }
 
+   Future<void> updateStatus(String uid, bool status) async {
+  try {
+    await _firestore.collection('tbl_user').doc(uid).update({
+      'isActive': status,
+    });
+    print("✅ Status user berhasil diperbarui menjadi: $status");
+  } catch (e) {
+    print("❌ Gagal memperbarui status: $e");
+  }
+}
+
+
   // 🔹 Stream real-time data karyawan
   Stream<List<UserModel>> streamKaryawan() {
     return _firestore
@@ -34,9 +46,21 @@ class KaryawanController {
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) =>
-                UserModel.fromFirestore(doc.data() as Map<String, dynamic>))
+                UserModel.fromFirestore(doc.data()))
             .toList());
   }
+
+    Stream<UserModel?> streamUserByUid(String uid) {
+      return FirebaseFirestore.instance
+          .collection('tbl_user')
+          .where('uid', isEqualTo: uid) // ✅ Cari berdasarkan field uid
+          .limit(1)
+          .snapshots()
+          .map((query) => 
+              query.docs.isNotEmpty ? UserModel.fromFirestore(query.docs.first as Map<String, dynamic>) : null
+          );
+    }
+
 
   // 🔹 Ambil 1 data karyawan berdasarkan UID
   Future<UserModel?> getKaryawanByUid(String uid) async {
