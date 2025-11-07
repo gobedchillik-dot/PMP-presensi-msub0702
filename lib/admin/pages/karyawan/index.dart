@@ -182,33 +182,31 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                                       ),
 
                                       // Kolom Tombol Detail
-                                      Expanded(
-                                        flex: 2,
-                                        child: Center(
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                    Navigator.push(
-                        context,
-                        createRoute(detailKaryawanPage(user:user)),
-                    );
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: const Color(0xFF2E6AC9),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(20),
-                                              ),
-                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                            ),
-                                            child: const Text(
-                                              "Detail",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      Flexible(
+  flex: 0,
+  child: Center(
+    child: ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          createRoute(detailKaryawanPage(user: user)),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF2E6AC9),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      ),
+      child: const Text(
+        "Cek",
+        style: TextStyle(color: Colors.white, fontSize: 13),
+      ),
+    ),
+  ),
+),
+
                                     ],
                                   ),
                                 );

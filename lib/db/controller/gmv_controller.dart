@@ -106,4 +106,32 @@ class GmvController with ChangeNotifier {
       return false;
     }
   }
+
+  //fungsi untuk ngambil total GMV - kebutuhan halaman index
+    // --- Fungsi untuk menghitung total seluruh GMV ---
+  Future<double> getTotalGmv() async {
+    try {
+      final snapshot = await _firestore.collection(_collectionName).get();
+      double total = 0.0;
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        if (data.containsKey('gmv')) {
+          final value = data['gmv'];
+          if (value is num) {
+            total += value.toDouble();
+          }
+        }
+      }
+
+      debugPrint('Total GMV: $total');
+      return total;
+    } catch (e) {
+      debugPrint('Error calculating total GMV: $e');
+      return 0.0;
+    }
+  }
+
+
+
 }

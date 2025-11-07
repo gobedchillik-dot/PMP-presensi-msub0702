@@ -1,24 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
+import 'package:tes_flutter/db/controller/gmv_controller.dart';
 import 'base_page.dart';
 import 'pages/gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 // IMPORT BARU: Impor widget animasi yang telah Anda buat
 import '../utils/animated_fade_slide.dart'; // Pastikan path ini benar
 import '../utils/route_generator.dart'; // Pastikan path ini benar
 
-class adminHomePage extends StatelessWidget {
+class adminHomePage extends StatefulWidget {
   const adminHomePage({super.key});
+  
+  @override
+  State<adminHomePage> createState() => _adminHomePageState();
+}
 
+class _adminHomePageState extends State<adminHomePage> {
+
+  final GmvController _gmvController = GmvController(); // ← Tambahkan ini
+  double totalGmv = 0.0;
+ @override
+  void initState() {
+    super.initState();
+    _loadTotalGmv();
+  }
+
+      Future<void> _loadTotalGmv() async {
+    final total = await _gmvController.getTotalGmv();
+    setState(() {
+      totalGmv = total;
+    });
+  }
 
 
   @override
   Widget build(BuildContext context) {
+final formattedGmv = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(totalGmv);
 
+    final profit = (totalGmv * 5) / 100;
+    final formattedProfit = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(profit);
 
     return BasePage(
       title: 'Dashboard',
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -45,7 +77,7 @@ class adminHomePage extends StatelessWidget {
                   delay: 0.2,
                   child: _StatCard(
                     title: "Data GMV",
-                    subtitle: "Rp 123,456,789",
+                    subtitle: formattedGmv,
                     color: Colors.amberAccent.shade400,
                     icon: Iconsax.chart,
                     onTap: () {
@@ -72,7 +104,7 @@ class adminHomePage extends StatelessWidget {
                   delay: 0.3,
                   child: _StatCard(
                     title: "Est. Keuntungan",
-                    subtitle: "Rp 1.234.567,89",
+                    subtitle: formattedProfit,
                     color: Colors.greenAccent.shade400,
                     icon: Iconsax.money_4,
                     onTap: () {

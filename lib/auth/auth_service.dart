@@ -9,6 +9,27 @@ class AuthService {
 
   static User? get currentUser => _auth.currentUser;
 
+Future<Map<String, dynamic>?> signIn(String email, String password) async {
+    try {
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final userDoc = await _firestore
+          .collection('tbl_user')
+          .doc(userCredential.user!.uid)
+          .get();
+
+      if (userDoc.exists) {
+        return userDoc.data();
+      }
+      return null;
+    } catch (e) {
+      throw Exception("Gagal login: $e");
+    }
+  }
+
   static Future<Map<String, dynamic>?> getCurrentUserData() async {
     final user = _auth.currentUser;
     if (user == null) return null;

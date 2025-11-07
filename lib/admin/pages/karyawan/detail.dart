@@ -29,7 +29,7 @@ class _detailKaryawanPageState extends State<detailKaryawanPage> {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "Detail Data - ${widget.user.name}", // ✅ title = nama karyawan yang dipilih
+      title: "Detail Data - ${widget.user.panggilan}", // ✅ title = nama karyawan yang dipilih
       child: StreamBuilder<UserModel?>(
         stream: userStream,
         builder: (context, snapshot) {
