@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'base_page.dart';
-import 'pages/karyawan/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 import 'pages/gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 // IMPORT BARU: Impor widget animasi yang telah Anda buat
 import '../utils/animated_fade_slide.dart'; // Pastikan path ini benar
@@ -36,6 +35,28 @@ class adminHomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            // **Increment Delay**
+                Builder(builder: (context) {
+                  return const SizedBox.shrink();
+                }),
+
+                // StatCard 3 (Delay: 0.55s)
+                AnimatedFadeSlide(
+                  delay: 0.2,
+                  child: _StatCard(
+                    title: "Data GMV",
+                    subtitle: "Rp 123,456,789",
+                    color: Colors.amberAccent.shade400,
+                    icon: Iconsax.chart,
+                    onTap: () {
+                    Navigator.push(
+                        context,
+                        createRoute(const GmvIndexPage()),
+                    );
+                    },
+                  ),
+                ),
+                                const SizedBox(height: 12),
 
             // **Increment Delay**
             Builder(builder: (context) {
@@ -48,9 +69,9 @@ class adminHomePage extends StatelessWidget {
               children: [
                 // StatCard 1 (Delay: 0.25s)
                 AnimatedFadeSlide(
-                  delay: 0.2,
+                  delay: 0.3,
                   child: _StatCard(
-                    title: "Pendapatan",
+                    title: "Est. Keuntungan",
                     subtitle: "Rp 1.234.567,89",
                     color: Colors.greenAccent.shade400,
                     icon: Iconsax.money_4,
@@ -73,7 +94,7 @@ class adminHomePage extends StatelessWidget {
 
                 // StatCard 2 (Delay: 0.40s)
                 AnimatedFadeSlide(
-                  delay: 0.3,
+                  delay: 0.4,
                   child: _StatCard(
                     title: "Validasi Kehadiran",
                     subtitle: "1.234 data",
@@ -83,27 +104,7 @@ class adminHomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // **Increment Delay**
-                Builder(builder: (context) {
-                  return const SizedBox.shrink();
-                }),
-
-                // StatCard 3 (Delay: 0.55s)
-                AnimatedFadeSlide(
-                  delay: 0.4,
-                  child: _StatCard(
-                    title: "Data Karyawan",
-                    subtitle: "123 Pekerja",
-                    color: Colors.amberAccent.shade400,
-                    icon: Iconsax.people,
-                    onTap: () {
-                    Navigator.push(
-                        context,
-                        createRoute(const KaryawanIndexPage()),
-                    );
-                    },
-                  ),
-                ),
+                
               ],
             ),
 

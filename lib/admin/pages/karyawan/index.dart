@@ -6,7 +6,7 @@ import '../../../utils/animated_fade_slide.dart';
 import '../../../utils/route_generator.dart';
 import '../../base_page.dart';
 import '../../home_page.dart';
-import 'add.page.dart'; 
+import 'add_page.dart'; 
 
 class KaryawanIndexPage extends StatefulWidget {
   const KaryawanIndexPage({super.key});
