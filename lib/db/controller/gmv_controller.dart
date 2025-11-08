@@ -38,7 +38,7 @@ class GmvController with ChangeNotifier {
     try {
       final doc = await _firestore.collection(_collectionName).doc(id).get();
       if (doc.exists && doc.data() != null) {
-        return GmvModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>, null);
+        return GmvModel.fromFirestore(doc, null);
       }
       return null;
     } catch (e) {
