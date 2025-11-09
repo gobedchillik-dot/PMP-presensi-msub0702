@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:tes_flutter/admin/base_page.dart';
 import 'package:tes_flutter/db/model/gmv.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
-import '../../../db/controller/gmv_controller.dart';
+import '../../../db/controller/gmv/gmv_controller.dart';
 
 class GmvEditPage extends StatefulWidget {
   final GmvModel gmv; // Data GMV yang akan diedit

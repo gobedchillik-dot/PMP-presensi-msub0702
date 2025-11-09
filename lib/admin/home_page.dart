@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
-import 'package:tes_flutter/db/controller/gmv_controller.dart';
+import 'package:tes_flutter/db/controller/gmv/gmv_controller.dart';
+import 'package:tes_flutter/db/controller/gmv/gmv_controller_extra.dart';
+import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:tes_flutter/db/model/gmv.dart';
 import 'base_page.dart';
 import 'pages/gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 // IMPORT BARU: Impor widget animasi yang telah Anda buat
@@ -17,7 +21,7 @@ class adminHomePage extends StatefulWidget {
 
 class _adminHomePageState extends State<adminHomePage> {
 
-  final GmvController _gmvController = GmvController(); // ← Tambahkan ini
+  final GmvControllerExtra _gmvControllerExtra = GmvControllerExtra(); // ← Tambahkan ini
   double totalGmv = 0.0;
  @override
   void initState() {
@@ -26,7 +30,7 @@ class _adminHomePageState extends State<adminHomePage> {
   }
 
       Future<void> _loadTotalGmv() async {
-    final total = await _gmvController.getTotalGmv();
+    final total = await _gmvControllerExtra.getTotalGmv();
     setState(() {
       totalGmv = total;
     });
@@ -199,19 +203,47 @@ final formattedGmv = NumberFormat.currency(
               delay: 0.8,
               child: Container(
                 width: double.infinity,
-                height: 150,
+                height: 250,
                 decoration: BoxDecoration(
                   color: const Color(0xFF1C2A3A),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Center(
-                  child: Text(
-                    "Belum ada data",
-                    style: TextStyle(color: Colors.white54),
-                  ),
+                child: StreamBuilder<List<GmvModel>>(
+                  stream: context.read<GmvController>().gmvStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(
+
+                        child: Text("Belum ada data", style: TextStyle(color: Colors.white54)),
+                      );
+                    }
+
+                    final data = snapshot.data!;
+                    data.sort((a, b) => a.tanggal.toDate().compareTo(b.tanggal.toDate()));
+
+                    return SfCartesianChart(
+                      backgroundColor: Colors.transparent,
+                      primaryXAxis: DateTimeAxis(
+                        labelStyle: const TextStyle(color: Colors.white),
+                      ),
+                      primaryYAxis: NumericAxis(
+                        labelStyle: const TextStyle(color: Colors.white),
+                      ),
+                      series: <LineSeries<GmvModel, DateTime>>[
+                        LineSeries<GmvModel, DateTime>(
+                          dataSource: data,
+                          xValueMapper: (gmv, _) => gmv.tanggal.toDate(),
+                          yValueMapper: (gmv, _) => gmv.gmv,
+                          width: 2,
+                          markerSettings: const MarkerSettings(isVisible: true),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
+
 
             const SizedBox(height: 24),
 

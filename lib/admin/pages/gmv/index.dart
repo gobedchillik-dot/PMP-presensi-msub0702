@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tes_flutter/admin/pages/gmv/add.dart';
 import 'package:tes_flutter/admin/pages/gmv/edit.dart';
-import 'package:tes_flutter/db/controller/gmv_controller.dart';
+import 'package:tes_flutter/db/controller/gmv/gmv_controller.dart';
 import 'package:tes_flutter/db/model/gmv.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
 

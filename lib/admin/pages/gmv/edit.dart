@@ -5,7 +5,7 @@ import 'package:tes_flutter/admin/pages/gmv/update.dart';
 import 'package:tes_flutter/db/model/gmv.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
-import '../../../db/controller/gmv_controller.dart';
+import '../../../db/controller/gmv/gmv_controller.dart';
 import '../../base_page.dart';
 import 'index.dart';
 
