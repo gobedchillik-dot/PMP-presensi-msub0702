@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/admin/pages/karyawan/detail.dart';
-import '../../../db/controller/karyawan_controller.dart';
-import '../../../db/model/user.dart';
+import '../../../database/controller/karyawan/karyawan_controller.dart';
+import '../../../database/model/user.dart';
 import '../../../utils/animated_fade_slide.dart';
 import '../../../utils/route_generator.dart';
 import '../../base_page.dart';

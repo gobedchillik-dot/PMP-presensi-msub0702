@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
-import 'package:tes_flutter/db/controller/gmv/gmv_controller.dart';
-import 'package:tes_flutter/db/controller/gmv/gmv_controller_extra.dart';
+import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart';
+import 'package:tes_flutter/database/controller/gmv/gmv_controller_extra.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:tes_flutter/db/model/gmv.dart';
+import 'package:tes_flutter/database/model/gmv.dart';
 import 'base_page.dart';
 import 'pages/gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur project kamu
 // IMPORT BARU: Impor widget animasi yang telah Anda buat

@@ -5,8 +5,8 @@ import 'package:tes_flutter/admin/pages/karyawan/index.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
 import '../../../admin/base_page.dart';
 import '../../../utils/animated_fade_slide.dart';
-import '../../../db/controller/karyawan_controller.dart';
-import '../../../db/model/user.dart';
+import '../../../database/controller/karyawan/karyawan_controller.dart';
+import '../../../database/model/user.dart';
 
 class DetailKaryawanPage extends StatefulWidget {
   final UserModel user; // ✅ Data user yang dipilih

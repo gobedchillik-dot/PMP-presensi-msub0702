@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../db/controller/karyawan_controller.dart';
+import '../../../database/controller/karyawan/karyawan_controller.dart';
 import '../../../utils/animated_fade_slide.dart';
 import '../../../utils/route_generator.dart';
 import '../../base_page.dart';

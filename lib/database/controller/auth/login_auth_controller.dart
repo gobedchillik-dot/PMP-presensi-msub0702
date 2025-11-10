@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../model/user.dart'; // pastikan path sesuai struktur proyekmu
+import '../../model/user.dart'; // pastikan path sesuai struktur proyekmu
 
 class LoginAuthController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
-import '../../../db/controller/profil_controller.dart';
+import '../../../database/controller/karyawan/profil_controller.dart';
 import '../../base_page.dart';
 import '../../../utils/animated_fade_slide.dart'; // Pastikan path ini benar
 import 'index.dart';

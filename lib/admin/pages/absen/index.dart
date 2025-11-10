@@ -7,8 +7,8 @@ import 'package:tes_flutter/utils/route_generator.dart';
 import '../../base_page.dart';
 import '../../../utils/animated_fade_slide.dart';
 import '../../home_page.dart';
-import '../../../db/controller/absen/absen_controller.dart';
-import '../../../db/model/absen.dart';
+import '../../../database/controller/absen/absen_controller.dart';
+import '../../../database/model/absen.dart';
 
 class AbsenIndexPage extends StatefulWidget {
   const AbsenIndexPage({super.key});

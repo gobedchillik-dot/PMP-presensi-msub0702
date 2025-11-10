@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../db/model/user.dart';
-import '../../auth/auth_service.dart';
+import '../../model/user.dart';
+import '../../../auth/auth_service.dart';
 import 'package:flutter/material.dart';
 
 class ProfilController {
