@@ -114,7 +114,6 @@ class _ProfilUpdatePageState extends State<ProfilUpdatePage> {
       title: userName ?? "Tidak Diketahui",
       isPresentToday: true,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(

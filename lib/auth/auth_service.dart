@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tes_flutter/karyawan/pages/profil/update.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
 import '../karyawan/widget/alert_data.dart'; // ⚠️ ganti 'your_project_name' sesuai nama proyekmu
 
 class AuthService {
@@ -62,8 +64,10 @@ Future<Map<String, dynamic>?> signIn(String email, String password) async {
         context: context,
         builder: (_) => AlertDataWidget(
           onCompletePressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
+            Navigator.push(
+              context,
+              createRoute(const ProfilUpdatePage()),
+            );
           },
           onSkipPressed: () {
             Navigator.pop(context);

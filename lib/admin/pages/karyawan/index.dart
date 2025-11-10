@@ -35,7 +35,7 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                     onPressed: () {
                                           Navigator.push(
                         context,
-                        reverseCreateRoute(const adminHomePage()),
+                        reverseCreateRoute(const AdminHomePage()),
                     );
                     },
                     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -189,7 +189,7 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
       onPressed: () {
         Navigator.push(
           context,
-          createRoute(detailKaryawanPage(user: user)),
+          createRoute(DetailKaryawanPage(user: user)),
         );
       },
       style: ElevatedButton.styleFrom(

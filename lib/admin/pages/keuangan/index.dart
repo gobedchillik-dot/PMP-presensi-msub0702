@@ -93,7 +93,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                     onPressed: () {
                                           Navigator.push(
                         context,
-                        reverseCreateRoute(const adminHomePage()),
+                        reverseCreateRoute(const AdminHomePage()),
                     );
                     },
                     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -432,7 +432,6 @@ class _SalaryListItem extends StatelessWidget {
             height: 40,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Implementasi logika bayar gaji
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Membayar gaji untuk $name'),

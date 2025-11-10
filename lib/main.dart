@@ -19,14 +19,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Menggunakan MultiProvider di sini
     return MultiProvider(
       providers: [
-        // 2. Mendaftarkan GmvController menggunakan ChangeNotifierProvider
         ChangeNotifierProvider(create: (_) => GmvController()),
-        // Jika di masa depan ada Controller lain, tambahkan di sini
       ],
-      // 3. MaterialApp sekarang menjadi child dari MultiProvider
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: LoginPage(),

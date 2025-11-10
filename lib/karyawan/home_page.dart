@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:tes_flutter/karyawan/widget/kalender_kehadiran.dart';
+import 'package:tes_flutter/karyawan/widget/kartu_statis.dart';
+import 'package:tes_flutter/karyawan/widget/progres_absen.dart';
 import '../karyawan/base_page.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tes_flutter/auth/auth_service.dart';
+import '../auth/auth_service.dart';
 
 const int totalDaysInMonth = 31;
 
-class karyawanHomePage extends StatefulWidget {
-  const karyawanHomePage({super.key});
+class KaryawanHomePage extends StatefulWidget {
+  const KaryawanHomePage({super.key});
 
   @override
-  State<karyawanHomePage> createState() => karyawanHomePageState();
+  State<KaryawanHomePage> createState() => KaryawanHomePageState();
 }
 
-class karyawanHomePageState extends State<karyawanHomePage> {
+class KaryawanHomePageState extends State<KaryawanHomePage> {
   String userName = '';
   bool isPresentToday = false;
   List<bool> attendanceData = List.filled(totalDaysInMonth, false);
@@ -23,6 +26,10 @@ class karyawanHomePageState extends State<karyawanHomePage> {
   void initState() {
     super.initState();
     _loadUserName();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Panggil fungsi Anda di sini
+      AuthService.checkUserProfileCompleteness(context); 
+    });
   }
 
   Future<void> _loadUserName() async {
@@ -91,7 +98,6 @@ class karyawanHomePageState extends State<karyawanHomePage> {
           title: userName,
           isPresentToday: hadirHariIni,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -158,7 +164,7 @@ class karyawanHomePageState extends State<karyawanHomePage> {
                 const SizedBox(height: 24),
 
                 AnimatedFadeSlide(
-                  delay: 0.9,
+                  delay: 0.5,
                   child: Text(
                     "Rekap Absensi Anda",
                     style: Theme.of(context)
@@ -173,7 +179,7 @@ class karyawanHomePageState extends State<karyawanHomePage> {
                 const SizedBox(height: 12),
 
                 AnimatedFadeSlide(
-                  delay: 0.5,
+                  delay: 0.6,
                   child: AttendanceCalendar(
                     attendanceData: monthAttendance,
                   ),
@@ -182,7 +188,7 @@ class karyawanHomePageState extends State<karyawanHomePage> {
                 const SizedBox(height: 24),
 
                 AnimatedFadeSlide(
-                  delay: 0.9,
+                  delay: 0.7,
                   child: Text(
                     "Progress Absensi Anda",
                     style: Theme.of(context)
@@ -196,7 +202,7 @@ class karyawanHomePageState extends State<karyawanHomePage> {
                 ),
                 const SizedBox(height: 12),
                 AnimatedFadeSlide(
-                  delay: 1.0,
+                  delay: 0.8,
                   child: ProgressItem(
                     name: "Kehadiran Bulan Ini",
                     value: monthAttendance.where((e) => e).length /
@@ -215,225 +221,15 @@ class karyawanHomePageState extends State<karyawanHomePage> {
 
 // ======================== Widget Public ========================
 
-class AttendanceCalendar extends StatelessWidget {
-  final List<bool> attendanceData;
-
-  const AttendanceCalendar({required this.attendanceData});
-
-  Widget _buildDateBox(int day, bool isAttended, double size) {
-    return Container(
-      width: size,
-      height: size,
-      margin: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        color: isAttended ? Colors.green.shade400 : Colors.blueGrey.shade700,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        day.toString(),
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final monthName = "${_getMonthName(now.month)} ${now.year}";
-    final screenWidth = MediaQuery.of(context).size.width;
-    final spacing = 4.0;
-    final totalColumns = 9;
-    final boxSize = (screenWidth - 32 - (spacing * (totalColumns - 1))) / totalColumns;
-
-    final int totalDays = attendanceData.length;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF152A46),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, // Pusatkan grid
-        children: [
-          Text(
-            monthName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Wrap di tengah
-          Center(
-            child: Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              children: List.generate(totalDays, (index) {
-                return _buildDateBox(index + 1, attendanceData[index], boxSize);
-              }),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Legend(color: Colors.green, label: "Hadir"),
-              SizedBox(width: 8),
-              Legend(color: Color(0xFF546E7A), label: "Absen/Libur"),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getMonthName(int month) {
-    const monthNames = [
-      '',
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember'
-    ];
-    return monthNames[month];
-  }
-}
 
 
 
 
-class DayHeader extends StatelessWidget {
-  final String text;
-  final bool isWeekend;
-  const DayHeader({required this.text, required this.isWeekend});
 
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 40,
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: isWeekend ? Colors.red.shade300 : Colors.white70,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-}
 
-class Legend extends StatelessWidget {
-  final Color color;
-  final String label;
-  const Legend({required this.color, required this.label});
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-      ],
-    );
-  }
-}
 
-class StatCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onTap;
-  const StatCard({required this.title, required this.subtitle, required this.icon, required this.color, this.onTap});
 
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1C2A3A),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
-class ProgressItem extends StatelessWidget {
-  final String name;
-  final double value;
-  const ProgressItem({required this.name, required this.value});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFF1C2A3A), borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: value,
-              minHeight: 8,
-              backgroundColor: Colors.white10,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent.shade400),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+

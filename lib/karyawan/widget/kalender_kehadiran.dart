@@ -1,108 +1,122 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 class AttendanceCalendar extends StatelessWidget {
-  final List<Map<String, dynamic>> attendanceData;
+  final List<bool> attendanceData;
 
   const AttendanceCalendar({super.key, required this.attendanceData});
 
+  Widget _buildDateBox(int day, bool isAttended, double size) {
+    return Container(
+      width: size,
+      height: size,
+      margin: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: isAttended ? Colors.green.shade400 : Colors.blueGrey.shade700,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        day.toString(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Ambil tanggal bulan ini
     final now = DateTime.now();
-    final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+    final monthName = "${_getMonthName(now.month)} ${now.year}";
+    final screenWidth = MediaQuery.of(context).size.width;
+    final spacing = 4.0;
+    final totalColumns = 8;
+    final boxSize = (screenWidth - 32 - (spacing * (totalColumns - 1))) / totalColumns;
 
-    // Mapping tanggal => status absensi
-    final Map<String, String> attendanceMap = {};
-    for (var item in attendanceData) {
-      try {
-        DateTime tanggal;
-        if (item['tanggal'] is Timestamp) {
-          tanggal = (item['tanggal'] as Timestamp).toDate();
-        } else if (item['tanggal'] is DateTime) {
-          tanggal = item['tanggal'];
-        } else {
-          // skip kalau tidak valid
-          continue;
-        }
-
-
-        final key = DateFormat('yyyy-MM-dd').format(tanggal);
-        attendanceMap[key] = item['status'] ?? '-';
-      } catch (e) {
-        debugPrint('Gagal parsing tanggal: $e');
-      }
-    }
+    final int totalDays = attendanceData.length;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C2B4A),
+        color: const Color(0xFF152A46),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center, // Pusatkan grid
         children: [
           Text(
-            DateFormat('MMMM yyyy').format(now),
+            monthName,
             style: const TextStyle(
               color: Colors.white,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
             ),
           ),
           const SizedBox(height: 12),
-          GridView.builder(
-            shrinkWrap: true,
-            itemCount: daysInMonth,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7, // 7 hari dalam seminggu
-              crossAxisSpacing: 6,
-              mainAxisSpacing: 6,
+
+          // Wrap di tengah
+          Center(
+            child: Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: List.generate(totalDays, (index) {
+                return _buildDateBox(index + 1, attendanceData[index], boxSize);
+              }),
             ),
-            itemBuilder: (context, index) {
-              final day = index + 1;
-              final date =
-                  DateFormat('yyyy-MM-dd').format(DateTime(now.year, now.month, day));
+          ),
 
-              final status = attendanceMap[date];
-              Color color;
+          const SizedBox(height: 16),
 
-              switch (status) {
-                case 'Hadir':
-                  color = Colors.greenAccent.shade400;
-                  break;
-                case 'Izin':
-                  color = Colors.orangeAccent.shade400;
-                  break;
-                case 'Sakit':
-                  color = Colors.redAccent.shade400;
-                  break;
-                default:
-                  color = const Color(0xFF2E3B57);
-              }
-
-              return Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    '$day',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              );
-            },
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Legend(color: Colors.green, label: "Hadir"),
+              SizedBox(width: 8),
+              Legend(color: Color(0xFF546E7A), label: "Absen/Libur"),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  String _getMonthName(int month) {
+    const monthNames = [
+      '',
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return monthNames[month];
+  }
+}
+
+class Legend extends StatelessWidget {
+  final Color color;
+  final String label;
+  const Legend({super.key, required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      ],
     );
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
@@ -12,14 +14,14 @@ import 'pages/gmv/index.dart'; // ✅ pastikan path ini sesuai dengan struktur p
 import '../utils/animated_fade_slide.dart'; // Pastikan path ini benar
 import '../utils/route_generator.dart'; // Pastikan path ini benar
 
-class adminHomePage extends StatefulWidget {
-  const adminHomePage({super.key});
+class AdminHomePage extends StatefulWidget {
+  const AdminHomePage({super.key});
   
   @override
-  State<adminHomePage> createState() => _adminHomePageState();
+  State<AdminHomePage> createState() => _AdminHomePageState();
 }
 
-class _adminHomePageState extends State<adminHomePage> {
+class _AdminHomePageState extends State<AdminHomePage> {
 
   final GmvControllerExtra _gmvControllerExtra = GmvControllerExtra(); // ← Tambahkan ini
   double totalGmv = 0.0;

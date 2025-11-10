@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/auth_service.dart';
@@ -40,13 +42,13 @@ class _LoginPageState extends State<LoginPage> {
       if (role == 'admin') {
         Navigator.pushReplacement(
           context,
-          createRoute(const adminHomePage()),
+          createRoute(const AdminHomePage()),
         );
       } else if (role == 'karyawan') {
         if (isActive == true) {
           Navigator.pushReplacement(
             context,
-            createRoute(const karyawanHomePage()),
+            createRoute(const KaryawanHomePage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -91,13 +93,13 @@ class _LoginPageState extends State<LoginPage> {
       if (role == 'admin') {
         Navigator.pushReplacement(
           context,
-          createRoute(const adminHomePage()),
+          createRoute(const AdminHomePage()),
         );
       } else if (role == 'karyawan') {
         if (isActive == true) {
           Navigator.pushReplacement(
             context,
-            createRoute(const karyawanHomePage()),
+            createRoute(const KaryawanHomePage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

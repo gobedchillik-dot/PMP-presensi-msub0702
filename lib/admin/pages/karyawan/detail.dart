@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/admin/pages/karyawan/index.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
@@ -6,17 +8,17 @@ import '../../../utils/animated_fade_slide.dart';
 import '../../../db/controller/karyawan_controller.dart';
 import '../../../db/model/user.dart';
 
-class detailKaryawanPage extends StatefulWidget {
+class DetailKaryawanPage extends StatefulWidget {
   final UserModel user; // ✅ Data user yang dipilih
 
-  const detailKaryawanPage({super.key, required this.user});
+  const DetailKaryawanPage({super.key, required this.user});
 
   @override
-  State<detailKaryawanPage> createState() => _detailKaryawanPageState();
+  State<DetailKaryawanPage> createState() => _DetailKaryawanPageState();
 }
 
 
-class _detailKaryawanPageState extends State<detailKaryawanPage> {
+class _DetailKaryawanPageState extends State<DetailKaryawanPage> {
   late Stream<UserModel?> userStream;
   final KaryawanController profilController = KaryawanController();
 

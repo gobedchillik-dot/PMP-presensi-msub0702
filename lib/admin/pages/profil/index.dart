@@ -32,7 +32,7 @@ class ProfilIndexPage extends StatelessWidget {
                     onPressed: () {
                                           Navigator.push(
                         context,
-                        reverseCreateRoute(const adminHomePage()),
+                        reverseCreateRoute(const AdminHomePage()),
                     );
                     },
                     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -84,25 +84,6 @@ class ProfilIndexPage extends StatelessWidget {
                     const Text(
                       "Admin",
                       style: TextStyle(color: Colors.white70, fontSize: 16),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Tombol Sesuaikan Profil
-                    ElevatedButton(
-                      onPressed: () {
-                        // TODO: Navigasi ke halaman edit profil
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00ADB5), // Warna Tombol
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      ),
-                      child: const Text(
-                        "Sesuaikan profil",
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
                     ),
                   ],
                 ),
@@ -164,7 +145,6 @@ class ProfilIndexPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Implementasi Logout
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Anda telah keluar.'), duration: Duration(milliseconds: 800)),
                     );

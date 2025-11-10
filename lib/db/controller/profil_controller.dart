@@ -52,9 +52,7 @@ class ProfilController {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      print('✅ Profil berhasil diperbarui.');
     } catch (e) {
-      print('❌ Gagal memperbarui profil: $e');
       rethrow;
     }
   }

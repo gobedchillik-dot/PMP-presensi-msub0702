@@ -1,3 +1,5 @@
+// ignore_for_file: empty_catches, unused_catch_clause
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../model/user.dart';
@@ -20,10 +22,7 @@ class KaryawanController {
         return UserModel.fromFirestore(doc.data() as Map<String, dynamic>);
       }).toList();
 
-      print('✅ Berhasil memuat ${karyawanList.length} data karyawan');
-    } catch (e) {
-      print('❌ Terjadi kesalahan saat memuat data karyawan: $e');
-    }
+    } catch (e) {}
   }
 
    Future<void> updateStatus(String uid, bool status) async {
@@ -31,19 +30,13 @@ class KaryawanController {
     await _firestore.collection('tbl_user').doc(uid).update({
       'isActive': status,
     });
-    print("✅ Status user berhasil diperbarui menjadi: $status");
-  } catch (e) {
-    print("❌ Gagal memperbarui status: $e");
-  }
+  } catch (e) {}
 }
 
 Future<void> deleteUserFirestore(String uid) async {
   try {
     await _firestore.collection('tbl_user').doc(uid).delete();
-    print("✅ Data user berhasil dihapus dari Firestore");
-  } catch (e) {
-    print("❌ Gagal menghapus user: $e");
-  }
+  } catch (e) {}
 }
 
 
@@ -81,11 +74,9 @@ Future<void> deleteUserFirestore(String uid) async {
       if (doc.exists) {
         return UserModel.fromFirestore(doc.data() as Map<String, dynamic>);
       } else {
-        print('⚠️ Data karyawan dengan UID $uid tidak ditemukan.');
         return null;
       }
     } catch (e) {
-      print('❌ Gagal mengambil data karyawan: $e');
       return null;
     }
   }
@@ -120,18 +111,7 @@ Future<void> deleteUserFirestore(String uid) async {
 
       await _firestore.collection('tbl_user').doc(uid).set(data);
 
-      print('✅ Berhasil menambahkan karyawan baru: $email');
     } on FirebaseAuthException catch (e) {
-      // 3️⃣ Tangani error Firebase Auth
-      if (e.code == 'email-already-in-use') {
-        print('❌ Email sudah terdaftar.');
-      } else if (e.code == 'invalid-email') {
-        print('❌ Format email tidak valid.');
-      } else {
-        print('❌ Terjadi error FirebaseAuth: ${e.message}');
-      }
-    } catch (e) {
-      print('❌ Gagal menambahkan data karyawan: $e');
-    }
+    } catch (e) {}
   }
 }

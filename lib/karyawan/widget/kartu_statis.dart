@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class StatCard extends StatelessWidget {
@@ -6,14 +8,7 @@ class StatCard extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback? onTap;
-
-  const StatCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    this.onTap,
-  });
+  const StatCard({super.key, required this.title, required this.subtitle, required this.icon, required this.color, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -41,16 +36,9 @@ class StatCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
+                  Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-                  ),
+                  Text(subtitle, style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
                 ],
               ),
             ),

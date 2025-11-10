@@ -56,11 +56,9 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
 
           // Header
           AnimatedFadeSlide(
@@ -71,7 +69,7 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
                   onPressed: () {
                                         Navigator.push(
                         context,
-                        reverseCreateRoute(const karyawanHomePage()),
+                        reverseCreateRoute(const KaryawanHomePage()),
                     );
                   },
                   icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
