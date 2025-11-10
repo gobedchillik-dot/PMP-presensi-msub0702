@@ -19,15 +19,15 @@ class AttendanceCalendar extends StatelessWidget {
     for (var item in attendanceData) {
       try {
         DateTime tanggal;
-        if (item['tanggal'] is DateTime) {
-          tanggal = item['tanggal'];
-        } else if (item['tanggal'] is Timestamp) {
+        if (item['tanggal'] is Timestamp) {
           tanggal = (item['tanggal'] as Timestamp).toDate();
-        } else if (item['tanggal'] is String) {
-          tanggal = DateTime.parse(item['tanggal']);
+        } else if (item['tanggal'] is DateTime) {
+          tanggal = item['tanggal'];
         } else {
+          // skip kalau tidak valid
           continue;
         }
+
 
         final key = DateFormat('yyyy-MM-dd').format(tanggal);
         attendanceMap[key] = item['status'] ?? '-';

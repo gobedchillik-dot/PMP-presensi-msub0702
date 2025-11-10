@@ -1,3 +1,5 @@
+// ignore_for_file: dead_code, unnecessary_type_check
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -68,7 +70,6 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
   /// Membuat daftar tanggal dalam 1 bulan ini
   List<DateTime> _getDatesOfCurrentMonth() {
     final now = DateTime.now();
-    final firstDay = DateTime(now.year, now.month, 1);
     final nextMonth = DateTime(now.year, now.month + 1, 1);
     final lastDay = nextMonth.subtract(const Duration(days: 1));
 
@@ -137,160 +138,160 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
 
                     final userNames = userSnapshot.data ?? {};
 
-                    return FutureBuilder<Map<String, String>>(
-  future: absenController.getUserNames(),
-  builder: (context, userSnapshot) {
-    if (userSnapshot.connectionState == ConnectionState.waiting) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
-      );
-    }
-
-    final userNames = userSnapshot.data ?? {};
-
-    return FutureBuilder<Map<String, String>>(
-  future: absenController.getUserNames(),
-  builder: (context, userSnapshot) {
-    if (userSnapshot.connectionState == ConnectionState.waiting) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
-      );
-    }
-
-    final userNames = userSnapshot.data ?? {};
-
-    return StreamBuilder<List<AbsenModel>>(
-      stream: absenController.streamAll(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(color: Colors.white),
-            ),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text(
-                "Belum ada data absensi.",
-                style: TextStyle(color: Colors.white70),
-              ),
-            ),
-          );
-        }
-
-        final data = snapshot.data!;
-        const double rowHeight = 35.0;
-        const double boxWidth = 28.0;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // HEADER KOLOM
-            Row(
-              children: [
-                const Expanded(
-                  flex: 2,
-                  child: Text("Nama", style: TextStyle(color: Colors.white)),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  flex: 3,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: _headerScrollController,
-                    child: Row(
-                      children: List.generate(5, (i) {
-                        return Container(
-                          width: boxWidth,
-                          alignment: Alignment.center,
-                          child: Text(
-                            "P${i + 1}",
-                            style: const TextStyle(
-                                color: Colors.white70, fontSize: 12),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Divider(color: Colors.white30),
-
-            // DATA BARIS
-            SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // KOLOM NAMA
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: data.map((absen) {
-                        final nama = userNames[absen.idUser] ?? absen.idUser;
-                        return SizedBox(
-                          height: rowHeight,
-                          child: Text(
-                            nama,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-
-                  // KOLOM KEHADIRAN
-                  Expanded(
-                    flex: 3,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      controller: _dataScrollController,
-                      child: Column(
-                        children: data.map((absen) {
-                          final times = absen.times ?? [];
-                          return SizedBox(
-                            height: rowHeight,
-                            child: Row(
-                              children: List.generate(5, (i) {
-                                final hadir = i < times.length;
-                                return Container(
-                                  width: 20,
-                                  height: 20,
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 2),
-                                  decoration: BoxDecoration(
-                                    color: hadir
-                                        ? Colors.green
-                                        : Colors.grey.shade700,
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                );
-                              }),
+                    return StreamBuilder<List<AbsenModel>>(
+                      stream: absenController.streamAll(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20),
+                              child: CircularProgressIndicator(color: Colors.white),
                             ),
                           );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  },
-);
-  },
-);
+                        }
+
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20),
+                              child: Text(
+                                "Belum ada data absensi.",
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ),
+                          );
+                        }
+
+                        final allAbsens = snapshot.data!;
+
+                        // 🔹 Kelompokkan data berdasarkan idUser
+                        final groupedByUser = <String, List<AbsenModel>>{};
+                        for (final absen in allAbsens) {
+                          groupedByUser.putIfAbsent(absen.idUser, () => []).add(absen);
+                        }
+
+                        const double rowHeight = 35.0;
+                        const double boxSize = 24.0;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // HEADER KOLOM (Tanggal)
+                            Row(
+                              children: [
+                                const Expanded(
+                                  flex: 2,
+                                  child: Text("Nama",
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  flex: 8,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    controller: _headerScrollController,
+                                    child: Row(
+                                      children: datesInMonth.map((date) {
+                                        return Container(
+                                          width: boxSize,
+                                          alignment: Alignment.center,
+                                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                                          child: Text(
+                                            "${date.day}",
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(color: Colors.white30),
+
+                            // DATA BARIS (Per User)
+                            SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // KOLOM NAMA
+                                  Expanded(
+                                    flex: 2,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: groupedByUser.keys.map((userId) {
+                                        final nama = userNames[userId] ?? userId;
+                                        return SizedBox(
+                                          height: rowHeight,
+                                          child: Text(
+                                            nama,
+                                            style: const TextStyle(color: Colors.white),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+
+                                  // KOLOM KEHADIRAN PER TANGGAL
+                                  Expanded(
+                                    flex: 8,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      controller: _dataScrollController,
+                                      child: Column(
+                                        children: groupedByUser.entries.map((entry) {
+                                          final userAbsens = entry.value;
+
+                                          // Map hari ke model absen
+                                          final userDataByDate = {
+                                            for (var a in userAbsens)
+                                              ((a.tanggal is Timestamp)
+                                                      ? (a.tanggal).toDate()
+                                                      : (a.tanggal as DateTime))
+                                                  .day: a
+                                          };
+
+                                          return SizedBox(
+                                            height: rowHeight,
+                                            child: Row(
+                                              children: datesInMonth.map((date) {
+                                                final absen = userDataByDate[date.day];
+                                                final count = absen?.count ?? 0;
+                                                final tanggal = absen != null
+                                                    ? ((absen.tanggal is Timestamp)
+                                                        ? (absen.tanggal).toDate()
+                                                        : (absen.tanggal as DateTime))
+                                                    : date;
+                                                final color = _getColorForCount(count, tanggal);
+
+                                                return Container(
+                                                  width: boxSize,
+                                                  height: boxSize,
+                                                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: color,
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                 ),
               ),

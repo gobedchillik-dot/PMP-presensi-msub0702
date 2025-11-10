@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
         if (isActive == true) {
           Navigator.pushReplacement(
             context,
-            createRoute(const KaryawanHomePage()),
+            createRoute(const karyawanHomePage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
         if (isActive == true) {
           Navigator.pushReplacement(
             context,
-            createRoute(const KaryawanHomePage()),
+            createRoute(const karyawanHomePage()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
