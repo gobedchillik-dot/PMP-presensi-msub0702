@@ -8,7 +8,6 @@ import 'package:tes_flutter/karyawan/widget/progres_absen.dart';
 import 'package:tes_flutter/karyawan/widget/kalender_kehadiran.dart';
 import 'package:tes_flutter/karyawan/widget/kartu_statis.dart';
 
-
 class KaryawanHomePage extends StatefulWidget {
   const KaryawanHomePage({super.key});
 
@@ -19,6 +18,13 @@ class KaryawanHomePage extends StatefulWidget {
 class _KaryawanHomePageState extends State<KaryawanHomePage> {
   String? userName;
   bool isLoading = true;
+
+  // data absensi user
+  List<Map<String, dynamic>> attendanceList = [];
+  int totalHadir = 0;
+  int totalHari = 30; // bisa ubah sesuai bulan berjalan
+  String? statusHariIni;
+  String? jamMasukHariIni;
 
   @override
   void initState() {
@@ -38,8 +44,13 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
             .doc(user.uid)
             .get();
 
+        final name = doc.data()?['name'] ?? user.email ?? 'Pengguna';
+
+        // Setelah user berhasil didapat, ambil data absennya
+        await _loadUserAttendance(user.uid);
+
         setState(() {
-          userName = doc.data()?['name'] ?? user.email ?? 'Pengguna';
+          userName = name;
           isLoading = false;
         });
       } else {
@@ -56,6 +67,42 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
     }
   }
 
+  Future<void> _loadUserAttendance(String uid) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('tbl_absensi')
+          .where('userId', isEqualTo: uid)
+          .orderBy('tanggal', descending: true)
+          .get();
+
+      final now = DateTime.now();
+      String todayKey =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+      List<Map<String, dynamic>> list = [];
+      int hadirCount = 0;
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        list.add(data);
+
+        if (data['status'] == 'Hadir') hadirCount++;
+
+        if (data['tanggal'] == todayKey) {
+          statusHariIni = data['status'];
+          jamMasukHariIni = data['jamMasuk'];
+        }
+      }
+
+      setState(() {
+        attendanceList = list;
+        totalHadir = hadirCount;
+      });
+    } catch (e) {
+      debugPrint("Gagal memuat absensi: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -69,12 +116,13 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
 
     return BasePage(
       title: userName ?? "Tidak Diketahui",
-      isPresentToday: true,
+      isPresentToday: statusHariIni == 'Hadir',
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// ==== KARTU ATAS ====
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -82,7 +130,7 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
                   delay: 0.2,
                   child: StatCard(
                     title: "Estimasi penghasilan",
-                    subtitle: "Rp 1.234.567,89",
+                    subtitle: "Rp ${(totalHadir * 100000).toStringAsFixed(0)}", // contoh per hari 100rb
                     color: Colors.greenAccent.shade400,
                     icon: Iconsax.money_4,
                     onTap: () {},
@@ -93,7 +141,9 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
                   delay: 0.3,
                   child: StatCard(
                     title: "Status Kehadiran Hari Ini",
-                    subtitle: "Hadir (Pukul 07:45)",
+                    subtitle: statusHariIni != null
+                        ? "$statusHariIni (Pukul $jamMasukHariIni)"
+                        : "Belum Absen",
                     color: Colors.blueAccent.shade400,
                     icon: Iconsax.user_tick,
                   ),
@@ -103,7 +153,7 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
                   delay: 0.4,
                   child: StatCard(
                     title: "Total Hari Kerja",
-                    subtitle: "22 Hari dari 30 Hari",
+                    subtitle: "$totalHadir Hari dari $totalHari Hari",
                     color: Colors.amberAccent.shade400,
                     icon: Iconsax.video_tick,
                     onTap: () {},
@@ -111,9 +161,10 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
 
+            /// ==== KALENDER ABSENSI ====
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -131,14 +182,15 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
                 AnimatedFadeSlide(
                   delay: 0.5,
                   child: AttendanceCalendar(
-                    attendanceData: currentUserAttendance,
+                    attendanceData: attendanceList,
                   ),
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
 
+            /// ==== PROGRESS ABSEN ====
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -157,7 +209,7 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
                   delay: 1.0,
                   child: ProgressItem(
                     name: "Kehadiran ${userName ?? 'Pengguna'} Bulan Ini",
-                    value: 22 / 30,
+                    value: totalHadir / totalHari,
                   ),
                 ),
               ],

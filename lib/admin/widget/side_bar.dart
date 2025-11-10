@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
+import 'package:tes_flutter/db/controller/absen/absen_controller.dart';
 import '../pages/profil/index.dart';
 import '../pages/keuangan/index.dart';
 import '../pages/karyawan/index.dart'; // pastikan path ini sesuai struktur project kamu
@@ -109,10 +111,16 @@ class _SideBarState extends State<SideBar> {
                             "Data Absen",
                             LucideIcons.calendarCheck,
                             () {
-                    Navigator.push(
-                        context,
-                        createRoute(const AbsenIndexPage()),
-                    );
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => ChangeNotifierProvider(
+      create: (_) => AbsenController(),
+      child: const AbsenIndexPage(),
+    ),
+  ),
+);
+
                               widget.onClose();
                             },
                           ),
