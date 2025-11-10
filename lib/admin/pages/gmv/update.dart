@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:tes_flutter/admin/base_page.dart';
+import 'package:tes_flutter/admin/pages/gmv/index.dart';
+import 'package:tes_flutter/admin/widget/tittle_app.dart';
 import 'package:tes_flutter/database/model/gmv.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
 import '../../../database/controller/gmv/gmv_controller.dart';
@@ -113,25 +115,12 @@ class _GmvEditPageState extends State<GmvEditPage> {
             children: [
               // === HEADER (Judul & Tombol Kembali) ===
               AnimatedFadeSlide(
-                delay: 0.1,
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      "Edit Data GMV",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+              delay: 0.1,
+              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+                title: "Data GMV",
+                backToPage: const GmvIndexPage(),
               ),
+            ),
               const SizedBox(height: 30),
 
               // === FORM INPUT ===

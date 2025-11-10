@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/admin/pages/karyawan/index.dart';
+import 'package:tes_flutter/admin/widget/tittle_app.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
 import '../../../admin/base_page.dart';
 import '../../../utils/animated_fade_slide.dart';
@@ -51,27 +52,9 @@ class _DetailKaryawanPageState extends State<DetailKaryawanPage> {
                 // Header
                 AnimatedFadeSlide(
                   delay: 0.1,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                                              Navigator.push(
-                        context,
-                        reverseCreateRoute(const KaryawanIndexPage()),
-                    );
-                        },
-                        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "Profil",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+                    title: "Detail profil",
+                    backToPage: const KaryawanIndexPage(),
                   ),
                 ),
 

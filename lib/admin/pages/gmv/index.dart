@@ -1,18 +1,21 @@
+// lib/admin/pages/gmv/gmv_index_page.dart (Setelah Refactoring)
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tes_flutter/admin/pages/gmv/add.dart';
 import 'package:tes_flutter/admin/pages/gmv/edit.dart';
+import 'package:tes_flutter/admin/widget/filter_bar.dart';
+import 'package:tes_flutter/admin/widget/gmv_mingguan.dart';
+import 'package:tes_flutter/admin/widget/tittle_app.dart';
 import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart';
 import 'package:tes_flutter/database/model/gmv.dart';
+import 'package:tes_flutter/ui_page/font_size_patern.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
-
-// Import wajib untuk animasi:
 import '../../../utils/animated_fade_slide.dart';
-
-// Import wajib untuk navigasi tombol back:
 import '../../base_page.dart';
 import '../../home_page.dart';
+
 
 class GmvIndexPage extends StatefulWidget {
   const GmvIndexPage({super.key});
@@ -22,7 +25,7 @@ class GmvIndexPage extends StatefulWidget {
 }
 
 class _GmvIndexPageState extends State<GmvIndexPage> {
-  // Dummy Data untuk Summary Mingguan
+  // Dummy Data
   final List<Map<String, dynamic>> weeklySummary = [
     {'minggu': 1, 'total': 1300000000, 'isUp': true},
     {'minggu': 2, 'total': 1300000000, 'isUp': false},
@@ -32,65 +35,8 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
 
   String selectedPeriod = '1 Bulan';
   String selectedQuarter = 'M4';
-
-  // Fungsi untuk format uang
-  String formatMoney(int number) {
-    if (number >= 1000000000) {
-      double billions = number / 1000000000;
-      return "Rp ${billions.toStringAsFixed(1).replaceAll('.', ',')} M";
-    }
-    return "Rp ${number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => "${m[1]}.",
-    )}";
-  }
-
-  // Widget kartu summary mingguan
-  Widget _buildSummaryCard(Map<String, dynamic> data) {
-    final bool isUp = data['isUp'];
-    final Color color = isUp ? Colors.green : Colors.red;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF152A46),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Minggu ke -${data['minggu']}",
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                formatMoney(data['total']),
-                style: TextStyle(
-                  color: color,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Icon(
-                isUp ? Icons.arrow_upward : Icons.arrow_downward,
-                color: color,
-                size: 18,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
-
   
+  // Hapus formatMoney, karena sudah ada di GmvWeeklyCard (atau bisa dipindah ke utilitas)
 
   @override
   Widget build(BuildContext context) {
@@ -102,84 +48,27 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
           key: const Key('gmvIndexColumn'),
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== 1. CUSTOM TITLE & BACK BUTTON =====
+            // ===== 1. CUSTOM TITLE & BACK BUTTON (Di-refactor) =====
             AnimatedFadeSlide(
               delay: 0.1,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        reverseCreateRoute(const AdminHomePage()),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Data GMV",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+                title: "Data GMV",
+                backToPage: const AdminHomePage(),
               ),
             ),
             const SizedBox(height: 20),
 
 
-            // ===== 3. GRAFIK GMV =====
+            // ===== 3. GRAFIK GMV - MENGGUNAKAN FILTERBAR =====
             AnimatedFadeSlide(
               delay: 0.3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Grafik GMV",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Text(
-                    "Periode : 1 Oktober - 31 Oktober 2025",
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
+                  CustomSubtitle(text: "Grafik GMV"),
+                  CustomInfo(text: "Periode : 1 November - 30 November 2025"),
                   const SizedBox(height: 8),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: ['Semua', 'Hari ini', '7 Hari', '1 Bulan']
-                          .map(
-                            (period) => Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: TextButton(
-                                onPressed: () =>
-                                    setState(() => selectedPeriod = period),
-                                style: TextButton.styleFrom(
-                                  backgroundColor: selectedPeriod == period
-                                      ? const Color(0xFF3366CC)
-                                      : const Color(0xFF1E2F4D),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text(
-                                  period,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
+                  FilterBar(),
                   const SizedBox(height: 8),
                   Container(
                     height: 200,
@@ -189,48 +78,62 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
-                      "Belum ada data",
-                      style: TextStyle(color: Colors.white54),
-                    ),
+                    child: CustomInfo(text: "Belum ada data")
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
 
-            // ===== 4. KUARTAL GMV MINGGUAN =====
+            // ===== 4. KUARTAL GMV MINGGUAN - MENGGUNAKAN GMVWEEKLYCARD =====
             AnimatedFadeSlide(
               delay: 0.4,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Kuartal GMV Mingguan",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  CustomSubtitle(text: "Kuartal GMV Mingguan"),
                   const SizedBox(height: 12),
                   Column(
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: _buildSummaryCard(weeklySummary[0])),
+                          Expanded(
+                            child: GmvWeeklyCard( // ⭐️ MENGGANTIKAN _buildSummaryCard
+                              mingguKe: weeklySummary[0]['minggu'],
+                              total: weeklySummary[0]['total'],
+                              isUp: weeklySummary[0]['isUp'],
+                            ),
+                          ),
                           const SizedBox(width: 10),
-                          Expanded(child: _buildSummaryCard(weeklySummary[1])),
+                          Expanded(
+                            child: GmvWeeklyCard(
+                              mingguKe: weeklySummary[1]['minggu'],
+                              total: weeklySummary[1]['total'],
+                              isUp: weeklySummary[1]['isUp'],
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: _buildSummaryCard(weeklySummary[2])),
+                          Expanded(
+                            child: GmvWeeklyCard(
+                              mingguKe: weeklySummary[2]['minggu'],
+                              total: weeklySummary[2]['total'],
+                              isUp: weeklySummary[2]['isUp'],
+                            ),
+                          ),
                           const SizedBox(width: 10),
-                          Expanded(child: _buildSummaryCard(weeklySummary[3])),
+                          Expanded(
+                            child: GmvWeeklyCard(
+                              mingguKe: weeklySummary[3]['minggu'],
+                              total: weeklySummary[3]['total'],
+                              isUp: weeklySummary[3]['isUp'],
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -239,17 +142,19 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
               ),
             ),
             const SizedBox(height: 24),
+
+            // ===== Tombol Edit dan Tambah Data (Tetap) =====
             AnimatedFadeSlide(
               delay: 0.2,
               child: Row(
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {
+                      onPressed: () { 
                         Navigator.push(
-                        context,
-                        createRoute(const EditGmvPage()),
-                    );
+                          context,
+                          createRoute(const EditGmvPage()),
+                        );
                       },
                       icon: const Icon(Icons.edit, color: Colors.black),
                       label: const Text("Edit data"),
@@ -268,11 +173,11 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
                   ),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {                      
+                      onPressed: () {
                         Navigator.push(
-                        context,
-                        createRoute(const AddGmvPage()),
-                    );
+                          context,
+                          createRoute(const AddGmvPage()),
+                        );
                       },
                       icon: const Icon(Icons.add_circle, color: Colors.black),
                       label: const Text("Tambah data"),
@@ -294,60 +199,22 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
             ),
             const SizedBox(height: 24),
 
-            // ===== 5. DATA GMV (DARI FIRESTORE) =====
+            // ===== 5. DATA GMV (DARI FIRESTORE) - MENGGUNAKAN FILTERBAR =====
             AnimatedFadeSlide(
               delay: 0.5,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Data GMV",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Text(
-                    "Periode : 20 Oktober - 30 Oktober 2025",
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
+                  CustomSubtitle(text: "Data GMV"),
+                  CustomInfo(text: "Periode : 20 Oktober - 30 Oktober 2025"),
                   const SizedBox(height: 8),
 
-                  // PILIHAN KUARTAL
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: ['M1', 'M2', 'M3', 'M4']
-                          .map(
-                            (quarter) => Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: TextButton(
-                                onPressed: () =>
-                                    setState(() => selectedQuarter = quarter),
-                                style: TextButton.styleFrom(
-                                  backgroundColor: selectedQuarter == quarter
-                                      ? const Color(0xFF3366CC)
-                                      : const Color(0xFF1E2F4D),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text(
-                                  quarter,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
+                  // ⭐️ MENGGANTIKAN SingleChildScrollView + Row + List.generate filter kuartal
+                  FilterBar(),
+                  
                   const SizedBox(height: 24),
 
-                  // CARD DATA GMV
+                  // CARD DATA GMV (StreamBuilder)
                   AnimatedFadeSlide(
                     delay: 0.4,
                     child: Container(
@@ -407,44 +274,47 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
                               return Column(
                                 children: List.generate(data.length, (index) {
                                   final gmv = data[index];
-                                   final formattedGmv = NumberFormat.currency(
-                                    locale: 'id_ID',
-                                    symbol: 'Rp ',
-                                    decimalDigits: 0,
-                                  ).format(gmv.gmv);
-                                  final profit = (gmv.gmv * 5) / 100;
-                                  final formattedProfit = NumberFormat.currency(
-  locale: 'id_ID',
-  symbol: 'Rp ',
-  decimalDigits: 0,
-).format(profit);
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          dateFormat
-                                              .format(gmv.tanggal.toDate()),
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                        Text(
-                                          formattedGmv,
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                        Text(
-                                          formattedProfit,
-                                          style: TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
+                                    final formattedGmv = NumberFormat.currency(
+                                      locale: 'id_ID',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0,
+                                    ).format(gmv.gmv);
+                                    final profit = (gmv.gmv * 5) / 100;
+                                    final formattedProfit = NumberFormat.currency(
+                                      locale: 'id_ID',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0,
+                                    ).format(profit);
+                                    
+                                    // PENTING: Jika baris data ini sering digunakan, 
+                                    // kita bisa ekstrak menjadi GmvDataRow.
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            dateFormat
+                                                .format(gmv.tanggal.toDate()),
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                          Text(
+                                            formattedGmv,
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                          Text(
+                                            formattedProfit,
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
                               );
                             },
                           ),

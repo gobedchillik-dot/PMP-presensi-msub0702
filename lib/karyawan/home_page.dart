@@ -3,6 +3,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:tes_flutter/karyawan/widget/kalender_kehadiran.dart';
 import 'package:tes_flutter/karyawan/widget/kartu_statis.dart';
 import 'package:tes_flutter/karyawan/widget/progres_absen.dart';
+import 'package:tes_flutter/ui_page/font_size_patern.dart';
 import '../karyawan/base_page.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -165,16 +166,7 @@ class KaryawanHomePageState extends State<KaryawanHomePage> {
 
                 AnimatedFadeSlide(
                   delay: 0.5,
-                  child: Text(
-                    "Rekap Absensi Anda",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
+                  child: CustomSubtitle(text: "Rekap absensi anda")
                 ),
                 const SizedBox(height: 12),
 
@@ -189,16 +181,7 @@ class KaryawanHomePageState extends State<KaryawanHomePage> {
 
                 AnimatedFadeSlide(
                   delay: 0.7,
-                  child: Text(
-                    "Progress Absensi Anda",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
+                  child: CustomSubtitle(text: "Progres absensi anda")
                 ),
                 const SizedBox(height: 12),
                 AnimatedFadeSlide(

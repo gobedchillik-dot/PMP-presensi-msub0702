@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tes_flutter/utils/route_generator.dart';
+import 'package:tes_flutter/admin/widget/data_row.dart';
+import 'package:tes_flutter/admin/widget/profil_selection.dart';
+import 'package:tes_flutter/admin/widget/tittle_app.dart';
 // Import wajib untuk animasi:
 import '../../../utils/animated_fade_slide.dart'; 
 import '../../base_page.dart'; 
@@ -87,102 +89,26 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
             // ===== 1. CUSTOM TITLE & BACK BUTTON (Delay 0.1) =====
             AnimatedFadeSlide(
               delay: 0.1,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                                          Navigator.push(
-                        context,
-                        reverseCreateRoute(const AdminHomePage()),
-                    );
-                    },
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Keuangan",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ]
-              )
+              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+                title: "Keuangan",
+                backToPage: const AdminHomePage(),
+              ),
             ),
-            AnimatedFadeSlide(
-              delay: 0.2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  
-                  const Text(
-                    "Rangkuman keuangan",
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ]
-              )
-            ),
-            const SizedBox(height: 12),
-                  AnimatedFadeSlide(
-                    delay: 0.3,
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF152A46),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text("Est. Pemasukan", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text("Gaji karyawan", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text("Operasional", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          const Divider(color: Colors.white30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text("Total pengeluaran", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text("Total keuntungan", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
 
-                          // === LIST KARYAWAN (DUMMY DATA) ===
-                      
-                        ],
-                      ),
-                    ),
-                  ),
+            AnimatedFadeSlide(
+              delay: 0.3,
+              child: const ProfileSectionWrapper(
+                title: "Rangkuman keuangan",
+                children: [
+                  ProfileDataRow(label: "Est. Pemasukan", value: "Rp 123,456,789"),
+                  ProfileDataRow(label: "Gaji karyawan", value: "Rp 123,456,789"),
+                  ProfileDataRow(label: "Operasional", value: "Rp 123,456,789"),
+                  Divider(color: Colors.white30),
+                  ProfileDataRow(label: "Total pengeluaran", value: "Rp 123,456,789"),
+                  ProfileDataRow(label: "Total keuntungan", value: "Rp 123,456,789"),
+                ],
+              ),
+            ),
             const SizedBox(height: 24),
 
             // ===== 4. KUARTAL GMV MINGGUAN (Weekly Summary Cards) (Delay 0.3) =====
@@ -236,122 +162,19 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
             
             // ===== 5. PENGELUARAN OPERASIONAL (Tabs dan Tabel) (Delay 0.7) =====
             AnimatedFadeSlide(
-              delay: 0.6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              delay: 0.3,
+              child: const ProfileSectionWrapper(
+                title: "Pengeluaran opsional",
+                subtitle: "Total : Rp 123,456,789",
                 children: [
-                  const Text(
-                    "Pengeluaran operasional",
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const Text(
-                    "Total : Rp 123.456.789",
-                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  // Tombol Edit/Tambah Data (Delay 0.9)
-                  AnimatedFadeSlide(
-                    delay: 0.7,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(Icons.edit, color: Colors.black),
-                            label: const Text("Edit data"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00BCD4),
-                              foregroundColor: Colors.black,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(12),
-                                  bottomLeft: Radius.circular(12),
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(Icons.add_circle, color: Colors.black),
-                            label: const Text("Tambah data"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00E676),
-                              foregroundColor: Colors.black,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(12),
-                                  bottomRight: Radius.circular(12),
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Detail Operasional (Delay 1.1)
-                  AnimatedFadeSlide(
-                    delay: 0.8,
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF152A46),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: const Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Est. Pemasukan", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Gaji karyawan", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Operasional", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          Divider(color: Colors.white30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Total pengeluaran", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Total keuntungan", style: TextStyle(color: Colors.white)),
-                              Text(":", style: TextStyle(color: Colors.white)),
-                              Text("Rp 123.456.789", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  ProfileDataRow(label: "Kopi", value: "Rp 123,456,789"),
+                  ProfileDataRow(label: "Listrik", value: "Rp 123,456,789"),
+                  ProfileDataRow(label: "Wifi", value: "Rp 123,456,789"),
+                  ProfileDataRow(label: "", value: ""),
+                  ProfileDataRow(label: "", value: ""),
+                  Divider(color: Colors.white30),
+                  ProfileDataRow(label: "Total pengeluaran", value: "Rp 123,456,789"),
+                  ProfileDataRow(label: "Total keuntungan", value: "Rp 123,456,789"),
                 ],
               ),
             ),

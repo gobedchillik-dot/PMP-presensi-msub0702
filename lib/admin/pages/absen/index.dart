@@ -3,7 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tes_flutter/utils/route_generator.dart';
+import 'package:tes_flutter/admin/widget/tittle_app.dart';
 import '../../base_page.dart';
 import '../../../utils/animated_fade_slide.dart';
 import '../../home_page.dart';
@@ -93,26 +93,9 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
             // HEADER
             AnimatedFadeSlide(
               delay: 0.1,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        reverseCreateRoute(const AdminHomePage()),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  ),
-                  const Text(
-                    "Data absensi karyawan (bulan ini)",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+                title: "Data absensi",
+                backToPage: const AdminHomePage(),
               ),
             ),
 

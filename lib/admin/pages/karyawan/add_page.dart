@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tes_flutter/admin/widget/tittle_app.dart';
 import '../../../database/controller/karyawan/karyawan_controller.dart';
 import '../../../utils/animated_fade_slide.dart';
 import '../../../utils/route_generator.dart';
@@ -91,30 +92,11 @@ class _KaryawanAddPageState extends State<KaryawanAddPage> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            // 🔹 Tombol Back di luar Box
             AnimatedFadeSlide(
               delay: 0.1,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                                          Navigator.push(
-                        context,
-                        reverseCreateRoute(const KaryawanIndexPage()),
-                    );
-                    },
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Buatkan akun untuk karyawan",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+                title: "Buat akun untuk karyawan",
+                backToPage: const KaryawanIndexPage(),
               ),
             ),
             const SizedBox(height: 20),

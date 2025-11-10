@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/admin/pages/karyawan/detail.dart';
+import 'package:tes_flutter/admin/widget/tittle_app.dart';
 import '../../../database/controller/karyawan/karyawan_controller.dart';
 import '../../../database/model/user.dart';
 import '../../../utils/animated_fade_slide.dart';
@@ -29,27 +30,9 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
             // ===== TITLE BODY DENGAN TOMBOL BACK =====
             AnimatedFadeSlide(
               delay: 0.1,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                                          Navigator.push(
-                        context,
-                        reverseCreateRoute(const AdminHomePage()),
-                    );
-                    },
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Data Karyawan",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+                title: "Data karyawan",
+                backToPage: const AdminHomePage(),
               ),
             ),
 
