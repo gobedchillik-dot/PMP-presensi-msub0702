@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:tes_flutter/admin/base_page.dart';
+import 'package:tes_flutter/admin/pages/gmv/index.dart';
 import 'package:tes_flutter/admin/widget/tittle_app.dart';
+import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
-import '../../../database/controller/gmv/gmv_controller.dart';
-import '../../base_page.dart';
-import 'index.dart';
 
 class AddGmvPage extends StatefulWidget {
   const AddGmvPage({super.key});
@@ -87,10 +87,9 @@ class _AddGmvPageState extends State<AddGmvPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // HEADER DENGAN BACK & ANIMASI
               AnimatedFadeSlide(
               delay: 0.1,
-              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+              child: CustomAppTitle(
                 title: "Data GMV",
                 backToPage: const GmvIndexPage(),
               ),
@@ -98,7 +97,6 @@ class _AddGmvPageState extends State<AddGmvPage> {
 
               const SizedBox(height: 24),
 
-              // FIELD GMV
               AnimatedFadeSlide(
                 delay: 0.2,
                 child: TextFormField(
@@ -131,7 +129,6 @@ class _AddGmvPageState extends State<AddGmvPage> {
 
               const SizedBox(height: 20),
 
-              // PICK TANGGAL
               AnimatedFadeSlide(
                 delay: 0.3,
                 child: GestureDetector(
@@ -162,7 +159,6 @@ class _AddGmvPageState extends State<AddGmvPage> {
 
               const SizedBox(height: 32),
 
-              // TOMBOL SIMPAN
               AnimatedFadeSlide(
                 delay: 0.4,
                 child: SizedBox(

@@ -18,6 +18,7 @@ dependencies:
   provider: ^6.1.1 # Gunakan versi terbaru yang stabil
   intl: ^0.18.1    # Gunakan versi terbaru yang stabil
   syncfusion_flutter_charts: ^26.1.40
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

@@ -3,15 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:tes_flutter/admin/base_page.dart';
+import 'package:tes_flutter/admin/pages/gmv/index.dart';
 import 'package:tes_flutter/admin/pages/gmv/update.dart';
 import 'package:tes_flutter/admin/widget/tittle_app.dart';
+import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart';
 import 'package:tes_flutter/database/model/gmv.dart';
 import 'package:tes_flutter/ui_page/font_size_patern.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
-import '../../../database/controller/gmv/gmv_controller.dart';
-import '../../base_page.dart';
-import 'index.dart';
 
 class EditGmvPage extends StatefulWidget {
   const EditGmvPage({super.key});
@@ -29,17 +29,14 @@ class _EditGmvPageState extends State<EditGmvPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== CUSTOM TITLE & BACK BUTTON =====
             AnimatedFadeSlide(
               delay: 0.1,
-              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+              child: CustomAppTitle(
                 title: "Edit Data GMV",
                 backToPage: const GmvIndexPage(),
               ),
             ),
             const SizedBox(height: 24),
-
-            // ===== INFORMASI =====
             AnimatedFadeSlide(
               delay: 0.5,
               child: Column(
@@ -51,8 +48,6 @@ class _EditGmvPageState extends State<EditGmvPage> {
                 ],
               ),
             ),
-
-            // ===== CARD DATA GMV =====
             AnimatedFadeSlide(
               delay: 0.6,
               child: Container(
@@ -64,19 +59,15 @@ class _EditGmvPageState extends State<EditGmvPage> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // HEADER
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [
-                        Text("Tanggal",
-                            style: TextStyle(color: Colors.white)),
+                        Text("Tanggal", style: TextStyle(color: Colors.white)),
                         Text("GMV", style: TextStyle(color: Colors.white)),
                         Text("Aksi", style: TextStyle(color: Colors.white)),
                       ],
                     ),
                     const Divider(color: Colors.white30),
-
-                    // STREAMBUILDER FIRESTORE
                     StreamBuilder<List<GmvModel>>(
                       stream: context.watch<GmvController>().gmvStream,
                       builder: (context, snapshot) {
@@ -85,8 +76,8 @@ class _EditGmvPageState extends State<EditGmvPage> {
                           return const Padding(
                             padding: EdgeInsets.all(16.0),
                             child: Center(
-                              child: CircularProgressIndicator(
-                                  color: Colors.white),
+                              child:
+                                  CircularProgressIndicator(color: Colors.white),
                             ),
                           );
                         }
@@ -119,24 +110,18 @@ class _EditGmvPageState extends State<EditGmvPage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  // === Tanggal ===
                                   Text(
                                     dateFormat.format(gmv.tanggal.toDate()),
                                     style:
                                         const TextStyle(color: Colors.white),
                                   ),
-
-                                  // === Nilai GMV ===
                                   Text(
                                     numberFormat.format(gmv.gmv),
                                     style:
                                         const TextStyle(color: Colors.white),
                                   ),
-
-                                  // === Tombol Aksi ===
                                   Row(
                                     children: [
-                                      // Tombol edit
                                       IconButton(
                                         onPressed: () {
                                           Navigator.push(
@@ -150,7 +135,6 @@ class _EditGmvPageState extends State<EditGmvPage> {
                                           size: 20,
                                         ),
                                       ),
-                                      // Tombol hapus
                                       IconButton(
                                         onPressed: () async {
                                           final confirm = await showDialog(

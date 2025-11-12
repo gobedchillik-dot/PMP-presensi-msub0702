@@ -10,9 +10,9 @@ class AnimatedFadeSlide extends StatefulWidget {
   const AnimatedFadeSlide({
     super.key,
     required this.child,
-    this.beginY = 0.2, // jarak awal geser vertikal
+    this.beginY = 0.4, // jarak awal geser vertikal
     this.delay = 0.0, // waktu tunda animasi
-    this.duration = const Duration(milliseconds: 800),
+    this.duration = const Duration(milliseconds: 500),
   });
 
   @override

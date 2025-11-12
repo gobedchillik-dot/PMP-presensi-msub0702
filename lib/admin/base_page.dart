@@ -87,7 +87,6 @@ class _BasePageState extends State<BasePage>
           ),
         ),
 
-        // === SIDEBAR OVERLAY ===
         AnimatedBuilder(
           animation: _sidebarController,
           builder: (context, child) {
