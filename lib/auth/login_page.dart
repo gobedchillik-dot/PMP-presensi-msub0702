@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
       } else if (role == 'karyawan') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const karyawanHomePage()),
+          MaterialPageRoute(builder: (_) => const KaryawanHomePage()),
         );
       } else {
         throw Exception("Role tidak dikenal: $role");

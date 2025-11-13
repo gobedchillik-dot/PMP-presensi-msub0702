@@ -100,7 +100,7 @@ class _profilIndexPageState extends State<profilIndexPage> {
                           Navigator.pushReplacement(
                             context,
                             PageRouteBuilder(
-                              pageBuilder: (_, __, ___) => const karyawanHomePage(),
+                              pageBuilder: (_, __, ___) => const KaryawanHomePage(),
                               transitionsBuilder: (context, animation, secondaryAnimation, child) {
                                 final fade = Tween(begin: 0.0, end: 1.0).animate(animation);
                                 final slide = Tween<Offset>(

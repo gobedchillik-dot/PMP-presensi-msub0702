@@ -27,40 +27,47 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Bagian kiri: salam dan status
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Hai, $employeeName',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      isPresentToday ? Icons.check_circle : Icons.cancel,
-                      color: isPresentToday ? Colors.green : Colors.red,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      isPresentToday
-                          ? 'Hadir hari ini'
-                          : 'Belum mengisi daftar hadir hari ini',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            Flexible(
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Text(
+        'Hai, $employeeName',
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+      const SizedBox(height: 4),
+      Row(
+        children: [
+          Icon(
+            isPresentToday ? Icons.check_circle : Icons.cancel,
+            color: isPresentToday ? Colors.green : Colors.red,
+            size: 16,
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              isPresentToday
+                  ? 'Hadir hari ini'
+                  : 'Belum mengisi daftar hadir hari ini',
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
             ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+
 
             // Avatar + menu popup
             PopupMenuButton<String>(

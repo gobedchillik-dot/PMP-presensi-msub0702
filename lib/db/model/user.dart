@@ -10,7 +10,8 @@ class UserModel {
   final String bank;
   final String panggilan;
   final String alamat;
-  // Anda bisa menambahkan field lain yang dibutuhkan di sini, seperti 'imageUrl', 'jabatan', dll.
+  final String? faceId;     // 🔹 Token dari Face++
+  final String? faceImage;  // 🔹 URL gambar wajah (bukan base64)
 
   UserModel({
     required this.uid,
@@ -22,24 +23,28 @@ class UserModel {
     required this.bank,
     required this.panggilan,
     required this.alamat,
+    this.faceId,
+    this.faceImage,
   });
 
-  // Factory constructor untuk membuat objek dari data Firestore
+  // 🔹 Factory dari Firestore
   factory UserModel.fromFirestore(Map<String, dynamic> data) {
     return UserModel(
       uid: data['uid'] ?? '',
       name: data['name'] ?? '',
       email: data['email'] ?? '',
       nohp: data['nohp'] ?? '',
+      role: data['role'] ?? 'karyawan',
       norek: data['norek'] ?? '',
       bank: data['bank'] ?? '',
       panggilan: data['panggilan'] ?? '',
       alamat: data['alamat'] ?? '',
-      role: data['role'] ?? 'karyawan', // Default role jika tidak ditemukan
+      faceId: data['face_id'],
+      faceImage: data['face_image'],
     );
   }
 
-  // Konversi objek menjadi Map untuk disimpan ke Firestore
+  // 🔹 Konversi ke Map untuk Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'uid': uid,
@@ -47,7 +52,13 @@ class UserModel {
       'email': email,
       'nohp': nohp,
       'role': role,
-      'createdAt': FieldValue.serverTimestamp(), // Timestamp untuk rekaman waktu
+      'norek': norek,
+      'bank': bank,
+      'panggilan': panggilan,
+      'alamat': alamat,
+      'face_id': faceId ?? '',
+      'face_image': faceImage ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
     };
   }
 }

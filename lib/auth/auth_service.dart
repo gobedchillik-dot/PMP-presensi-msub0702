@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../karyawan/widget/alert_data.dart'; // ⚠️ ganti 'your_project_name' sesuai nama proyekmu
+import '../karyawan/pages/profil/index.dart';
 
 class AuthService {
   static final _auth = FirebaseAuth.instance;
@@ -40,10 +41,16 @@ class AuthService {
       showDialog(
         context: context,
         builder: (_) => AlertDataWidget(
-          onCompletePressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
-          },
+onCompletePressed: () {
+  Navigator.pop(context); // Tutup dialog dulu
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const profilIndexPage(), // Ganti dengan halaman form profil lo
+    ),
+  );
+},
+
           onSkipPressed: () {
             Navigator.pop(context);
           },
