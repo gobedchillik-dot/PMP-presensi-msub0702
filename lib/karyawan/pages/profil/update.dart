@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../db/controller/profil_controller.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
+import '../../../database/controller/karyawan/profil_controller.dart';
 import '../../base_page.dart';
-import '../../widget/animated_fade_slide.dart';
+import '../../../utils/animated_fade_slide.dart'; // Pastikan path ini benar
 import 'index.dart';
 import '../../../auth/auth_service.dart';
 
@@ -100,10 +101,10 @@ class _ProfilUpdatePageState extends State<ProfilUpdatePage> {
         ),
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const profilIndexPage()),
-      );
+                    Navigator.push(
+                        context,
+                        reverseCreateRoute(const ProfilIndexPage()),
+                    );
     }
   }
 
@@ -113,7 +114,6 @@ class _ProfilUpdatePageState extends State<ProfilUpdatePage> {
       title: userName ?? "Tidak Diketahui",
       isPresentToday: true,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
@@ -123,12 +123,14 @@ class _ProfilUpdatePageState extends State<ProfilUpdatePage> {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () => Navigator.pushReplacement(
+                  onPressed: () {
+                                        Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const profilIndexPage()),
-                      ),
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    ),
+                        reverseCreateRoute(const ProfilIndexPage()),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                ),
                     const SizedBox(width: 8),
                     const Text(
                       "Edit Profil",

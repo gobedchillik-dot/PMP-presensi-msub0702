@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart'; // Import Provider
 import 'package:tes_flutter/auth/login_page.dart';
-import 'firebase_options.dart'; // ini dihasilkan otomatis oleh Firebase CLI
+import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart'; // Import GmvController
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +19,14 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => GmvController()),
+      ],
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: LoginPage(),
+      ),
     );
   }
 }

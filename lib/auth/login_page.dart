@@ -1,7 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
-import '../db/controller/login_auth_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../auth/auth_service.dart';
 import '../admin/home_page.dart';
 import '../karyawan/home_page.dart';
+import '../utils/route_generator.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,17 +17,50 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final LoginAuthController _authController = LoginAuthController();
-
+  final AuthService _authService = AuthService();
 
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _checkExistingUser(); // ✅ langsung cek sesi aktif dari AuthService
   }
 
-  
+  /// 🔹 Mengecek apakah ada sesi login aktif
+  Future<void> _checkExistingUser() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    try {
+      final userData = await AuthService.getCurrentUserData();
+      if (!mounted || userData == null) return;
+
+      final role = userData['role'];
+      final isActive = userData['isActive'];
+
+      if (role == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          createRoute(const AdminHomePage()),
+        );
+      } else if (role == 'karyawan') {
+        if (isActive == true) {
+          Navigator.pushReplacement(
+            context,
+            createRoute(const KaryawanHomePage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Akun kamu sedang dinonaktifkan.")),
+          );
+          await FirebaseAuth.instance.signOut();
+        }
+      }
+    } catch (e) {
+      debugPrint("Error checking current user: $e");
+    }
+  }
 
   /// 🔹 Fungsi login utama
   Future<void> _handleLogin() async {
@@ -38,31 +75,41 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      String role = await _authController.login(
-        _emailController.text,
-        _passwordController.text,
+      final result = await _authService.signIn(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
+
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Login gagal, periksa kembali data.")),
+        );
+        return;
+      }
+
+      final role = result['role'];
+      final isActive = result['isActive'];
 
       if (role == 'admin') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const adminHomePage()),
+          createRoute(const AdminHomePage()),
         );
       } else if (role == 'karyawan') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const KaryawanHomePage()),
-        );
-      } else {
-        throw Exception("Role tidak dikenal: $role");
+        if (isActive == true) {
+          Navigator.pushReplacement(
+            context,
+            createRoute(const KaryawanHomePage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Akun kamu sedang dinonaktifkan.")),
+          );
+        }
       }
     } catch (e) {
-      String message = e.toString().contains(']')
-          ? e.toString().split(']').last.trim()
-          : e.toString().replaceFirst('Exception: ', '').trim();
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login gagal: $message")),
+        SnackBar(content: Text("Login gagal: $e")),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -111,8 +158,8 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                        color: Colors.blueAccent, width: 2),
+                    borderSide:
+                        const BorderSide(color: Colors.blueAccent, width: 2),
                   ),
                 ),
               ),
@@ -134,8 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                        color: Colors.blueAccent, width: 2),
+                    borderSide:
+                        const BorderSide(color: Colors.blueAccent, width: 2),
                   ),
                 ),
               ),

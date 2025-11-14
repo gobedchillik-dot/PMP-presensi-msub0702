@@ -1,6 +1,8 @@
+// ignore_for_file: empty_catches, unused_catch_clause, avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../model/user.dart';
+import '../../model/user.dart';
 
 class KaryawanController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -17,14 +19,27 @@ class KaryawanController {
           .get();
 
       karyawanList = snapshot.docs.map((doc) {
-        return UserModel.fromFirestore(doc.data() as Map<String, dynamic>);
+      return UserModel.fromFirestore(doc.data());
       }).toList();
 
-      print('✅ Berhasil memuat ${karyawanList.length} data karyawan');
-    } catch (e) {
-      print('❌ Gagal memuat data karyawan: $e');
-    }
+    } catch (e) {}
   }
+
+   Future<void> updateStatus(String uid, bool status) async {
+  try {
+    await _firestore.collection('tbl_user').doc(uid).update({
+      'isActive': status,
+    });
+  } catch (e) {}
+}
+
+Future<void> deleteUserFirestore(String uid) async {
+  try {
+    await _firestore.collection('tbl_user').doc(uid).delete();
+  } catch (e) {}
+}
+
+
 
   // 🔹 Stream real-time data karyawan
   Stream<List<UserModel>> streamKaryawan() {
@@ -34,9 +49,21 @@ class KaryawanController {
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) =>
-                UserModel.fromFirestore(doc.data() as Map<String, dynamic>))
+                UserModel.fromFirestore(doc.data()))
             .toList());
   }
+
+    Stream<UserModel?> streamUserByUid(String uid) {
+      return FirebaseFirestore.instance
+          .collection('tbl_user')
+          .where('uid', isEqualTo: uid) // ✅ Cari berdasarkan field uid
+          .limit(1)
+          .snapshots()
+          .map((query) => 
+              query.docs.isNotEmpty ? UserModel.fromFirestore(query.docs.first as Map<String, dynamic>) : null
+          );
+    }
+
 
   // 🔹 Ambil 1 data karyawan berdasarkan UID
   Future<UserModel?> getKaryawanByUid(String uid) async {
@@ -45,11 +72,9 @@ class KaryawanController {
       if (doc.exists) {
         return UserModel.fromFirestore(doc.data() as Map<String, dynamic>);
       } else {
-        print('⚠️ Data karyawan dengan UID $uid tidak ditemukan.');
         return null;
       }
     } catch (e) {
-      print('❌ Gagal mengambil data karyawan: $e');
       return null;
     }
   }
@@ -84,7 +109,6 @@ class KaryawanController {
 
       await _firestore.collection('tbl_user').doc(uid).set(data);
 
-      print('✅ Berhasil menambahkan karyawan baru: $email');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         print('❌ Email sudah terdaftar.');

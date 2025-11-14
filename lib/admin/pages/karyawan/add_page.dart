@@ -1,7 +1,11 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../db/controller/karyawan_controller.dart';
-import '../../widget/animated_fade_slide.dart';
+import 'package:tes_flutter/admin/widget/tittle_app.dart';
+import '../../../database/controller/karyawan/karyawan_controller.dart';
+import '../../../utils/animated_fade_slide.dart';
+import '../../../utils/route_generator.dart';
 import '../../base_page.dart';
 import '../../widget/form_verifikasi.dart';
 import 'index.dart';
@@ -67,10 +71,10 @@ class _KaryawanAddPageState extends State<KaryawanAddPage> {
           const SnackBar(
               content: Text("✅ Akun karyawan berhasil dibuat")),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const KaryawanIndexPage()),
-        );
+                    Navigator.push(
+                        context,
+                        reverseCreateRoute(const KaryawanIndexPage()),
+                    );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -88,48 +92,11 @@ class _KaryawanAddPageState extends State<KaryawanAddPage> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            // 🔹 Tombol Back di luar Box
             AnimatedFadeSlide(
               delay: 0.1,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const KaryawanIndexPage(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            final fade =
-                                Tween(begin: 0.0, end: 1.0).animate(animation);
-                            final slide = Tween<Offset>(
-                              begin: const Offset(-0.2, 0),
-                              end: Offset.zero,
-                            ).animate(animation);
-                            return FadeTransition(
-                              opacity: fade,
-                              child: SlideTransition(
-                                  position: slide, child: child),
-                            );
-                          },
-                          transitionDuration:
-                              const Duration(milliseconds: 300),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Buatkan akun untuk karyawan",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+                title: "Buat akun untuk karyawan",
+                backToPage: const KaryawanIndexPage(),
               ),
             ),
             const SizedBox(height: 20),

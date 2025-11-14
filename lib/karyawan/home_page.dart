@@ -2,8 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:tes_flutter/karyawan/widget/kalender_kehadiran.dart';
+import 'package:tes_flutter/karyawan/widget/kartu_statis.dart';
+import 'package:tes_flutter/karyawan/widget/progres_absen.dart';
+import 'package:tes_flutter/ui_page/font_size_patern.dart';
+import '../karyawan/base_page.dart';
+import 'package:tes_flutter/utils/animated_fade_slide.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -12,64 +17,54 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 
 import 'package:tes_flutter/auth/auth_service.dart';
-import '../karyawan/base_page.dart';
-import 'package:tes_flutter/admin/widget/animated_fade_slide.dart';
 
-// Data simulasi absensi
-final List<bool> currentUserAttendance = List.generate(
-  31,
-  (day) => day < 30 ? day % 3 != 0 : true,
-);
+const int totalDaysInMonth = 31;
 
 class KaryawanHomePage extends StatefulWidget {
   const KaryawanHomePage({super.key});
 
   @override
-  State<KaryawanHomePage> createState() => _KaryawanHomePageState();
+  State<KaryawanHomePage> createState() => KaryawanHomePageState();
 }
 
-class _KaryawanHomePageState extends State<KaryawanHomePage> {
-  String? userName;
+class KaryawanHomePageState extends State<KaryawanHomePage> {
+  String userName = '';
+  bool isPresentToday = false;
+  List<bool> attendanceData = List.filled(totalDaysInMonth, false);
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadCurrentUser();
+    _loadUserName();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      AuthService.checkUserProfileCompleteness(context);
+      // Panggil fungsi Anda di sini
+      AuthService.checkUserProfileCompleteness(context); 
     });
   }
 
-  Future<void> _loadCurrentUser() async {
+  Future<void> _loadUserName() async {
     try {
       final user = AuthService.currentUser;
-      if (user != null) {
-        final doc = await FirebaseFirestore.instance
-            .collection('tbl_user')
-            .doc(user.uid)
-            .get();
-
-        setState(() {
-          userName = doc.data()?['name'] ?? user.email ?? 'Pengguna';
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          userName = 'Tidak ada pengguna aktif';
-          isLoading = false;
-        });
+      if (user == null) {
+        setState(() => userName = "Tidak ada pengguna aktif");
+        return;
       }
-    } catch (e) {
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('tbl_user')
+          .doc(user.uid)
+          .get();
       setState(() {
-        userName = 'Gagal memuat user';
-        isLoading = false;
+        userName = userDoc.data()?['name'] ?? user.email ?? "Pengguna";
       });
-      debugPrint('Error load current user: $e');
+    } catch (e) {
+      debugPrint("Gagal memuat nama user: $e");
+      setState(() => userName = "Gagal memuat user");
     }
   }
 
-Future<void> _handleAttendance(BuildContext context) async {
+Future<void> _handleAttendance() async {
   String? faceId;
   String? faceImage;
 
@@ -85,24 +80,26 @@ Future<void> _handleAttendance(BuildContext context) async {
 
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Izin lokasi dibutuhkan untuk absen.")),
       );
-      setState(() => isLoading = false);
       return;
     }
 
     // 2. Ambil lokasi
     final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
     );
 
     // 3. Deteksi fake GPS
     if (position.isMocked) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Fake GPS terdeteksi! Aksi dibatalkan.")),
       );
-      setState(() => isLoading = false);
       return;
     }
 
@@ -118,6 +115,7 @@ Future<void> _handleAttendance(BuildContext context) async {
     );
 
     if (distance > allowedRadius) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -125,17 +123,13 @@ Future<void> _handleAttendance(BuildContext context) async {
           ),
         ),
       );
-      setState(() => isLoading = false);
       return;
     }
 
     // 5. Ambil selfie dari kamera
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.camera);
-    if (image == null) {
-      setState(() => isLoading = false);
-      return;
-    }
+    if (image == null) return;
 
     // 6. Kompres gambar
     final tempDir = await getTemporaryDirectory();
@@ -151,10 +145,10 @@ Future<void> _handleAttendance(BuildContext context) async {
     );
 
     if (compressedResult == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Gagal mengompres foto selfie.")),
       );
-      setState(() => isLoading = false);
       return;
     }
 
@@ -172,10 +166,10 @@ Future<void> _handleAttendance(BuildContext context) async {
     faceImage = userDoc.data()?['face_image'];
 
     if (faceId == null || faceImage == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Data wajah belum terdaftar di sistem.")),
       );
-      setState(() => isLoading = false);
       return;
     }
 
@@ -192,10 +186,10 @@ Future<void> _handleAttendance(BuildContext context) async {
     final detectData = jsonDecode(detectResponse.body);
     final newFaceToken = detectData['faces']?[0]?['face_token'];
     if (newFaceToken == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Gagal mendeteksi wajah dari selfie baru.")),
       );
-      setState(() => isLoading = false);
       return;
     }
 
@@ -229,10 +223,11 @@ Future<void> _handleAttendance(BuildContext context) async {
             "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}",
         'status': 'hadir',
         'confidence': data['confidence'],
-        'selfie_url': null, // tidak disimpan
+        'selfie_url': null,
         'created_at': Timestamp.now(),
       });
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Absensi berhasil disimpan ✅"),
@@ -241,6 +236,7 @@ Future<void> _handleAttendance(BuildContext context) async {
         ),
       );
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Verifikasi wajah gagal ❌"),
@@ -254,6 +250,7 @@ Future<void> _handleAttendance(BuildContext context) async {
     debugPrint("Face Image length: ${faceImage?.length}");
     debugPrint("Error absensi: $e");
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text("Gagal absen: $e"),
@@ -261,366 +258,201 @@ Future<void> _handleAttendance(BuildContext context) async {
       ),
     );
   } finally {
-    setState(() => isLoading = false);
+    if (mounted) setState(() => isLoading = false);
   }
 }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF0F1E33),
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
-      );
+    final user = AuthService.currentUser;
+    if (user == null) {
+      return const Center(child: Text("Tidak ada pengguna aktif"));
     }
 
-    return BasePage(
-      title: userName ?? "Tidak Diketahui",
-      isPresentToday: true,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 0);
+
+    // Stream untuk absensi bulanan
+    final Stream<QuerySnapshot> attendanceStream = FirebaseFirestore.instance
+        .collection('tbl_absen')
+        .where('idUser', isEqualTo: user.uid)
+        .where('tanggal',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+        .where('tanggal',
+            isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth))
+        .snapshots();
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: attendanceStream,
+      builder: (context, snapshot) {
+        List<bool> monthAttendance =
+            List.filled(endOfMonth.day, false); // default
+
+        if (snapshot.hasData) {
+          for (var doc in snapshot.data!.docs) {
+            final Timestamp ts = doc['tanggal'];
+            final bool status = doc['status'] ?? false;
+            final int index = ts.toDate().day - 1;
+            if (index >= 0 && index < monthAttendance.length) {
+              monthAttendance[index] = status;
+            }
+          }
+        }
+
+        final todayIndex = now.day - 1;
+        bool hadirHariIni = monthAttendance[todayIndex];
+
+        return BasePage(
+          title: userName,
+          isPresentToday: hadirHariIni,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AnimatedFadeSlide(
-                  delay: 0.2,
-                  child: _StatCard(
-                    title: "Estimasi penghasilan",
-                    subtitle: "Rp 1.234.567,89",
-                    color: Colors.greenAccent.shade400,
-                    icon: Iconsax.money_4,
-                    onTap: () {},
+                  delay: 0.1,
+                  beginY: 0.3,
+                  child: Text(
+                    "Dashboard Karyawan",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall!
+                        .copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
+                ),
+                const SizedBox(height: 16),
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AnimatedFadeSlide(
+                      delay: 0.2,
+                      child: StatCard(
+                        title: "Estimasi penghasilan",
+                        subtitle: "Rp 1.234.567,89",
+                        color: Colors.greenAccent.shade400,
+                        icon: Iconsax.money_4,
+                        onTap: () {},
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    AnimatedFadeSlide(
+                      delay: 0.3,
+                      child: StatCard(
+                        title: "Status Kehadiran Hari Ini",
+                        subtitle: hadirHariIni
+                            ? "Hadir (Data Terekam)"
+                            : "Belum Hadir",
+                        color: hadirHariIni
+                            ? Colors.blueAccent.shade400
+                            : Colors.redAccent.shade200,
+                        icon: hadirHariIni
+                            ? Iconsax.user_tick
+                            : Iconsax.user_remove,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    AnimatedFadeSlide(
+                      delay: 0.4,
+                      child: StatCard(
+                        title: "Total Hari Kerja",
+                        subtitle:
+                            "${monthAttendance.where((e) => e).length} Hari dari $totalDaysInMonth Hari",
+                        color: Colors.amberAccent.shade400,
+                        icon: Iconsax.video_tick,
+                        onTap: () {},
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                                // Tombol Absen
+                AnimatedFadeSlide(
+                  delay: 0.5,
+                  child: Center(
+                    child: ElevatedButton.icon(
+                      onPressed: isLoading ? null : _handleAttendance,
+                      icon: const Icon(Icons.edit),
+                      label: isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text("Absen Sekarang"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                AnimatedFadeSlide(
+                  delay: 0.5,
+                  child: CustomSubtitle(text: "Rekap absensi anda")
+                ),
+                const SizedBox(height: 12),
+
+                AnimatedFadeSlide(
+                  delay: 0.6,
+                  child: AttendanceCalendar(
+                    attendanceData: monthAttendance,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                AnimatedFadeSlide(
+                  delay: 0.7,
+                  child: CustomSubtitle(text: "Progres absensi anda")
                 ),
                 const SizedBox(height: 12),
                 AnimatedFadeSlide(
-                  delay: 0.3,
-                  child: _StatCard(
-                    title: "Status Kehadiran Hari Ini",
-                    subtitle: "Hadir (Pukul 07:45)",
-                    color: Colors.blueAccent.shade400,
-                    icon: Iconsax.user_tick,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                AnimatedFadeSlide(
-                  delay: 0.4,
-                  child: _StatCard(
-                    title: "Total Hari Kerja",
-                    subtitle: "22 Hari dari 30 Hari",
-                    color: Colors.amberAccent.shade400,
-                    icon: Iconsax.video_tick,
-                    onTap: () {},
+                  delay: 0.8,
+                  child: ProgressItem(
+                    name: "Kehadiran Bulan Ini",
+                    value: monthAttendance.where((e) => e).length /
+                        totalDaysInMonth,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // Tombol Absen
-            AnimatedFadeSlide(
-              delay: 0.8,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent.shade400,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 20,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () async => await _handleAttendance(context),
-                icon: const Icon(Iconsax.camera, color: Colors.white),
-                label: const Text(
-                  "Ambil Selfie & Absen",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            AnimatedFadeSlide(
-              delay: 0.9,
-              child: Text(
-                "Rekap Absensi Anda",
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            AnimatedFadeSlide(
-              delay: 0.5,
-              child: _AttendanceCalendar(attendanceData: currentUserAttendance),
-            ),
-            const SizedBox(height: 24),
-
-            AnimatedFadeSlide(
-              delay: 0.9,
-              child: Text(
-                "Progress Absensi Anda",
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            AnimatedFadeSlide(
-              delay: 1.0,
-              child: _ProgressItem(name: "Kehadiran Bulan Ini", value: 22 / 30),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// =================================================================
-// === Widget Kalender dan Komponen Pendukung ===
-// =================================================================
-
-class _AttendanceCalendar extends StatelessWidget {
-  final List<bool> attendanceData;
-  const _AttendanceCalendar({required this.attendanceData});
-
-  Widget _buildDateBox(int day, bool isAttended) {
-    return Container(
-      width: 50,
-      height: 40,
-      margin: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: isAttended ? Colors.green.shade400 : Colors.blueGrey.shade700,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        day.toString(),
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const int startDayOfWeek = 3;
-    final int totalDays = attendanceData.length;
-    final List<Widget> calendarBoxes = List.generate(
-      startDayOfWeek - 1,
-      (index) => const SizedBox(width: 50, height: 40),
-    );
-
-    for (int day = 1; day <= totalDays; day++) {
-      final bool isAttended = attendanceData[day - 1];
-      calendarBoxes.add(_buildDateBox(day, isAttended));
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF152A46),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _DayHeader(text: 'S', isWeekend: false),
-              _DayHeader(text: 'S', isWeekend: false),
-              _DayHeader(text: 'R', isWeekend: false),
-              _DayHeader(text: 'K', isWeekend: false),
-              _DayHeader(text: 'J', isWeekend: false),
-              _DayHeader(text: 'S', isWeekend: true),
-              _DayHeader(text: 'M', isWeekend: true),
-            ],
           ),
-          const Divider(color: Colors.white30, height: 16),
-          Wrap(children: calendarBoxes),
-          const SizedBox(height: 16),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              _Legend(color: Colors.green, label: "Hadir"),
-              SizedBox(width: 8),
-              _Legend(color: Color(0xFF546E7A), label: "Absen/Libur"),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-class _DayHeader extends StatelessWidget {
-  final String text;
-  final bool isWeekend;
-  const _DayHeader({required this.text, required this.isWeekend});
 
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 40,
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: isWeekend ? Colors.red.shade300 : Colors.white70,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-}
+// ======================== Widget Public ========================
 
-class _Legend extends StatelessWidget {
-  final Color color;
-  final String label;
-  const _Legend({required this.color, required this.label});
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-      ],
-    );
-  }
-}
 
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onTap;
 
-  const _StatCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    this.onTap,
-  });
 
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1C2A3A),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
-class _ProgressItem extends StatelessWidget {
-  final String name;
-  final double value;
 
-  const _ProgressItem({required this.name, required this.value});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C2A3A),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            name,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: value,
-              minHeight: 8,
-              backgroundColor: Colors.white10,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Colors.blueAccent.shade400,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+
+
+
+
+

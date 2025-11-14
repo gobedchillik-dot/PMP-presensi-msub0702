@@ -8,7 +8,7 @@
 
 
     <application
-        android:label="tes_flutter"
+        android:label="aplikasi_presensi_Msub0702"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

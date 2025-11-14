@@ -10,8 +10,9 @@ class UserModel {
   final String bank;
   final String panggilan;
   final String alamat;
-  final String? faceId;     // 🔹 Token dari Face++
-  final String? faceImage;  // 🔹 URL gambar wajah (bukan base64)
+  final bool isActive;
+  final String? faceId; // 🔹 Token dari Face++
+  final String? faceImage; // 🔹 URL gambar wajah (bukan base64)
 
   UserModel({
     required this.uid,
@@ -25,9 +26,9 @@ class UserModel {
     required this.alamat,
     this.faceId,
     this.faceImage,
+    required this.isActive,
   });
 
-  // 🔹 Factory dari Firestore
   factory UserModel.fromFirestore(Map<String, dynamic> data) {
     return UserModel(
       uid: data['uid'] ?? '',
@@ -41,6 +42,7 @@ class UserModel {
       alamat: data['alamat'] ?? '',
       faceId: data['face_id'],
       faceImage: data['face_image'],
+      isActive: data['isActive'] ?? true,
     );
   }
 
@@ -56,6 +58,7 @@ class UserModel {
       'bank': bank,
       'panggilan': panggilan,
       'alamat': alamat,
+      'isActive': isActive,
       'face_id': faceId ?? '',
       'face_image': faceImage ?? '',
       'createdAt': FieldValue.serverTimestamp(),

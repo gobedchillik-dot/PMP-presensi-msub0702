@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
 import '../pages/profil/index.dart';
 import 'package:tes_flutter/auth/auth_service.dart';
 import 'package:tes_flutter/auth/login_page.dart';
@@ -27,47 +28,48 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Bagian kiri: salam dan status
-            Flexible(
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Text(
-        'Hai, $employeeName',
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
-      ),
-      const SizedBox(height: 4),
-      Row(
-        children: [
-          Icon(
-            isPresentToday ? Icons.check_circle : Icons.cancel,
-            color: isPresentToday ? Colors.green : Colors.red,
-            size: 16,
-          ),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              isPresentToday
-                  ? 'Hadir hari ini'
-                  : 'Belum mengisi daftar hadir hari ini',
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
+            Expanded( // <— tambahkan ini
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Hai, $employeeName',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        isPresentToday ? Icons.check_circle : Icons.cancel,
+                        color: isPresentToday ? Colors.green : Colors.red,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          isPresentToday
+                              ? 'Hadir hari ini'
+                              : 'Belum mengisi daftar hadir hari ini',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-    ],
-  ),
-),
-
 
             // Avatar + menu popup
             PopupMenuButton<String>(
@@ -86,12 +88,10 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               onSelected: (value) {
                 if (value == 'profil') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const profilIndexPage(),
-                    ),
-                  );
+                    Navigator.push(
+                        context,
+                        createRoute(const ProfilIndexPage()),
+                    );
                 } else if (value == 'keluar') {
                   _handleLogout(context);
                 }
@@ -155,15 +155,14 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
     if (confirm == true) {
       await AuthService.signOut();
       if (context.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false,
-        );
+                    Navigator.push(
+                        context,
+                        reverseCreateRoute(const LoginPage()),
+                    );
       }
     }
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(72);
+  Size get preferredSize => const Size.fromHeight(101);
 }
