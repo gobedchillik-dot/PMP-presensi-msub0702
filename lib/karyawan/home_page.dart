@@ -29,6 +29,26 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
     });
   }
 
+  // --- Fungsi Penentu Warna Kartu Status Absen ---
+  Color _getAttendanceStatusColor(int count) {
+    // Asumsi: KaryawanHomeController.maxAbsencesPerDay = 3
+    switch (count) {
+      case 3:
+        // Selesai Penuh: Hijau/Biru (Warna Sukses)
+        return Colors.greenAccent.shade400; 
+      case 2:
+        // Hampir Penuh: Biru Muda (Transisi)
+        return Colors.lightBlueAccent.shade400; 
+      case 1:
+        // Kurang: Oranye/Kuning (Peringatan)
+        return Colors.amberAccent.shade400; 
+      case 0:
+      default:
+        // Belum Absen: Merah (Perlu Tindakan)
+        return Colors.redAccent.shade400; 
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -53,7 +73,7 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
           
           return BasePage(
             title: controller.userName,
-            todayStatusMessage: controller.isToday,
+            todayStatusMessage: controller.isToday, // Menggunakan isPresentToday (boolean)
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,49 +144,49 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
     );
   }
 
-  // --- WIDGET SKELETON LOADING ---
+  // --- WIDGET SKELETON LOADING (Tidak Berubah) ---
   Widget _buildSkeletonLoading() {
     return const SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SkeletonBox(height: 24, width: 200, borderRadius: 4),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           
           // Kartu Statistik
           SkeletonBox(height: 80, width: double.infinity),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           SkeletonBox(height: 80, width: double.infinity),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           SkeletonBox(height: 80, width: double.infinity),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Tombol Absen Placeholder
           SkeletonBox(height: 50, width: double.infinity),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Subtitle Kalender
           SkeletonBox(height: 20, width: 150, borderRadius: 4),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           
           // Kalender
           SkeletonBox(height: 300, width: double.infinity),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Subtitle Progres
           SkeletonBox(height: 20, width: 150, borderRadius: 4),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           
           // Progress Item
           SkeletonBox(height: 50, width: double.infinity),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
         ],
       ),
     );
   }
 
-  // --- WIDGET STAT CARDS (Tidak Berubah) ---
+  // --- WIDGET STAT CARDS (Diperbarui pada kartu Absen Hari Ini) ---
   Widget _buildStatCards(KaryawanHomeController controller, int count) {
     final bool isComplete = count >= KaryawanHomeController.maxAbsencesPerDay;
     return Column(
@@ -188,9 +208,9 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
           child: StatCard(
             title: "Sesi Absen Hari Ini",
             subtitle: "$count dari ${KaryawanHomeController.maxAbsencesPerDay} Sesi",
-            color: isComplete
-                ? Colors.blueAccent.shade400
-                : (count > 0 ? Colors.amberAccent.shade400 : Colors.redAccent.shade200),
+            // <--- Implementasi Warna Baru di SINI --->
+            color: _getAttendanceStatusColor(count),
+            // <--- Implementasi Warna Baru di SINI --->
             icon: isComplete
                 ? Iconsax.task_square
                 : Iconsax.timer,
@@ -214,7 +234,7 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
 
   // --- WIDGET ATTENDANCE BUTTON (Tidak Berubah) ---
   Widget _buildAttendanceButton(BuildContext context, KaryawanHomeController controller, int count, bool isComplete) {
-    final buttonColor = isComplete ? const Color.fromARGB(255, 255, 255, 255) : const Color(0xFF00E676);
+    final buttonColor = isComplete ? Colors.white : const Color(0xFF00E676);
     final buttonText = isComplete 
         ? "Kewajiban Absen Selesai" 
         : "Absen ${controller.nextAbsenceSession}";

@@ -16,24 +16,30 @@ import 'package:tes_flutter/database/model/absen_detail.dart';
 class KaryawanHomeController extends ChangeNotifier {
   // --- State Variables ---
   String _userName = 'Memuat...';
-  bool _isLoading = true; // DEFAULT TRUE: Skeleton akan tampil saat inisialisasi
-  List<bool> _monthAttendance = [];
+  bool _isLoading = true; 
+  // DIPERBAIKI: Tipe data sekarang List<int>
+  List<int> _monthAttendance = []; 
   String? _userId;
-  AbsenModel? _todayAttendance; // Data absensi hari ini
+  AbsenModel? _todayAttendance; 
 
   // Constants
-  static const int maxAbsencesPerDay = 3; // Batasan 3x wajib
+  static const int maxAbsencesPerDay = 3; 
   static const double _officeLat = -6.763314;
   static const double _officeLong = 108.480080;
-  static const double _allowedRadius = 1000000.0; // Meter
+  static const double _allowedRadius = 1000000.0; 
   static const String _apiKey = 'vLyZVMDR_GzfyZrBrg-c1079Wcu4Iamw';
   static const String _apiSecret = 'kG8h1bie531eS5lQ4aV6vEDcynPZpWBC';
 
   // --- Getters ---
   String get userName => _userName;
   bool get isLoading => _isLoading;
-  List<bool> get monthAttendance => _monthAttendance;
-  int get totalPresentDays => _monthAttendance.where((e) => e).length;
+  // DIPERBAIKI: Getter sekarang mengembalikan List<int>
+  List<int> get monthAttendance => _monthAttendance; 
+  
+  // DIPERBAIKI: Hitung Hari Hadir dari List<int>
+  // Hadir = count > 0 (setidaknya 1 sesi)
+  int get totalPresentDays => _monthAttendance.where((count) => count > 0).length; 
+  
   int get daysInMonth {
     final now = DateTime.now();
     return DateTime(now.year, now.month + 1, 0).day;
@@ -72,7 +78,6 @@ class KaryawanHomeController extends ChangeNotifier {
     if (_userId != null) {
       _listenToAttendance();
     } else {
-      // Jika tidak ada user, langsung hentikan loading
       _isLoading = false;
       notifyListeners();
     }
@@ -83,7 +88,6 @@ class KaryawanHomeController extends ChangeNotifier {
     final user = AuthService.currentUser;
     if (user == null) {
       _userName = "Tidak ada pengguna aktif";
-      // TIDAK notifyListeners di sini, biarkan _listenToAttendance yang menanganinya
       return; 
     }
     try {
@@ -94,9 +98,7 @@ class KaryawanHomeController extends ChangeNotifier {
       _userName = userDoc.data()?['name'] ?? user.email ?? "Pengguna";
     } catch (e) {
       _userName = "Gagal memuat user";
-    } finally {
-      // TIDAK notifyListeners di sini.
-    }
+    } 
   }
 
   // Cari dokumen absensi hari ini
@@ -129,7 +131,8 @@ class KaryawanHomeController extends ChangeNotifier {
         .listen((snapshot) {
       
       final int daysInCurrentMonth = endOfMonth.day;
-      List<bool> newAttendance = List.filled(daysInCurrentMonth, false);
+      // DIPERBAIKI: Inisialisasi list dengan 0 (count absen)
+      List<int> newAttendanceCounts = List.filled(daysInCurrentMonth, 0);
 
       AbsenModel? latestTodayData;
 
@@ -139,9 +142,10 @@ class KaryawanHomeController extends ChangeNotifier {
         final DateTime date = model.tanggal.toDate();
         final int index = date.day - 1;
         
-        // Update list absensi bulanan
-        if (index >= 0 && index < newAttendance.length) {
-          newAttendance[index] = model.status;
+        // Update list absensi bulanan dengan nilai count
+        if (index >= 0 && index < newAttendanceCounts.length) {
+          // DIPERBAIKI: Simpan nilai count ke dalam list
+          newAttendanceCounts[index] = model.count; 
         }
 
         // Cek apakah ini data hari ini
@@ -150,10 +154,10 @@ class KaryawanHomeController extends ChangeNotifier {
         }
       }
       
-      _monthAttendance = newAttendance;
-      _todayAttendance = latestTodayData; // Update state absensi hari ini
+      // DIPERBAIKI: Tetapkan _monthAttendance sebagai List<int>
+      _monthAttendance = newAttendanceCounts; 
+      _todayAttendance = latestTodayData; 
       
-      // LOGIKA PENTING: HENTIKAN LOADING HANYA PADA SHOT PERTAMA
       if (_isLoading) {
           _isLoading = false; 
       }
@@ -162,7 +166,6 @@ class KaryawanHomeController extends ChangeNotifier {
 
     }, onError: (error) {
       debugPrint("Gagal mendengarkan stream absensi: $error");
-      // Hentikan loading juga jika ada error pada stream pertama kali
       if (_isLoading) {
           _isLoading = false; 
       }
@@ -170,8 +173,9 @@ class KaryawanHomeController extends ChangeNotifier {
     });
   }
 
-  // --- Logic Absensi ---
+  // --- Logic Absensi (Tidak ada perubahan signifikan yang dibutuhkan di sini) ---
   Future<String?> _detectNewFace(String imageBase64) async {
+    // ... (Logika deteksi wajah)
     final detectResponse = await http.post(
       Uri.parse('https://api-us.faceplusplus.com/facepp/v3/detect'),
       body: {'api_key': _apiKey, 'api_secret': _apiSecret, 'image_base64': imageBase64},
@@ -181,6 +185,7 @@ class KaryawanHomeController extends ChangeNotifier {
   }
 
   Future<double?> _compareFaces(String faceId, String newFaceToken) async {
+    // ... (Logika perbandingan wajah)
     final compareResponse = await http.post(
       Uri.parse('https://api-us.faceplusplus.com/facepp/v3/compare'),
       body: {'api_key': _apiKey, 'api_secret': _apiSecret, 'face_token1': faceId, 'face_token2': newFaceToken},
@@ -211,7 +216,6 @@ class KaryawanHomeController extends ChangeNotifier {
         return;
       }
 
-      // Lakukan semua cek lokasi dan verifikasi wajah (Langkah 1 s/d 9)
       // 1. Cek izin lokasi
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
@@ -340,7 +344,6 @@ class KaryawanHomeController extends ChangeNotifier {
         SnackBar(content: Text("Gagal absen: $e"), backgroundColor: Colors.redAccent),
       );
     } finally {
-      // Matikan loading, ini akan memicu refresh UI dari stream/listener
       _isLoading = false;
       notifyListeners();
     }

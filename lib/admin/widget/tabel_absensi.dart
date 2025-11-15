@@ -23,14 +23,14 @@ class TabelAbsensi extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
     final target = DateTime(date.year, date.month, date.day);
 
-    if (count == 3) return Colors.greenAccent;
-    if (count == 2) return Colors.green;
-    if (count == 1) return Colors.green.shade700;
+    if (count == 3) return Colors.greenAccent.shade400;
+    if (count == 2) return Colors.lightBlueAccent.shade400;
+    if (count == 1) return Colors.amberAccent.shade400;
 
-    if (count == 0 && target.isBefore(today)) return Colors.redAccent;
-    if (count == 0 && target == today) return Colors.grey;
+    if (count == 0 && target.isBefore(today)) return Colors.redAccent.shade400;
+    if (count == 0 && target == today) return Colors.amber.shade400;
 
-    return Colors.grey.shade800;
+    return Colors.blueGrey.shade700;
   }
 
   /// Dapatkan semua tanggal bulan ini
