@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
+import 'package:provider/provider.dart'; // <-- Diperlukan
 import '../../home_page.dart';
 import '../../base_page.dart';
-import '../../../utils/animated_fade_slide.dart'; // Pastikan path ini benar
+import '../../../utils/animated_fade_slide.dart'; 
 import '../../../database/controller/karyawan/profil_controller.dart';
 import '../../../database/model/user.dart';
 import '../../../auth/auth_service.dart';
 import '../../../auth/login_page.dart';
 import 'update.dart';
+// Impor Controller Absensi yang berisi status isToday
+import '../../../database/controller/absen/homepage_karyawan_controller.dart'; 
 
 class ProfilIndexPage extends StatefulWidget {
   const ProfilIndexPage({super.key});
@@ -22,27 +25,39 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
   @override
   void initState() {
     super.initState();
-    profilController = ProfilController(); // ✅ Dibuat sekali
+    profilController = ProfilController(); 
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<UserModel?>(
-      stream: profilController.streamCurrentUserProfile(),
-      builder: (context, snapshot) {
-        final user = snapshot.data;
+    // 1. Menyediakan KaryawanHomeController untuk digunakan Consumer
+    return ChangeNotifierProvider<KaryawanHomeController>(
+      create: (context) => KaryawanHomeController(),
+      child: Consumer<KaryawanHomeController>(
+        builder: (context, homeController, child) {
+          
+          // 2. StreamBuilder untuk mendapatkan data profil user secara real-time
+          return StreamBuilder<UserModel?>(
+            stream: profilController.streamCurrentUserProfile(),
+            builder: (context, snapshot) {
+              final user = snapshot.data;
 
-        return BasePage(
-          title: user?.name ?? "Profil",
-          isPresentToday: true,
-          child: _buildContent(snapshot, user),
-        );
-      },
+              // 3. Menggunakan BasePage dan meneruskan status isToday dari homeController
+              return BasePage(
+                title: user?.name ?? "Profil",
+                todayStatusMessage: homeController.isToday, // <-- STATUS ABSENSI DI SINI
+                child: _buildContent(snapshot, user),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
   Widget _buildContent(AsyncSnapshot<UserModel?> snapshot, UserModel? user) {
     if (snapshot.connectionState == ConnectionState.waiting) {
+      // Pastikan CircularProgressIndicator berwarna putih untuk BasePage
       return const Center(child: CircularProgressIndicator(color: Colors.white));
     }
 
@@ -67,9 +82,9 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
               children: [
                 IconButton(
                   onPressed: () {
-                                        Navigator.push(
-                        context,
-                        reverseCreateRoute(const KaryawanHomePage()),
+                    Navigator.push(
+                      context,
+                      reverseCreateRoute(const KaryawanHomePage()),
                     );
                   },
                   icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -121,10 +136,10 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
 
                   ElevatedButton(
                     onPressed: () {
-                                          Navigator.push(
+                      Navigator.push(
                         context,
                         createRoute(const ProfilUpdatePage()),
-                    );
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF00ADB5),
@@ -327,6 +342,8 @@ class _SimpleCard extends StatelessWidget {
     );
   }
 }
+
+// Dibuat sebagai fungsi global (di luar kelas State) agar tetap bisa diakses
 Future<void> _handleLogout(BuildContext context) async {
   final confirm = await showDialog<bool>(
     context: context,
@@ -352,11 +369,10 @@ Future<void> _handleLogout(BuildContext context) async {
   if (confirm == true) {
     await AuthService.signOut();
     if (context.mounted) {
-                    Navigator.push(
-                        context,
-                        reverseCreateRoute(const LoginPage()),
-                    );
+      Navigator.push(
+        context,
+        reverseCreateRoute(const LoginPage()),
+      );
     }
   }
 }
-

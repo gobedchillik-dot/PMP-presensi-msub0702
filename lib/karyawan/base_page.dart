@@ -5,12 +5,13 @@ import 'widget/bottom_bar.dart';
 class BasePage extends StatefulWidget {
   final Widget child; // konten unik setiap halaman
   final String title; // nama karyawan
-  final bool isPresentToday; // status kehadiran
+  final String todayStatusMessage; // <-- PERUBAHAN UTAMA: Ganti bool jadi String
+  
   const BasePage({
     super.key,
     required this.child,
     required this.title,
-    required this.isPresentToday,
+    required this.todayStatusMessage, // <-- Ganti parameter
   });
 
   @override
@@ -58,7 +59,11 @@ class _BasePageState extends State<BasePage>
           // ✅ TopBar versi baru
           appBar: TopBar(
             employeeName: widget.title,
-            isPresentToday: widget.isPresentToday,
+            // <-- PERUBAHAN: Meneruskan pesan status baru
+            isTodayStatusMessage: widget.todayStatusMessage, 
+            // Karena TopBar Anda mungkin masih memerlukan isPresentToday (bool), 
+            // kita bisa membuat nilai boolean dari String status:
+            isPresentToday: widget.todayStatusMessage != "Belum absen hari ini", 
             onAvatarTap: _toggleSidebar, // aksi ketika avatar ditekan
           ),
           

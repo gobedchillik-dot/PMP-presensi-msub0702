@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -8,14 +6,14 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tes_flutter/admin/base_page.dart';
 
 import 'package:tes_flutter/admin/pages/karyawan/index.dart';
 import 'package:tes_flutter/admin/widget/tittle_app.dart';
+import 'package:tes_flutter/database/controller/karyawan/karyawan_controller.dart';
+import 'package:tes_flutter/database/model/user.dart';
+import 'package:tes_flutter/utils/animated_fade_slide.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
-import '../../../admin/base_page.dart';
-import '../../../utils/animated_fade_slide.dart';
-import '../../../database/controller/karyawan/karyawan_controller.dart';
-import '../../../database/model/user.dart';
 
 class DetailKaryawanPage extends StatefulWidget {
   final UserModel user;
@@ -191,22 +189,7 @@ class _DetailKaryawanPageState extends State<DetailKaryawanPage> {
                             ),
                           ),
 
-                        const SizedBox(height: 10),
-                        ElevatedButton.icon(
-                          onPressed: () =>
-                              _uploadFaceToFacePlus(context, user.uid),
-                          icon: const Icon(Icons.camera_alt),
-                          label: const Text("Upload Wajah"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00E676),
-                            foregroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
                         Text(
                           user.email,
                           style: Theme.of(context).textTheme.headlineSmall!
@@ -222,6 +205,23 @@ class _DetailKaryawanPageState extends State<DetailKaryawanPage> {
                             fontSize: 16,
                           ),
                         ),
+
+                        const SizedBox(height: 10),
+                        ElevatedButton.icon(
+                          onPressed: () =>
+                              _uploadFaceToFacePlus(context, user.uid),
+                          icon: const Icon(Icons.camera_alt),
+                          label: const Text("Upload Wajah"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00E676),
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+
+                        
                       ],
                     ),
                   ),

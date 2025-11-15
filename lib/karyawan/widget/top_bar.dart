@@ -6,12 +6,17 @@ import 'package:tes_flutter/auth/login_page.dart';
 
 class TopBar extends StatelessWidget implements PreferredSizeWidget {
   final String employeeName;
-  final bool isPresentToday;
+  // Catatan: Nama parameter di BasePage diubah menjadi isPresentToday (String)
+  // namun di TopBar Anda menggunakan isTodayStatusMessage, saya akan menggunakannya
+  // sebagai teks pesan status dinamis.
+  final String isTodayStatusMessage; 
+  final bool isPresentToday; // Digunakan untuk warna dan ikon
   final VoidCallback? onAvatarTap;
 
   const TopBar({
     super.key,
     required this.employeeName,
+    required this.isTodayStatusMessage,
     required this.isPresentToday,
     this.onAvatarTap,
   });
@@ -28,7 +33,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Bagian kiri: salam dan status
-            Expanded( // <— tambahkan ini
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -54,9 +59,8 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          isPresentToday
-                              ? 'Hadir hari ini'
-                              : 'Belum mengisi daftar hadir hari ini',
+                          // <-- PERUBAHAN UTAMA: Menggunakan pesan status dinamis
+                          isTodayStatusMessage,
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
