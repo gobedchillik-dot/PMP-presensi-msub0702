@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Wajib: Import provider
+import 'package:intl/intl.dart'; // Wajib: Untuk format uang yang lebih baik
 import 'package:tes_flutter/admin/widget/data_row.dart';
 import 'package:tes_flutter/admin/widget/profil_selection.dart';
 import 'package:tes_flutter/admin/widget/tittle_app.dart';
-// Import wajib untuk animasi:
+import 'package:tes_flutter/database/controller/absen/payroll_controller.dart';
 import '../../../utils/animated_fade_slide.dart'; 
 import '../../base_page.dart'; 
-// Import wajib untuk navigasi tombol back:
 import '../../home_page.dart'; 
+
 
 class KeuanganIndexPage extends StatefulWidget {
   const KeuanganIndexPage({super.key});
@@ -24,14 +26,21 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
     {'minggu': 4, 'total': 1300000000, 'isUp': true},
   ];
 
-  String formatMoney(int number) {
+  // Menggunakan NumberFormat untuk format uang yang lebih aman dan global
+  final NumberFormat currencyFormatter = NumberFormat.currency(
+    locale: 'id_ID', // Lokasi Indonesia
+    symbol: 'Rp ', 
+    decimalDigits: 0, // Tidak menampilkan desimal
+  );
+
+  String formatMoney(double number) {
     if (number >= 1000000000) {
-      // Jika di atas 1 Miliar (untuk kartu summary)
+      // Format Miliar (untuk kartu summary)
       double billions = number / 1000000000;
       return "Rp ${billions.toStringAsFixed(1).replaceAll('.', ',')} M";
     }
     // Untuk tampilan detail (Ribuan separator)
-    return "Rp ${number.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => "${m[1]}.")}";
+    return currencyFormatter.format(number).replaceAll(',', '.');
   }
 
   Widget _buildSummaryCard(Map<String, dynamic> data) {
@@ -54,7 +63,8 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
           Row(
             children: [
               Text(
-                formatMoney(data['total']),
+                // Mengubah total dari int ke double
+                formatMoney(data['total'].toDouble()), 
                 style: TextStyle(
                   color: color,
                   fontSize: 18,
@@ -77,6 +87,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return BasePage(
       title: "Keuangan",
       child: SingleChildScrollView(
@@ -86,10 +97,10 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             
-            // ===== 1. CUSTOM TITLE & BACK BUTTON (Delay 0.1) =====
+            // ... (Bagian header dan rangkuman lainnya tidak berubah)
             AnimatedFadeSlide(
               delay: 0.1,
-              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+              child: CustomAppTitle( 
                 title: "Keuangan",
                 backToPage: const AdminHomePage(),
               ),
@@ -111,13 +122,12 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
             ),
             const SizedBox(height: 24),
 
-            // ===== 4. KUARTAL GMV MINGGUAN (Weekly Summary Cards) (Delay 0.3) =====
+            // ... (Bagian Weekly Summary Cards tidak berubah)
             AnimatedFadeSlide(
               delay: 0.4,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  
                   const Text(
                     "Est. Pemasukan GMV",
                     style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
@@ -153,14 +163,15 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
             ),
             const SizedBox(height: 24),
 
-            // ===== ✅ KARTU GAJI KARYAWAN (New Section) (Delay 0.5) =====
+            // ===== ✅ KARTU GAJI KARYAWAN (Menggunakan PayrollController) =====
             AnimatedFadeSlide(
               delay: 0.5,
-              child: const _EmployeeSalaryCard(initialDelay: 0.5), // Meneruskan delay untuk staggered item
+              // Mengganti widget lama dengan versi berbasis Provider
+              child: _EmployeeSalaryCard(initialDelay: 0.5), 
             ),
             const SizedBox(height: 24),
             
-            // ===== 5. PENGELUARAN OPERASIONAL (Tabs dan Tabel) (Delay 0.7) =====
+            // ... (Bagian Pengeluaran Opsional tidak berubah)
             AnimatedFadeSlide(
               delay: 0.3,
               child: const ProfileSectionWrapper(
@@ -178,9 +189,8 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 24), // 
+            const SizedBox(height: 24), 
           ],
-          
         )
       )
     );
@@ -188,35 +198,26 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
 }
 
 // ====================================================================
-//                   WIDGET BARU UNTUK GAJI KARYAWAN
+//                   WIDGET BARU YANG TERINTEGRASI DENGAN CONTROLLER
 // ====================================================================
-
-// Definisi data dummy untuk daftar gaji
-class EmployeeSalary {
-  final String name;
-  final String salary;
-
-  EmployeeSalary(this.name, this.salary);
-}
-
-// Data Dummy Karyawan
-final List<EmployeeSalary> dummySalaries = [
-  EmployeeSalary("Karyawan 1", "Rp 1.234.567"),
-  EmployeeSalary("Karyawan 2", "Rp 1.234.567"),
-  EmployeeSalary("Karyawan 3", "Rp 1.234.567"),
-  EmployeeSalary("Karyawan 4", "Rp 1.234.567"),
-  EmployeeSalary("Karyawan 5", "Rp 1.234.567"),
-  EmployeeSalary("Karyawan 6", "Rp 1.234.567"),
-  EmployeeSalary("Karyawan 7", "Rp 1.234.567"),
-  EmployeeSalary("Karyawan 8", "Rp 1.234.567"),
-];
 
 // Widget untuk setiap baris gaji karyawan
 class _SalaryListItem extends StatelessWidget {
   final String name;
-  final String salary;
+  final String userId;
+  final double salary;
+  final int totalCounts;
+  final DateTime newPeriodStartDate;
+  final NumberFormat currencyFormatter; // Terima formatter dari luar
 
-  const _SalaryListItem({required this.name, required this.salary});
+  const _SalaryListItem({
+    required this.name, 
+    required this.userId, 
+    required this.salary,
+    required this.totalCounts,
+    required this.newPeriodStartDate,
+    required this.currencyFormatter,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +225,7 @@ class _SalaryListItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C385C), // Warna card item
+        color: const Color(0xFF1C385C), 
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -240,12 +241,20 @@ class _SalaryListItem extends StatelessWidget {
                     color: Colors.white70, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 4),
+              // Tampilkan Nominal Gaji
               Text(
-                salary,
+                salary.toInt().toString().isNotEmpty
+                    ? currencyFormatter.format(salary).replaceAll(',', '.')
+                    : 'Rp 0',
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
+              ),
+              // Tambahkan keterangan total counts sebagai info
+              Text(
+                "Total jam kerja: ${totalCounts*2} jam",
+                style: const TextStyle(color: Colors.white54, fontSize: 10),
               ),
             ],
           ),
@@ -254,16 +263,35 @@ class _SalaryListItem extends StatelessWidget {
           SizedBox(
             height: 40,
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                Provider.of<PayrollController>(context, listen: false);
+                
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Membayar gaji untuk $name'),
-                    duration: const Duration(milliseconds: 800),
+                    content: Text('Memproses pembayaran gaji untuk $name...'),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+
+                // await payrollController.processPayment(
+                //   userId: userId,
+                //   amount: double.parse(salary.replaceAll(RegExp(r'[Rp .,]'), '')), // Hati-hati dengan konversi string ke double
+                //   totalCounts: totalCounts,
+                //   newStartDate: newPeriodStartDate,
+                // );
+                
+                // Setelah pembayaran, refresh data (hanya contoh sementara)
+                // await payrollController.fetchUnpaidEmployeeData(); 
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Pembayaran gaji untuk $name berhasil dicatat! (Fungsi processPayment masih perlu diimplementasikan)'),
+                    duration: const Duration(milliseconds: 1500),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00ADB5), // Warna tombol
+                backgroundColor: const Color(0xFF00ADB5), 
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -282,69 +310,88 @@ class _SalaryListItem extends StatelessWidget {
   }
 }
 
-// Widget utama Pengeluaran Gaji Karyawan
+// Widget utama Pengeluaran Gaji Karyawan (Menggunakan Consumer)
 class _EmployeeSalaryCard extends StatelessWidget {
-  final double initialDelay; // Delay awal dari AnimatedFadeSlide pembungkus
+  final double initialDelay; 
 
   const _EmployeeSalaryCard({required this.initialDelay});
 
   @override
   Widget build(BuildContext context) {
-    const String totalPengeluaran = "Rp 12.345.678";
+    // Akses controller untuk mendengarkan perubahan state
+    return Consumer<PayrollController>(
+      builder: (context, controller, child) {
+        
+        final List<Map<String, dynamic>> employeeList = controller.unpaidEmployeeList;
+        
+        // 1. Hitung Total Pengeluaran Gaji yang Belum Dibayar
+        final double totalUnpaidSalary = employeeList.fold(
+          0.0, 
+          (sum, item) => sum + (item['unpaidAmount'] as double)
+        );
+        
+        // Formatter yang sama dari KeuanganIndexPage
+        final NumberFormat currencyFormatter = NumberFormat.currency(
+          locale: 'id_ID', 
+          symbol: 'Rp ', 
+          decimalDigits: 0, 
+        );
+        final String formattedTotal = currencyFormatter.format(totalUnpaidSalary).replaceAll(',', '.');
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: const Color(0xFF152A46),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Text(
-            "Pengeluaran gaji karyawan",
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color(0xFF152A46),
+            borderRadius: BorderRadius.circular(16),
           ),
-          const SizedBox(height: 4),
-          Text(
-            "Total : $totalPengeluaran",
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Colors.white70,
-                ),
-          ),
-          const SizedBox(height: 12),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ProfileSectionWrapper(title: "Pengeluaran gaji karyawan", subtitle: "Total : $formattedTotal", children: []),
 
-          // Daftar Karyawan yang Dapat Digulir (Scrollable List)
-          SizedBox(
-            // Tinggi 3 item karyawan
-            height: 3 * 80.0, 
-            child: ListView.builder(
-              padding: EdgeInsets.zero, // Hapus padding default ListView
-              physics: const ClampingScrollPhysics(), // Memastikan scroll halus di dalam SingleChildScrollView
-              itemCount: dummySalaries.length,
-              itemBuilder: (context, index) {
-                final employee = dummySalaries[index];
+              // Tampilan Loading atau Daftar Karyawan
+              if (controller.isLoading)
+                const Center(child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: CircularProgressIndicator(color: Color(0xFF00ADB5)),
+                ))
+              else if (employeeList.isEmpty)
+                const Center(child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Text("Tidak ada karyawan yang memiliki gaji yang belum dibayar.", style: TextStyle(color: Colors.white54)),
+                ))
+              else
+                // Daftar Karyawan yang Dapat Digulir
+                SizedBox(
+                  height: 3 * 80.0, // Tinggi tetap untuk 3 item
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero, 
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: employeeList.length,
+                    itemBuilder: (context, index) {
+                      final employeeData = employeeList[index];
 
-                // AnimatedFadeSlide untuk setiap item (Staggered List)
-                return AnimatedFadeSlide(
-                  // Delay awal + penambahan 100ms per item untuk efek staggered
-                  delay: 0.9,
-                  duration: const Duration(milliseconds: 600),
-                  child: _SalaryListItem(
-                    name: employee.name,
-                    salary: employee.salary,
+                      return AnimatedFadeSlide(
+                        // Staggered list: delay 0.1 detik per item
+                        delay: initialDelay + (index * 0.1), 
+                        duration: const Duration(milliseconds: 600),
+                        child: _SalaryListItem(
+                          name: employeeData['userName'],
+                          userId: employeeData['userId'],
+                          salary: employeeData['unpaidAmount'],
+                          totalCounts: employeeData['totalUnpaidCounts'],
+                          newPeriodStartDate: employeeData['newPeriodStartDate'],
+                          currencyFormatter: currencyFormatter,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+                ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

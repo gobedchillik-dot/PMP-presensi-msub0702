@@ -28,7 +28,7 @@ class TabelAbsensi extends StatelessWidget {
     if (count == 1) return Colors.amberAccent.shade400;
 
     if (count == 0 && target.isBefore(today)) return Colors.redAccent.shade400;
-    if (count == 0 && target == today) return Colors.amber.shade400;
+    if (count == 0 && target == today) return Colors.blueGrey.shade700;
 
     return Colors.blueGrey.shade700;
   }
@@ -147,8 +147,8 @@ class TabelAbsensi extends StatelessWidget {
                           flex: 2,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: groupedByUser.keys.map((userId) {
-                              final nama = userNames[userId] ?? userId;
+                            children: groupedByUser.keys.map((idUser) {
+                              final nama = userNames[idUser] ?? idUser;
                               return SizedBox(
                                 height: rowHeight,
                                 child: Text(

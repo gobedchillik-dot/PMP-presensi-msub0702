@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_types_as_parameter_types, unused_catch_clause, avoid_print
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,36 +10,44 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+
 import 'package:tes_flutter/auth/auth_service.dart';
 import 'package:tes_flutter/database/model/absen.dart';
 import 'package:tes_flutter/database/model/absen_detail.dart';
+// ⭐️ PENTING: Pastikan Anda memiliki model ini (Model yang digunakan di PayrollController)
+import 'package:tes_flutter/database/model/payroll.dart'; 
 
 
 class KaryawanHomeController extends ChangeNotifier {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
   // --- State Variables ---
   String _userName = 'Memuat...';
   bool _isLoading = true; 
-  // DIPERBAIKI: Tipe data sekarang List<int>
   List<int> _monthAttendance = []; 
-  String? _userId;
+  String? _idUser;
   AbsenModel? _todayAttendance; 
+  double _estimatedUnpaidSalary = 0.0; // ⭐️ BARU: Estimasi Gaji
 
-  // Constants
+  // --- Constants Absensi & Gaji ---
   static const int maxAbsencesPerDay = 3; 
   static const double _officeLat = -6.763314;
   static const double _officeLong = 108.480080;
   static const double _allowedRadius = 1000000.0; 
   static const String _apiKey = 'vLyZVMDR_GzfyZrBrg-c1079Wcu4Iamw';
   static const String _apiSecret = 'kG8h1bie531eS5lQ4aV6vEDcynPZpWBC';
+  
+  // ⭐️ KONSTANTA GAJI (Duplikasi dari PayrollController)
+  static const double maxMonthlySalary = 2500000.0;
+  static const int workingDaysInMonth = 30;
+  static const int maxCountPerDay = 3;
+  static const double valuePerCount = maxMonthlySalary / workingDaysInMonth / maxCountPerDay;
 
   // --- Getters ---
   String get userName => _userName;
   bool get isLoading => _isLoading;
-  // DIPERBAIKI: Getter sekarang mengembalikan List<int>
   List<int> get monthAttendance => _monthAttendance; 
   
-  // DIPERBAIKI: Hitung Hari Hadir dari List<int>
-  // Hadir = count > 0 (setidaknya 1 sesi)
   int get totalPresentDays => _monthAttendance.where((count) => count > 0).length; 
   
   int get daysInMonth {
@@ -71,11 +81,13 @@ class KaryawanHomeController extends ChangeNotifier {
     }
   }
 
+  double get estimatedUnpaidSalary => _estimatedUnpaidSalary; // ⭐️ GETTER Gaji
+
   // --- Constructor dan Inisialisasi ---
   KaryawanHomeController() {
-    _userId = AuthService.currentUser?.uid;
+    _idUser = AuthService.currentUser?.uid;
     _loadUserName();
-    if (_userId != null) {
+    if (_idUser != null) {
       _listenToAttendance();
     } else {
       _isLoading = false;
@@ -91,11 +103,14 @@ class KaryawanHomeController extends ChangeNotifier {
       return; 
     }
     try {
-      final userDoc = await FirebaseFirestore.instance
+      final userDoc = await _db
           .collection('tbl_user')
           .doc(user.uid)
           .get();
-      _userName = userDoc.data()?['name'] ?? user.email ?? "Pengguna";
+      // Menggunakan nama/panggilan jika ada, fallback ke email
+      final data = userDoc.data();
+      String name = data?['name'] ?? data?['panggilan'] ?? user.email ?? "Pengguna";
+      _userName = name;
     } catch (e) {
       _userName = "Gagal memuat user";
     } 
@@ -106,7 +121,7 @@ class KaryawanHomeController extends ChangeNotifier {
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day, 0, 0, 0);
 
-    final snapshot = await FirebaseFirestore.instance
+    final snapshot = await _db
         .collection('tbl_absen')
         .where('idUser', isEqualTo: userId)
         .where('tanggal', isEqualTo: Timestamp.fromDate(startOfDay))
@@ -122,16 +137,15 @@ class KaryawanHomeController extends ChangeNotifier {
     final startOfMonth = DateTime(now.year, now.month, 1);
     final endOfMonth = DateTime(now.year, now.month + 1, 0);
     
-    FirebaseFirestore.instance
+    _db
         .collection('tbl_absen')
-        .where('idUser', isEqualTo: _userId)
+        .where('idUser', isEqualTo: _idUser)
         .where('tanggal', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
         .where('tanggal', isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth))
         .snapshots()
-        .listen((snapshot) {
-      
+        .listen((snapshot) async { // ⭐️ Tambahkan async di sini
+
       final int daysInCurrentMonth = endOfMonth.day;
-      // DIPERBAIKI: Inisialisasi list dengan 0 (count absen)
       List<int> newAttendanceCounts = List.filled(daysInCurrentMonth, 0);
 
       AbsenModel? latestTodayData;
@@ -142,21 +156,20 @@ class KaryawanHomeController extends ChangeNotifier {
         final DateTime date = model.tanggal.toDate();
         final int index = date.day - 1;
         
-        // Update list absensi bulanan dengan nilai count
         if (index >= 0 && index < newAttendanceCounts.length) {
-          // DIPERBAIKI: Simpan nilai count ke dalam list
           newAttendanceCounts[index] = model.count; 
         }
 
-        // Cek apakah ini data hari ini
         if (date.day == now.day && date.month == now.month) {
           latestTodayData = model;
         }
       }
       
-      // DIPERBAIKI: Tetapkan _monthAttendance sebagai List<int>
       _monthAttendance = newAttendanceCounts; 
       _todayAttendance = latestTodayData; 
+      
+      // ⭐️ Panggil fungsi hitung gaji setiap kali data absensi di-update
+      await _updateEstimatedSalary(); 
       
       if (_isLoading) {
           _isLoading = false; 
@@ -172,8 +185,95 @@ class KaryawanHomeController extends ChangeNotifier {
       notifyListeners();
     });
   }
+  
+  // =======================================================
+  // ⭐️ LOGIKA PERHITUNGAN GAJI (BARU)
+  // =======================================================
 
-  // --- Logic Absensi (Tidak ada perubahan signifikan yang dibutuhkan di sini) ---
+  Future<void> _updateEstimatedSalary() async {
+    if (_idUser == null) return;
+    
+    final lastEndDate = await _getLastPayrollEndDate(_idUser!);
+    final totalUnpaidCounts = await _calculateUnpaidCounts(_idUser!, lastEndDate);
+    
+    _estimatedUnpaidSalary = totalUnpaidCounts * valuePerCount;
+
+    notifyListeners();
+  }
+  
+  // --- FUNGSI UTILITAS GAJI (Perhitungan Waktu) ---
+
+  Future<DateTime?> _getLastPayrollEndDate(String userId) async {
+    try {
+      final snapshot = await _db.collection('tbl_payroll')
+          .where('idUser', isEqualTo: userId)
+          .orderBy('periodEndDate', descending: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) return null;
+
+      final payrollDoc = AbsenPayrollModel.fromFirestore(snapshot.docs.first);
+      final lastEndDate = payrollDoc.periodEndDate.toDate();
+
+      return DateTime(lastEndDate.year, lastEndDate.month, lastEndDate.day);
+    } catch (e) {
+      debugPrint("Error fetching last payroll end date: $e");
+      return null;
+    }
+  }
+
+  Future<int> _calculateUnpaidCounts(String userId, DateTime? lastEndDate) async {
+    DateTime startDate;
+    
+    if (lastEndDate == null) {
+      final firstAbsenDate = await _getFirstAbsenceDate(userId);
+      if (firstAbsenDate == null) return 0;
+      startDate = firstAbsenDate;
+    } else {
+      startDate = lastEndDate.add(const Duration(days: 1));
+    }
+
+    final now = DateTime.now();
+    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    final absenSnapshot = await _db.collection('tbl_absen')
+        .where('idUser', isEqualTo: userId)
+        .where('tanggal', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where('tanggal', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+        .get();
+
+    int totalUnpaidCounts = 0;
+    for (var doc in absenSnapshot.docs) {
+      final count = (doc.data()['count'] as num?)?.toInt() ?? 0;
+      totalUnpaidCounts += count; 
+    }
+
+    return totalUnpaidCounts;
+  }
+  
+  Future<DateTime?> _getFirstAbsenceDate(String userId) async {
+    try {
+      final firstAbsenSnapshot = await _db.collection('tbl_absen')
+          .where('idUser', isEqualTo: userId)
+          .orderBy('tanggal', descending: false)
+          .limit(1)
+          .get();
+      
+      if (firstAbsenSnapshot.docs.isEmpty) return null;
+
+      final date = firstAbsenSnapshot.docs.first.data()['tanggal']?.toDate();
+      if (date == null) return null;
+      
+      return DateTime(date.year, date.month, date.day);
+    } catch (e) {
+        debugPrint("Error fetching first absence date: $e");
+        return null;
+    }
+  }
+
+
+  // --- Logic Absensi (Tidak perlu diubah) ---
   Future<String?> _detectNewFace(String imageBase64) async {
     // ... (Logika deteksi wajah)
     final detectResponse = await http.post(
@@ -195,7 +295,7 @@ class KaryawanHomeController extends ChangeNotifier {
   }
 
   Future<void> handleAttendance(BuildContext context) async {
-    if (_userId == null) {
+    if (_idUser == null) {
       if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Pengguna tidak terautentikasi.")));
       return;
     }
@@ -257,7 +357,7 @@ class KaryawanHomeController extends ChangeNotifier {
       final imageBase64 = base64Encode(imageBytes);
 
       // 7. Ambil data wajah terdaftar
-      final userDoc = await FirebaseFirestore.instance.collection('tbl_user').doc(_userId).get();
+      final userDoc = await _db.collection('tbl_user').doc(_idUser).get();
       final faceId = userDoc.data()?['face_id'];
       if (faceId == null) {
         if (!context.mounted) return;
@@ -290,20 +390,20 @@ class KaryawanHomeController extends ChangeNotifier {
         );
 
         // Ambil dokumen hari ini
-        final todayDoc = await _getTodayAttendanceDoc(_userId!);
+        final todayDoc = await _getTodayAttendanceDoc(_idUser!);
 
         if (todayDoc == null) {
           // Kasus: Absen Sesi 1 (Buat dokumen baru)
           final newAbsenModel = AbsenModel(
             id: '', 
-            idUser: _userId!,
+            idUser: _idUser!,
             tanggal: Timestamp.fromDate(startOfDay),
             count: 1,
             status: true,
             lastUpdate: Timestamp.now(),
             times: [newDetail],
           );
-          await FirebaseFirestore.instance.collection('tbl_absen').add(newAbsenModel.toMap());
+          await _db.collection('tbl_absen').add(newAbsenModel.toMap());
 
         } else {
           // Kasus: Absen Sesi 2 atau 3 (Update dokumen yang sudah ada)
@@ -316,13 +416,13 @@ class KaryawanHomeController extends ChangeNotifier {
             'lastUpdate': Timestamp.now(),
             'times': updatedTimes.map((e) => e.toMap()).toList(),
           };
-          await FirebaseFirestore.instance.collection('tbl_absen').doc(todayDoc.id).update(updateData);
+          await _db.collection('tbl_absen').doc(todayDoc.id).update(updateData);
         }
         
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Absensi Sesi ${currentAbsenceCount + 1} berhasil disimpan ✅"),
+            content: Text("Absensi Sesi $currentAbsenceCount berhasil disimpan!"),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),

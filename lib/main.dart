@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart'; // Import Provider
 import 'package:tes_flutter/auth/login_page.dart';
+import 'package:tes_flutter/database/controller/absen/payroll_controller.dart';
 import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart'; // Import GmvController
 import 'firebase_options.dart';
 
@@ -22,6 +23,7 @@ class MainApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GmvController()),
+        ChangeNotifierProvider(create: (_) => PayrollController()),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
