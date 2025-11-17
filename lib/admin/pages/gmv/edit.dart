@@ -69,7 +69,7 @@ class _EditGmvPageState extends State<EditGmvPage> {
                     ),
                     const Divider(color: Colors.white30),
                     StreamBuilder<List<GmvModel>>(
-                      stream: context.watch<GmvController>().gmvStream,
+                      stream: context.watch<GmvController>().allGmvStream,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {

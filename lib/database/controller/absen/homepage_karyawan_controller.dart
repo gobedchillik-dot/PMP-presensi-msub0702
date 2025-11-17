@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_types_as_parameter_types, unused_catch_clause, avoid_print
+// ignore_for_file: avoid_types_as_parameter_types, unused_catch_choice, avoid_print
 
 import 'dart:convert';
 import 'dart:io';
@@ -14,7 +14,6 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:tes_flutter/auth/auth_service.dart';
 import 'package:tes_flutter/database/model/absen.dart';
 import 'package:tes_flutter/database/model/absen_detail.dart';
-// ⭐️ PENTING: Pastikan Anda memiliki model ini (Model yang digunakan di PayrollController)
 import 'package:tes_flutter/database/model/payroll.dart'; 
 
 
@@ -27,7 +26,7 @@ class KaryawanHomeController extends ChangeNotifier {
   List<int> _monthAttendance = []; 
   String? _idUser;
   AbsenModel? _todayAttendance; 
-  double _estimatedUnpaidSalary = 0.0; // ⭐️ BARU: Estimasi Gaji
+  double _estimatedUnpaidSalary = 0.0; 
 
   // --- Constants Absensi & Gaji ---
   static const int maxAbsencesPerDay = 3; 
@@ -37,7 +36,7 @@ class KaryawanHomeController extends ChangeNotifier {
   static const String _apiKey = 'vLyZVMDR_GzfyZrBrg-c1079Wcu4Iamw';
   static const String _apiSecret = 'kG8h1bie531eS5lQ4aV6vEDcynPZpWBC';
   
-  // ⭐️ KONSTANTA GAJI (Duplikasi dari PayrollController)
+  // KONSTANTA GAJI
   static const double maxMonthlySalary = 2500000.0;
   static const int workingDaysInMonth = 30;
   static const int maxCountPerDay = 3;
@@ -81,7 +80,7 @@ class KaryawanHomeController extends ChangeNotifier {
     }
   }
 
-  double get estimatedUnpaidSalary => _estimatedUnpaidSalary; // ⭐️ GETTER Gaji
+  double get estimatedUnpaidSalary => _estimatedUnpaidSalary; 
 
   // --- Constructor dan Inisialisasi ---
   KaryawanHomeController() {
@@ -107,7 +106,6 @@ class KaryawanHomeController extends ChangeNotifier {
           .collection('tbl_user')
           .doc(user.uid)
           .get();
-      // Menggunakan nama/panggilan jika ada, fallback ke email
       final data = userDoc.data();
       String name = data?['name'] ?? data?['panggilan'] ?? user.email ?? "Pengguna";
       _userName = name;
@@ -143,8 +141,7 @@ class KaryawanHomeController extends ChangeNotifier {
         .where('tanggal', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
         .where('tanggal', isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth))
         .snapshots()
-        .listen((snapshot) async { // ⭐️ Tambahkan async di sini
-
+        .listen((snapshot) async {
       final int daysInCurrentMonth = endOfMonth.day;
       List<int> newAttendanceCounts = List.filled(daysInCurrentMonth, 0);
 
@@ -168,7 +165,7 @@ class KaryawanHomeController extends ChangeNotifier {
       _monthAttendance = newAttendanceCounts; 
       _todayAttendance = latestTodayData; 
       
-      // ⭐️ Panggil fungsi hitung gaji setiap kali data absensi di-update
+      // Panggil fungsi hitung gaji setiap kali data absensi di-update
       await _updateEstimatedSalary(); 
       
       if (_isLoading) {
@@ -187,7 +184,7 @@ class KaryawanHomeController extends ChangeNotifier {
   }
   
   // =======================================================
-  // ⭐️ LOGIKA PERHITUNGAN GAJI (BARU)
+  // LOGIKA PERHITUNGAN GAJI
   // =======================================================
 
   Future<void> _updateEstimatedSalary() async {
@@ -273,7 +270,7 @@ class KaryawanHomeController extends ChangeNotifier {
   }
 
 
-  // --- Logic Absensi (Tidak perlu diubah) ---
+  // --- Logic Absensi (Diperbaiki) ---
   Future<String?> _detectNewFace(String imageBase64) async {
     // ... (Logika deteksi wajah)
     final detectResponse = await http.post(
@@ -391,14 +388,16 @@ class KaryawanHomeController extends ChangeNotifier {
 
         // Ambil dokumen hari ini
         final todayDoc = await _getTodayAttendanceDoc(_idUser!);
+        int newCount; // 🔥 Inisiasi variabel count baru
 
         if (todayDoc == null) {
           // Kasus: Absen Sesi 1 (Buat dokumen baru)
+          newCount = 1; // Sesi 1
           final newAbsenModel = AbsenModel(
             id: '', 
             idUser: _idUser!,
             tanggal: Timestamp.fromDate(startOfDay),
-            count: 1,
+            count: newCount, // Gunakan newCount
             status: true,
             lastUpdate: Timestamp.now(),
             times: [newDetail],
@@ -408,10 +407,11 @@ class KaryawanHomeController extends ChangeNotifier {
         } else {
           // Kasus: Absen Sesi 2 atau 3 (Update dokumen yang sudah ada)
           final existingModel = AbsenModel.fromFirestore(todayDoc);
+          newCount = existingModel.count + 1; // 🔥 Hitung nilai yang baru
           final updatedTimes = List<AbsenDetailModel>.from(existingModel.times)..add(newDetail);
 
           final updateData = {
-            'count': FieldValue.increment(1),
+            'count': newCount, // 🔥 Gunakan newCount eksplisit
             'status': true,
             'lastUpdate': Timestamp.now(),
             'times': updatedTimes.map((e) => e.toMap()).toList(),
@@ -422,7 +422,8 @@ class KaryawanHomeController extends ChangeNotifier {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Absensi Sesi $currentAbsenceCount berhasil disimpan!"),
+            // 🔥 Gunakan newCount yang baru dihitung
+            content: Text("Absensi Sesi $newCount berhasil disimpan!"), 
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -444,7 +445,9 @@ class KaryawanHomeController extends ChangeNotifier {
         SnackBar(content: Text("Gagal absen: $e"), backgroundColor: Colors.redAccent),
       );
     } finally {
-      _isLoading = false;
+      // Stream akan otomatis memperbarui _todayAttendance dan _isLoading
+      // Tapi kita set isLoading ke false untuk menghindari tampilan loading yang berkepanjangan
+      _isLoading = false; 
       notifyListeners();
     }
   }

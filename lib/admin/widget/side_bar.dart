@@ -164,18 +164,6 @@ Navigator.push(
                       leading: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.lightBlue.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(LucideIcons.checkSquare, color: Colors.lightBlue),
-                      ),
-                      title: const Text('Validasi Absen', style: TextStyle(color: Colors.white)),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
                           color: Colors.blue.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),

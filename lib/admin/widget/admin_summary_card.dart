@@ -44,18 +44,6 @@ class AdminSummaryCards extends StatelessWidget {
             // Arahkan ke halaman yang kamu mau
           },
         ),
-
-        const SizedBox(height: 12),
-
-        StatCard(
-          title: "Validasi Kehadiran",
-          subtitle: "1.234 data",
-          color: Colors.blueAccent,
-          icon: Iconsax.user_tick,
-          onTap: () {
-            // Halaman validasi kehadiran
-          },
-        ),
       ],
     );
   }

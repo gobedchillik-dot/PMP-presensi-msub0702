@@ -1,22 +1,25 @@
-// lib/widgets/gmv/gmv_weekly_card.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class GmvWeeklyCard extends StatelessWidget {
   final int mingguKe;
-  final int total;
+  final double total; // 💡 Diubah menjadi double
   final bool isUp;
+  // Tambahkan dateRange (opsional, tapi berguna untuk GmvController)
+  final String dateRange; 
 
   const GmvWeeklyCard({
     super.key,
     required this.mingguKe,
     required this.total,
     required this.isUp,
+    this.dateRange = '', // Beri nilai default
   });
 
-  String formatMoney(int number) {
-    if (number >= 1000000000) {
+  // 💡 Gunakan formatMoney yang sudah ada untuk konsistensi
+  String formatMoney(double number) {
+    // Menggunakan compactCurrency untuk angka besar
+    if (number >= 1000000) {
       final formatter = NumberFormat.compactCurrency(
         locale: 'id_ID',
         symbol: 'Rp ',
@@ -24,15 +27,18 @@ class GmvWeeklyCard extends StatelessWidget {
       );
       return formatter.format(number);
     }
-    return "Rp ${number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => "${m[1]}.",
-    )}";
+    // Menggunakan format penuh untuk angka yang lebih kecil
+    final formatter = NumberFormat.currency(
+        locale: 'id_ID',
+        symbol: 'Rp ',
+        decimalDigits: 0,
+    );
+    return formatter.format(number);
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color color = isUp ? Colors.green : Colors.red;
+    final Color color = isUp ? const Color(0xFF00E676) : Colors.red; // Green untuk Up
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -47,6 +53,9 @@ class GmvWeeklyCard extends StatelessWidget {
             "Minggu ke - $mingguKe",
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
+          // Tambahkan rentang tanggal jika Anda mau (saat ini di-hidden)
+          // if (dateRange.isNotEmpty)
+          //   Text(dateRange, style: const TextStyle(color: Colors.white54, fontSize: 10)),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -59,11 +68,13 @@ class GmvWeeklyCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(
-                isUp ? Icons.arrow_upward : Icons.arrow_downward,
-                color: color,
-                size: 18,
-              ),
+              // Hanya tampilkan panah jika total > 0 (untuk menghindari panah di Rp 0)
+              if (total > 0)
+                Icon(
+                  isUp ? Icons.arrow_upward : Icons.arrow_downward,
+                  color: color,
+                  size: 18,
+                ),
             ],
           ),
         ],

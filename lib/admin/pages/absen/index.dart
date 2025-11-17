@@ -85,7 +85,7 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
             ),
             AnimatedFadeSlide(
               delay: 0.5,
-              child: const AttendanceTrackerSection(),
+              child: const AttendanceTrackerSection(employeeData: [],),
             ),
             const SizedBox(height: 24),
           ],
