@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:tes_flutter/admin/pages/keuangan/add.dart'; 
+import 'package:tes_flutter/admin/pages/keuangan/add.dart';
+import 'package:tes_flutter/admin/pages/keuangan/edit.dart'; 
 import 'package:tes_flutter/admin/widget/data_row.dart';
 import 'package:tes_flutter/admin/widget/profil_selection.dart';
 import 'package:tes_flutter/admin/widget/tittle_app.dart';
@@ -341,7 +342,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                                   Expanded(
                                     child: ElevatedButton.icon(
                                       onPressed: () { 
-                                        Navigator.push(context, createRoute(const AdminHomePage()));
+                                        Navigator.push(context, createRoute(const KeuanganEditPage()));
                                       },
                                       icon: const Icon(Icons.edit, color: Colors.black),
                                       label: const Text("Edit data"),
@@ -544,7 +545,7 @@ class _OtherExpenseCard extends StatelessWidget {
                 
                 return ProfileDataRow(
                   // Menghilangkan kategori dari label karena sudah jelas di judul "Pengeluaran Lainnya"
-                  label: '${expense.deskripsi} - $formattedDate', 
+                  label: '${expense.deskripsi} (${expense.kategori}) - $formattedDate', 
                   value: formattedValue,
                 );
               }),

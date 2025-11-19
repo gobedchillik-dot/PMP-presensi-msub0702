@@ -55,7 +55,7 @@ class ProfileDataRow extends StatelessWidget {
       if (label.toLowerCase().contains('keuntungan')) {
         final double numericValue = _parseValue(value);
 
-        if (numericValue < 0) {
+        if (numericValue <= 0) {
           // KONDISI BARU: Merah jika nilai < 0
           valueColor = Colors.redAccent;
         } else {

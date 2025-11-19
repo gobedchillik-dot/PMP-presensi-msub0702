@@ -1,10 +1,9 @@
-// File: lib/views/admin/keuangan/add.dart
+// File: lib/admin/pages/keuangan/update.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; 
-import 'package:cloud_firestore/cloud_firestore.dart'; // 🔥 IMPORT BARU: Untuk Timestamp
-import 'package:tes_flutter/admin/pages/keuangan/index.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:tes_flutter/database/controller/pengeluaran/fitur/pengeluaran_controller_fitur.dart';
 import 'package:tes_flutter/database/model/pengeluaran.dart';
 import '../../../utils/animated_fade_slide.dart'; 
@@ -12,25 +11,28 @@ import '../../base_page.dart';
 import '../../../admin/widget/tittle_app.dart';
 
 
-class KeuanganAddPage extends StatefulWidget {
-  const KeuanganAddPage({super.key});
+class KeuanganUpdatePage extends StatefulWidget {
+  // 🔥 Properti wajib: Menerima data Pengeluaran yang akan diedit
+  final Pengeluaran existingExpense;
+
+  const KeuanganUpdatePage({super.key, required this.existingExpense});
 
   @override
-  State<KeuanganAddPage> createState() => _KeuanganAddPageState();
+  State<KeuanganUpdatePage> createState() => _KeuanganUpdatePageState();
 }
 
-class _KeuanganAddPageState extends State<KeuanganAddPage> {
+class _KeuanganUpdatePageState extends State<KeuanganUpdatePage> {
   
   // --- Form Keys dan Controllers ---
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _deskripsiController = TextEditingController();
-  final TextEditingController _nominalController = TextEditingController();
+  late final TextEditingController _deskripsiController;
+  late final TextEditingController _nominalController;
   final TextEditingController _lainLainController = TextEditingController();
   
   // --- State untuk Dropdown & Date Picker ---
   String? _selectedKategori;
-  DateTime _selectedDate = DateTime.now(); // Tetap menggunakan DateTime untuk UI Picker
-
+  late DateTime _selectedDate;
+  
   // Daftar Kategori Statis
   final List<String> _kategoriList = [
     'Operasional',
@@ -38,6 +40,37 @@ class _KeuanganAddPageState extends State<KeuanganAddPage> {
     'Akomodasi & Transport',
     'Lain-lain',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // 🔥 INISIALISASI CONTROLLER DENGAN DATA YANG ADA (EXISTING DATA)
+    
+    // Konversi nominal kembali ke format yang mudah diedit (misal: 25000)
+    // PENTING: Anda mungkin perlu menggunakan mask/formatter jika Anda ingin format "Rp 25.000"
+    _nominalController = TextEditingController(text: widget.existingExpense.nominal.toStringAsFixed(0));
+    _deskripsiController = TextEditingController(text: widget.existingExpense.deskripsi);
+    _selectedDate = widget.existingExpense.dateTime; // Menggunakan getter dateTime
+    
+    // Cek apakah kategori adalah salah satu dari kategori statis
+    final String currentKategori = widget.existingExpense.kategori;
+    if (_kategoriList.contains(currentKategori)) {
+      _selectedKategori = currentKategori;
+    } else {
+      // Jika kategori di luar daftar statis, anggap itu 'Lain-lain' dan masukkan nilainya ke _lainLainController
+      _selectedKategori = 'Lain-lain';
+      _lainLainController.text = currentKategori;
+    }
+  }
+
+  @override
+  void dispose() {
+    _deskripsiController.dispose();
+    _nominalController.dispose();
+    _lainLainController.dispose();
+    super.dispose();
+  }
+
 
   // --- Helper Functions ---
   Future<void> _selectDate(BuildContext context) async {
@@ -54,65 +87,64 @@ class _KeuanganAddPageState extends State<KeuanganAddPage> {
     }
   }
 
-  // --- Fungsi Submit Form ---
+  // 🔥 Fungsi Submit Form (Diubah menjadi UPDATE)
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       // 1. Dapatkan Kategori Akhir
       String finalKategori = _selectedKategori ?? 'Lain-lain';
       if (_selectedKategori == 'Lain-lain') {
-        // PERINGATAN: Harus divalidasi juga bahwa _lainLainController.text tidak kosong.
         finalKategori = _lainLainController.text.trim();
       }
       
-      // 2. 🔥 KONVERSI TANGGAL: Konversi DateTime ke Timestamp
+      // 2. Konversi Tanggal dan Nominal
       final finalTimestamp = Timestamp.fromDate(_selectedDate); 
+      // Membersihkan input nominal dari karakter non-angka sebelum parsing
+      final finalNominal = double.tryParse(_nominalController.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0.0;
       
-      // 3. Buat objek Pengeluaran
-      final newExpense = Pengeluaran(
-        id: null, // Menggunakan null lebih eksplisit daripada string kosong
-        tanggal: finalTimestamp, // 🔥 Menggunakan Timestamp yang sudah dikonversi
+      // 3. Buat objek Pengeluaran (PENTING: ID harus sama dengan ID yang diedit)
+      final updatedExpense = Pengeluaran(
+        id: widget.existingExpense.id, // 🔥 Mempertahankan ID yang sudah ada!
+        tanggal: finalTimestamp, 
         deskripsi: _deskripsiController.text.trim(),
-        // Membersihkan input nominal dari karakter non-angka sebelum parsing
-        nominal: double.tryParse(_nominalController.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0.0,
+        nominal: finalNominal,
         kategori: finalKategori,
       );
       
-      // 4. Panggil Controller untuk menyimpan data
+      // 4. Panggil Controller untuk UPDATE data
       final controller = Provider.of<PengeluaranController>(context, listen: false);
       
       try {
-        // Saya asumsikan metode addExpense Anda menerima objek Pengeluaran yang sudah lengkap
-        await controller.addExpense(newExpense); 
+        await controller.updateExpense(updatedExpense); // Asumsi Anda punya fungsi updateExpense
         
         // Tampilkan notifikasi sukses
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Pengeluaran berhasil ditambahkan!')),
+            const SnackBar(content: Text('Pengeluaran berhasil diperbarui!')),
           );
-          // Kembali ke halaman sebelumnya
+          // Kembali ke halaman sebelumnya (Halaman Edit)
           Navigator.pop(context);
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Gagal menambahkan pengeluaran: $e')),
+            SnackBar(content: Text('Gagal memperbarui pengeluaran: $e')),
           );
         }
       }
     }
   }
 
-  // --- Widget Build ---
+  // --- Widget Build (Sama persis dengan add.dart) ---
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "Tambah Pengeluaran",
+      title: "Edit Pengeluaran",
       child: SingleChildScrollView(
-        key: const PageStorageKey<String>('keuanganAddScroll'),
+        key: const PageStorageKey<String>('keuanganUpdateScroll'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AnimatedFadeSlide(delay: 0.1, child: CustomAppTitle(title: "Tambah Pengeluaran", backToPage: KeuanganIndexPage())),
+            AnimatedFadeSlide(delay: 0.1, child: CustomAppTitle(title: "Edit Pengeluaran", backToPage: null)),
             
             const SizedBox(height: 16),
             
@@ -152,7 +184,6 @@ class _KeuanganAddPageState extends State<KeuanganAddPage> {
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) return 'Nominal tidak boleh kosong';
-                          // Lakukan validasi pada nilai yang sudah dibersihkan dari non-angka
                           if (double.tryParse(value.replaceAll(RegExp(r'[^\d]'), '')) == null) return 'Input harus berupa angka';
                           return null;
                         },
@@ -179,8 +210,8 @@ class _KeuanganAddPageState extends State<KeuanganAddPage> {
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: _submitForm,
-                          icon: const Icon(Icons.check, color: Colors.black),
-                          label: const Text("Simpan Pengeluaran"),
+                          icon: const Icon(Icons.save, color: Colors.black), // Ubah icon menjadi save
+                          label: const Text("Simpan Perubahan"),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF00E676),
                             foregroundColor: Colors.black,
@@ -200,7 +231,7 @@ class _KeuanganAddPageState extends State<KeuanganAddPage> {
     );
   }
   
-  // --- Private Widgets (Tidak ada perubahan) ---
+  // --- Private Widgets (Sama persis dengan add.dart) ---
   
   Widget _buildDateField(BuildContext context) {
     return Column(
@@ -284,7 +315,6 @@ class _KeuanganAddPageState extends State<KeuanganAddPage> {
             onChanged: (String? newValue) {
               setState(() {
                 _selectedKategori = newValue;
-                // Kosongkan field 'Lain-lain' jika kategori berubah
                 if (newValue != 'Lain-lain') {
                   _lainLainController.clear();
                 }
