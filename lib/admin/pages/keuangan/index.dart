@@ -55,6 +55,16 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
     // kita pastikan untuk menghilangkan ',' yang dihasilkan NumberFormat jika ada.
     return currencyFormatter.format(number).replaceAll(',', '.');
   }
+  String kuartalFormatMoney(double number) {
+    // Logika formatting yang lebih bersih
+    if (number.abs() >= 1000000) { 
+      return compactFormatter.format(number);
+    }
+    // Perbaikan: Gunakan replaceAll(',', '.') hanya jika locale menggunakan koma sebagai pemisah desimal, 
+    // namun karena locale 'id_ID' sudah menggunakan titik sebagai pemisah ribuan, 
+    // kita pastikan untuk menghilangkan ',' yang dihasilkan NumberFormat jika ada.
+    return currencyFormatter.format(number).replaceAll(',', '.');
+  }
 
   double calculateProfit(double gmvTotal) {
     // PENTING: Untuk Profit Margin, nilai ini harusnya didefinisikan secara global 
@@ -89,7 +99,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
           Row(
             children: [
               Text(
-                formatMoney(totalAmount), 
+                kuartalFormatMoney(totalAmount), 
                 style: TextStyle(
                   color: color,
                   fontSize: 18,
