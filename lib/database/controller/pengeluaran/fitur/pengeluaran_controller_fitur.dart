@@ -1,18 +1,16 @@
-// File: lib/controllers/pengeluaran_controller.dart
-
+import 'dart:async'; 
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/database/controller/pengeluaran/crud/pengeluaran_controller.dart';
 import 'package:tes_flutter/database/model/pengeluaran.dart';
 
 class PengeluaranController extends ChangeNotifier {
-  
   final PengeluaranRepository _repository = PengeluaranRepository();
+  
+  StreamSubscription<List<Pengeluaran>>? _expenseSubscription; 
 
-  // State BARU: Menyimpan semua pengeluaran yang diambil
   List<Pengeluaran> _allExpenses = [];
-  bool _isLoading = false;
+  bool _isLoading = false; 
 
-  // Getters (Akses data untuk UI)
   List<Pengeluaran> get allExpenses => _allExpenses;
   bool get isLoading => _isLoading;
 
@@ -32,48 +30,84 @@ class PengeluaranController extends ChangeNotifier {
   
   // Computed Property 3: Total Pengeluaran Lainnya (Misal: 'Pajak', 'Marketing')
   double get totalOtherExpenses {
-    // Semua yang bukan Operasional atau Gaji
     return _allExpenses
-        .where((e) => e.kategori != 'Operasional' && e.kategori != 'Gaji')
+        .where((e) => e.kategori != 'Operasional')
         .fold(0.0, (sum, expense) => sum + expense.nominal);
   }
 
 
   PengeluaranController() {
-    fetchData(); 
+    _subscribeToExpenses(); 
   }
 
-  // Logic: Mengambil SEMUA data pengeluaran bulanan
-  Future<void> fetchData() async {
-    if (_isLoading) return; 
-
+  void _subscribeToExpenses() {
     _isLoading = true;
-    notifyListeners(); 
+    notifyListeners();
+    
+    _expenseSubscription?.cancel();
 
-    try {
-      // Panggil metode repository yang baru
-      final List<Pengeluaran> result = await _repository.fetchAllExpensesByMonth();
+    // Pastikan Stream dari Repository sudah memfilter data berdasarkan bulan berjalan
+    _expenseSubscription = _repository.fetchAllExpensesByMonthStream().listen(
+      (dataList) {
+        _allExpenses = dataList;
+        
+        if (_isLoading) {
+          _isLoading = false;
+        }
 
-      // Simpan semua data di state
-      _allExpenses = result;
-
-    } catch (e) {
-      print("Error fetching all expenses: $e");
-    } finally {
-      _isLoading = false;
-      notifyListeners(); 
-    }
+        notifyListeners(); 
+      },
+      onError: (e) {
+        print("Error in expense stream: $e");
+        _isLoading = false;
+        notifyListeners();
+      },
+      onDone: () {
+        print("Expense stream closed.");
+      }
+    );
+  }
+  
+  @override
+  void dispose() {
+    _expenseSubscription?.cancel();
+    super.dispose();
   }
 
-  // --- Metode CRUD (Refresh data setelah operasi) ---
+
+  // --- Metode CRUD ---
 
   Future<void> addExpense(Pengeluaran expense) async {
     try {
       await _repository.savePengeluaran(expense);
-      await fetchData(); // Refresh data untuk update UI
+      // Stream akan update otomatis
     } catch (e) {
       print("Error saving expense: $e");
-      // throw e; // Lempar error untuk ditangani oleh UI
+      throw Exception("Gagal menyimpan pengeluaran."); 
+    }
+  }
+
+  // ⭐️ FUNGSI BARU: UPDATE
+  Future<void> updateExpense(Pengeluaran expense) async {
+    // Perlu ada fungsi update di Repository: _repository.updatePengeluaran(expense);
+    // Asumsi sudah ada, jika tidak, tolong tambahkan
+    try {
+      await _repository.updatePengeluaran(expense);
+    } catch (e) {
+      print("Error updating expense: $e");
+      throw Exception("Gagal memperbarui pengeluaran.");
+    }
+  }
+
+  // ⭐️ FUNGSI BARU: DELETE
+  Future<void> deleteExpense(String id) async {
+    // Perlu ada fungsi delete di Repository: _repository.deletePengeluaran(id);
+    // Asumsi sudah ada, jika tidak, tolong tambahkan
+    try {
+      await _repository.deletePengeluaran(id);
+    } catch (e) {
+      print("Error deleting expense: $e");
+      throw Exception("Gagal menghapus pengeluaran.");
     }
   }
 }
