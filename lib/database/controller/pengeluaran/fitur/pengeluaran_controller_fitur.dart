@@ -1,9 +1,11 @@
 import 'dart:async'; 
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/database/controller/pengeluaran/crud/pengeluaran_controller.dart';
+// Asumsi ini adalah path ke file Repository
 import 'package:tes_flutter/database/model/pengeluaran.dart';
 
 class PengeluaranController extends ChangeNotifier {
+  // Asumsi PengeluaranRepository berada di path yang terpisah
   final PengeluaranRepository _repository = PengeluaranRepository();
   
   StreamSubscription<List<Pengeluaran>>? _expenseSubscription; 
@@ -12,6 +14,10 @@ class PengeluaranController extends ChangeNotifier {
   bool _isLoading = false; 
 
   List<Pengeluaran> get allExpenses => _allExpenses;
+  
+  // Getter ini bisa digunakan sebagai list detail cashflow untuk PDF
+  List<Pengeluaran> get expenses => _allExpenses; 
+
   bool get isLoading => _isLoading;
 
   // Computed Property 1: Total Biaya Operasional (Hanya kategori 'Operasional')
@@ -28,10 +34,11 @@ class PengeluaranController extends ChangeNotifier {
         .fold(0.0, (sum, expense) => sum + expense.nominal);
   }
   
-  // Computed Property 3: Total Pengeluaran Lainnya (Misal: 'Pajak', 'Marketing')
+  // 🔥 PERBAIKAN LOGIKA: Hanya hitung pengeluaran yang bukan Operasional dan bukan Gaji.
+  // Ini menghindari double counting Gaji di KeuanganIndexPage.
   double get totalOtherExpenses {
     return _allExpenses
-        .where((e) => e.kategori != 'Operasional')
+        .where((e) => e.kategori != 'Operasional' && e.kategori != 'Gaji') 
         .fold(0.0, (sum, expense) => sum + expense.nominal);
   }
 
@@ -47,6 +54,7 @@ class PengeluaranController extends ChangeNotifier {
     _expenseSubscription?.cancel();
 
     // Pastikan Stream dari Repository sudah memfilter data berdasarkan bulan berjalan
+    // Asumsi: fetchAllExpensesByMonthStream() sudah didefinisikan di Repository
     _expenseSubscription = _repository.fetchAllExpensesByMonthStream().listen(
       (dataList) {
         _allExpenses = dataList;
@@ -58,12 +66,12 @@ class PengeluaranController extends ChangeNotifier {
         notifyListeners(); 
       },
       onError: (e) {
-        print("Error in expense stream: $e");
+        debugPrint("Error in expense stream: $e");
         _isLoading = false;
         notifyListeners();
       },
       onDone: () {
-        print("Expense stream closed.");
+        debugPrint("Expense stream closed.");
       }
     );
   }
@@ -82,31 +90,31 @@ class PengeluaranController extends ChangeNotifier {
       await _repository.savePengeluaran(expense);
       // Stream akan update otomatis
     } catch (e) {
-      print("Error saving expense: $e");
+      debugPrint("Error saving expense: $e");
       throw Exception("Gagal menyimpan pengeluaran."); 
     }
   }
 
   // ⭐️ FUNGSI BARU: UPDATE
   Future<void> updateExpense(Pengeluaran expense) async {
-    // Perlu ada fungsi update di Repository: _repository.updatePengeluaran(expense);
-    // Asumsi sudah ada, jika tidak, tolong tambahkan
     try {
+      // Pastikan objek expense memiliki ID untuk diupdate
+      if (expense.id == null) {
+        throw Exception("ID pengeluaran tidak ditemukan untuk diperbarui.");
+      }
       await _repository.updatePengeluaran(expense);
     } catch (e) {
-      print("Error updating expense: $e");
+      debugPrint("Error updating expense: $e");
       throw Exception("Gagal memperbarui pengeluaran.");
     }
   }
 
   // ⭐️ FUNGSI BARU: DELETE
   Future<void> deleteExpense(String id) async {
-    // Perlu ada fungsi delete di Repository: _repository.deletePengeluaran(id);
-    // Asumsi sudah ada, jika tidak, tolong tambahkan
     try {
       await _repository.deletePengeluaran(id);
     } catch (e) {
-      print("Error deleting expense: $e");
+      debugPrint("Error deleting expense: $e");
       throw Exception("Gagal menghapus pengeluaran.");
     }
   }
