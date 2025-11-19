@@ -1,3 +1,5 @@
+// File: lib/database/controller/absen/payroll_controller.dart
+
 import 'dart:async'; 
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,11 +21,18 @@ class PayrollController extends ChangeNotifier {
 
   // --- State Variables ---
   List<Map<String, dynamic>> _unpaidEmployeeList = [];
+  
+  //   VARIABEL BARU UNTUK MENYIMPAN TOTAL GAJI
+  double _totalUnpaidSalary = 0.0; 
+  
   bool _isLoading = false;
 
   // --- Getters ---
   List<Map<String, dynamic>> get unpaidEmployeeList => _unpaidEmployeeList;
   bool get isLoading => _isLoading;
+  
+  //   GETTER BARU
+  double get totalUnpaidSalary => _totalUnpaidSalary;
 
   // --- Constructor ---
   PayrollController() {
@@ -50,14 +59,21 @@ class PayrollController extends ChangeNotifier {
           (employeeSnapshot) async { 
             List<Map<String, dynamic>> results = [];
             List<Future<void>> calculationFutures = [];
+            double tempTotalSalary = 0.0; // Inisialisasi penghitung sementara
 
             for (var doc in employeeSnapshot.docs) {
-              calculationFutures.add(_calculateEmployeeData(doc, results));
+              calculationFutures.add(_calculateEmployeeData(doc, results, (amount) {
+                // Callback untuk menambahkan ke total gaji
+                tempTotalSalary += amount; 
+              }));
             }
 
             // Menunggu semua perhitungan selesai secara paralel
             await Future.wait(calculationFutures);
-
+            
+            // PERBARUI STATE TOTAL GAJI
+            _totalUnpaidSalary = tempTotalSalary; 
+            
             _unpaidEmployeeList = results;
             _isLoading = false;
             notifyListeners();
@@ -94,7 +110,12 @@ class PayrollController extends ChangeNotifier {
   // ⭐️ FUNGSI PERHITUNGAN GAJI
   // =========================================================================
 
-  Future<void> _calculateEmployeeData(DocumentSnapshot doc, List<Map<String, dynamic>> results) async {
+  Future<void> _calculateEmployeeData(
+      DocumentSnapshot doc, 
+      List<Map<String, dynamic>> results,
+      // Tambahkan callback untuk mengumpulkan total
+      void Function(double unpaidAmount) onAmountCalculated, 
+    ) async {
     final data = doc.data() as Map<String, dynamic>?; 
     if (data == null) return; 
 
@@ -117,6 +138,8 @@ class PayrollController extends ChangeNotifier {
             ? lastEndDate.add(const Duration(days: 1)) 
             : await _getFirstAbsenceDate(userId), 
       });
+      // Panggil callback untuk menambahkan ke total
+      onAmountCalculated(unpaidAmount);
     }
   }
 
