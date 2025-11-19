@@ -15,7 +15,6 @@ class Pengeluaran {
     required this.kategori,
     required this.nominal,
     required this.tanggal,
-    required this.isPaid,
   });
 
   // Konstruktor untuk membuat objek dari Map (dari Firestore)
@@ -35,7 +34,7 @@ class Pengeluaran {
       deskripsi: map['deskripsi'] as String? ?? 'N/A',
       kategori: map['kategori'] as String? ?? 'N/A',
       nominal: nominalValue,
-      tanggal: parsedDate,
+      tanggal: tanggalValue,
     );
   }
 
