@@ -8,7 +8,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:tes_flutter/auth/login_page.dart';
 import 'package:tes_flutter/database/controller/absen/payroll_controller.dart';
 import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart'; 
-import 'package:tes_flutter/database/controller/gmv/gmv_controller_extra.dart'; 
+import 'package:tes_flutter/database/controller/gmv/gmv_controller_extra.dart';
+import 'package:tes_flutter/database/controller/pengeluaran/fitur/pengeluaran_controller_fitur.dart'; 
 import 'firebase_options.dart';
 
 void main() async {
@@ -38,6 +39,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider<GmvControllerExtra>(create: (_) => GmvControllerExtra()), 
         ChangeNotifierProvider(create: (_) => GmvController()), // Hapus baris ini jika GmvController tidak dipakai
         ChangeNotifierProvider(create: (_) => PayrollController()),
+        ChangeNotifierProvider(create: (_) => PengeluaranController()),
       ],
       child: const MaterialApp(
         // 💡 Tambahkan LocalizationsDelegates di MaterialApp

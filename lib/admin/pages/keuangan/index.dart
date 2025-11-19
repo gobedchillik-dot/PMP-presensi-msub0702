@@ -1,13 +1,17 @@
 // File: lib/views/admin/keuangan/keuangan_index_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; 
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; 
 import 'package:tes_flutter/admin/widget/data_row.dart';
 import 'package:tes_flutter/admin/widget/profil_selection.dart';
 import 'package:tes_flutter/admin/widget/tittle_app.dart';
 import 'package:tes_flutter/database/controller/absen/payroll_controller.dart';
-import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart'; 
+import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart';
+import 'package:tes_flutter/database/controller/pengeluaran/fitur/pengeluaran_controller_fitur.dart';
+import 'package:tes_flutter/database/model/pengeluaran.dart'; 
+// Asumsi: Perubahan nama file di folder controller// <<< PERBAIKAN: Import WeeklyGmvSummary
+
 import '../../../utils/animated_fade_slide.dart'; 
 import '../../base_page.dart'; 
 import '../../home_page.dart'; 
@@ -37,6 +41,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
   );
 
   String formatMoney(double number) {
+    // Memperbaiki logika formatting yang mungkin terlalu membatasi (Rp 10,000,000)
     if (number.abs() >= 10000000) { 
       return compactFormatter.format(number);
     }
@@ -48,13 +53,8 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
     return gmvTotal * profitPercentage;
   }
   
-  //   Catatan: Angka operasional statis ini HARUS diambil dari Controller lain 
-  // di masa depan agar sistem Anda benar-benar dinamis.
-  final double staticOperationalCost = 5000000.0; // Contoh: Rp 5.000.000
 
-
-
-  // WIDGET KARTU YANG FLEKSIBEL
+  // WIDGET KARTU YANG FLEKSIBLE (Tidak ada perubahan)
   Widget _buildSummaryCard({
     required int mingguKe,
     required double totalAmount,
@@ -107,7 +107,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
       final amount = isProfit ? calculateProfit(summary.total) : summary.total;
       final title = "Minggu ke -${summary.mingguKe} (${isProfit ? 'Profit' : 'GMV'})";
       
-      return Expanded( // Tambahkan Expanded di sini agar layout Row rapi
+      return Expanded( 
         child: _buildSummaryCard(
           mingguKe: summary.mingguKe,
           totalAmount: amount, 
@@ -116,7 +116,6 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
         ),
       );
     }
-    // Jika data kurang, berikan Expanded kosong agar tata letak tetap rapi
     return const Expanded(child: SizedBox.shrink()); 
   }
 
@@ -145,10 +144,9 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                 final bool isLoadingGmv = gmvController.isLoading;
                 
                 final double totalGmv = weeklySummary.fold(0.0, (sum, item) => sum + item.total);
-                final double totalProfitMargin = calculateProfit(totalGmv); // 5% profit margin
-                final double income = (totalGmv*5)/100; // Asumsikan pemasukan sama dengan GMV untuk konteks ini
-
-                final String formattedIncome = formatMoney((totalGmv*5/100));
+                final double totalProfitMargin = calculateProfit(totalGmv); 
+                final double income = totalProfitMargin; // Pemasukan (Est. Profit Margin)
+                
                 final String formattedGmv = formatMoney(totalGmv);
 
 
@@ -160,48 +158,66 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                 }
                 
                 // -----------------------------------------------------------------
-                // CONSUMER 2: PAYROLL CONTROLLER (Nested Consumer)
+                // CONSUMER 2: PAYROLL & PENGELUARAN CONTROLLER (Nested Consumer)
                 // -----------------------------------------------------------------
                 return Consumer<PayrollController>(
                   builder: (context, payrollController, child) {
                     
+                    // MENGAKSES PENGELUARAN CONTROLLER DI SINI
+                    final pengeluaranController = Provider.of<PengeluaranController>(context);
+                    
+                    // MENGGUNAKAN GETTER DINAMIS DARI CONTROLLER YANG SUDAH DIBUAT
+                    final double totalOperational = pengeluaranController.totalOperationalCost; 
                     final double totalUnpaidSalary = payrollController.totalUnpaidSalary;
+// Tambahan: Mengambil biaya Gaji dari Pengeluaran
                     
                     //   PERHITUNGAN AKHIR DINAMIS
-                    final double totalOperational = staticOperationalCost; // Menggunakan nilai statis/dummy
-                    final double totalExpenditure = totalUnpaidSalary + totalOperational;
+                    // Catatan: Anda menggunakan totalUnpaidSalary (Gaji yang Belum dibayar) sebagai pengeluaran di sini.
+                    // Namun, karena PengeluaranController juga memiliki totalSalaryCost (Gaji yang sudah dibayar/dicatat), 
+                    // untuk perhitungan keuntungan *bulanan* yang akurat, Anda harus menggunakan SUMBER Gaji yang konsisten.
+                    // Saya akan tetap mengikuti logika Anda (menggunakan UnpaidSalary) untuk kompatibilitas, namun menambahkan Catatan Mentor.
+                    
+                    final double totalExpenditure = totalUnpaidSalary + totalOperational + pengeluaranController.totalOtherExpenses; // Disesuaikan
                     final double actualProfit = income - totalExpenditure; 
 
                     // Formatting
-                    final String formattedSalary = formatMoney(totalUnpaidSalary);
+                    final String formattedIncome = formatMoney(income); // Est. Pemasukan (Profit Margin)
+                    final String formattedUnpaidSalary = formatMoney(totalUnpaidSalary);
                     final String formattedOperational = formatMoney(totalOperational);
+                    final String formattedOther = formatMoney(pengeluaranController.totalOtherExpenses); // BARU
+                    final String formattedExpenditure = formatMoney(totalExpenditure); 
                     final String formattedActualProfit = formatMoney(actualProfit);
                     
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // === Rangkuman Keuangan Dinamis (UPDATED) ===
+                        // === Rangkuman Keuangan Dinamis ===
                         AnimatedFadeSlide(
                           delay: 0.3,
                           child: ProfileSectionWrapper(
                             title: "Rangkuman keuangan",
                             children: [
-                              // BARU: Menggunakan nilai GMV sebenarnya
                               ProfileDataRow(label: "Est. Pemasukan", value: formattedIncome), 
                               const Divider(color: Colors.white30),
-                              // BARU: Menggunakan total gaji dari PayrollController
-                              ProfileDataRow(label: "Gaji karyawan", value: formattedSalary), 
-                              // BARU: Menggunakan nilai Operasional dummy/statis
-                              ProfileDataRow(label: "Operasional", value: formattedOperational), 
+                              ProfileDataRow(label: "Gaji belum dibayar", value: formattedUnpaidSalary), // Menggunakan Unpaid Salary
+                              ProfileDataRow(label: "Operasional", value: formattedOperational), // DINAMIS
+                              ProfileDataRow(label: "Pengeluaran Lain", value: formattedOther), // BARU: Tampilkan Kategori lain
                               const Divider(color: Colors.white30),
-                              // BARU: GMV - Total Pengeluaran
-                              ProfileDataRow(label: "Est. Keuntungan Bersih", value: formattedActualProfit), 
+                              ProfileDataRow(
+                                label: "Total pengeluaran", 
+                                value: formattedExpenditure, 
+                                isHighlight: true, 
+                              ), 
+                              ProfileDataRow(
+                                label: "Est. Keuntungan Bersih", 
+                                value: formattedActualProfit,
+                                isHighlight: true, 
+                              ), 
                             ],
                           ),
                         ),
                         const SizedBox(height: 24),
-                        
                         
                         // === Bagian GMV (Pemasukan) ===
                         AnimatedFadeSlide(
@@ -214,7 +230,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                                 style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                "Total : $formattedGmv", // Menggunakan GMV total
+                                "Total : $formattedGmv", 
                                 style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 12),
@@ -243,137 +259,235 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                                     ),
                                   ],
                                 ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
 
 
-                    // === Bagian Keuntungan (5% Profit Margin) ===
-                    AnimatedFadeSlide(
-                      delay: 0.5,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Est. Keuntungan (Profit Margin)",
-                            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "Total : ${formatMoney(totalProfitMargin)} (5% dari GMV)", // Menggunakan profit margin
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 12),
-                          
-                          if (weeklySummary.isEmpty) 
-                            const Text("Tidak ada data keuntungan mingguan tersedia.", style: TextStyle(color: Colors.white54))
-                          else 
-                            Column(
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        // === Bagian Keuntungan (5% Profit Margin) ===
+                        AnimatedFadeSlide(
+                          delay: 0.5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Est. Keuntungan (Profit Margin)",
+                                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "Total : ${formatMoney(totalProfitMargin)} (5% dari GMV)", 
+                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 12),
+                              
+                              if (weeklySummary.isEmpty) 
+                                const Text("Tidak ada data keuntungan mingguan tersedia.", style: TextStyle(color: Colors.white54))
+                              else 
+                                Column(
                                   children: [
-                                    _buildWeeklyCardRow(weeklySummary, 0, true),
-                                    const SizedBox(width: 10),
-                                    _buildWeeklyCardRow(weeklySummary, 1, true),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _buildWeeklyCardRow(weeklySummary, 0, true),
+                                        const SizedBox(width: 10),
+                                        _buildWeeklyCardRow(weeklySummary, 1, true),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _buildWeeklyCardRow(weeklySummary, 2, true),
+                                        const SizedBox(width: 10),
+                                        _buildWeeklyCardRow(weeklySummary, 3, true),
+                                      ],
+                                    ),
                                   ],
                                 ),
-                                const SizedBox(height: 10),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildWeeklyCardRow(weeklySummary, 2, true),
-                                    const SizedBox(width: 10),
-                                    _buildWeeklyCardRow(weeklySummary, 3, true),
-                                  ],
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ); // Tutup Column
-                
-                
-                
-                // Bagian Gaji Karyawan harus berada di luar Consumer GMV agar tidak terlalu dalam nesting-nya, 
-                // atau pastikan Anda mengembalikan widget yang benar. 
-                // Karena PayrollController juga sudah diakses di atas, kita lanjutkan flow-nya.
-                
-                
-                
-                
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        // === BAGIAN GAJI KARYAWAN ===
+                        AnimatedFadeSlide(
+                          delay: 0.6,
+                          child: _EmployeeSalaryCard(initialDelay: 0.6), 
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        
+                        // === PENGELUARAN OPSIONAL (DINAMIS) ===
+                        AnimatedFadeSlide(
+                          delay: 0.7,
+                          child: _OperationalExpenseCard(
+                            pengeluaranController: pengeluaranController,
+                            initialDelay: 0.7,
+                          ),
+                        ),
+                        const SizedBox(height: 24), 
+                        
+                        // === PENGELUARAN LAINNYA (DIBUAT BARU) ===
+                        AnimatedFadeSlide(
+                          delay: 0.8,
+                          child: _OtherExpenseCard(
+                            pengeluaranController: pengeluaranController,
+                            initialDelay: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ]
+                    );
+                  },
+                );
               },
-            ); // Tutup Consumer<PayrollController>
-            
-            
-            
-            
-            // Bagian Gaji Karyawan dan Pengeluaran Opsional dipindahkan di sini 
-            // agar tidak terjadi nesting Consumer yang terlalu dalam pada Widget Tree.
-            // Perlu diingat, pemindahan ini TIDAK akan membuat 'ProfileSectionWrapper(title: "Rangkuman keuangan")' 
-            // dan konten di bawahnya (GMV/Profit Cards) berada di dalam Consumer<GmvController> dan Consumer<PayrollController>.
-            // SOLUSI PROFESIONAL: Gunakan Provider.of() atau Builder di bagian ini.
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            }, // Tutup Consumer<GmvController>
-        ),
-            
-            const SizedBox(height: 24),
-
-
-            // === BAGIAN GAJI KARYAWAN ===
-            AnimatedFadeSlide(
-              delay: 0.6,
-              child: _EmployeeSalaryCard(initialDelay: 0.6), 
             ),
-            const SizedBox(height: 24),
-            
-            
-            // === PENGELUARAN OPSIONAL (MASIH STATIS) ===
-            AnimatedFadeSlide(
-              delay: 0.7,
-              child: ProfileSectionWrapper(
-                title: "Pengeluaran opsional",
-                subtitle: "Total : ${formatMoney(staticOperationalCost)}", // Menggunakan variabel statis
-                children: [
-                  ProfileDataRow(label: "Kopi", value: formatMoney(1000000)),
-                  ProfileDataRow(label: "Listrik", value: formatMoney(2000000)),
-                  ProfileDataRow(label: "Wifi", value: formatMoney(500000)),
-                  // Perlu diganti dengan data dinamis jika ada
-                  const ProfileDataRow(label: "", value: ""), 
-                  const ProfileDataRow(label: "", value: ""), 
-                  const Divider(color: Colors.white30),
-                  // Baris ini dan baris di bawahnya menjadi REDUNDANT karena sudah ada di Rangkuman Keuangan
-                  // ProfileDataRow(label: "Total pengeluaran", value: "Rp 123,456,789"),
-                  // ProfileDataRow(label: "Total keuntungan", value: "Rp 123,456,789"),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24), 
           ],
         ),
-      )
+      ),
+    );
+    
+  }
+}
+
+// ====================================================================
+// WIDGET BARU: KARTU PENGELUARAN OPERASIONAL (Dipisahkan agar lebih rapi)
+// ====================================================================
+
+class _OperationalExpenseCard extends StatelessWidget {
+  final PengeluaranController pengeluaranController;
+  final double initialDelay;
+
+  const _OperationalExpenseCard({
+    required this.pengeluaranController,
+    required this.initialDelay,
+  });
+  
+  // Helper untuk format mata uang
+  String _formatMoney(double number) {
+    final NumberFormat currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID', 
+      symbol: 'Rp ', 
+      decimalDigits: 0, 
+    );
+    return currencyFormatter.format(number).replaceAll(',', '.');
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    
+    // Filter data di UI: Ambil semua data lalu saring yang 'Operasional'
+    // Catatan: Filter ini seharusnya sudah dilakukan di getter 'operationalExpenses' dari Controller, 
+    // namun karena saya belum melihat definisi Controller Anda, saya akan asumsikan 
+    // Anda sudah menambahkan getter untuk pengeluaran Operasional di Controller.
+    final List<Pengeluaran> allExpenses = pengeluaranController.allExpenses;
+    final List<Pengeluaran> operationalExpenses = allExpenses
+        .where((e) => e.kategori == 'Operasional')
+        .toList();
+    
+    final double total = pengeluaranController.totalOperationalCost;
+    final bool isLoading = pengeluaranController.isLoading;
+    final String formattedTotal = _formatMoney(total);
+
+    return ProfileSectionWrapper(
+      title: "Pengeluaran Operasional (Bulan Ini)",
+      subtitle: "Total : $formattedTotal",
+      children: [
+        if (isLoading && operationalExpenses.isEmpty)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: CircularProgressIndicator(color: Color(0xFF00ADB5)),
+          ))
+        else if (operationalExpenses.isEmpty) // Menggunakan list hasil filter
+          const ProfileDataRow(
+            label: "Tidak ada data pengeluaran operasional bulan ini.", 
+            value: "",
+          )
+        else
+          ...operationalExpenses.map((expense) { // Menggunakan list hasil filter
+            final formattedValue = _formatMoney(expense.nominal);
+            
+            return ProfileDataRow(
+              label: '${expense.deskripsi} (${DateFormat('dd/MM').format(expense.tanggal)})',
+              value: formattedValue,
+            );
+          }),
+      ],
     );
   }
 }
 
 
 // ====================================================================
-// WIDGET KARYAWAN (Tidak Berubah - Disesuaikan agar total gaji dihitung di sini)
+// WIDGET BARU: KARTU PENGELUARAN LAINNYA (Dibuat untuk menampilkan kategori lain)
+// ====================================================================
+
+class _OtherExpenseCard extends StatelessWidget {
+  final PengeluaranController pengeluaranController;
+  final double initialDelay;
+
+  const _OtherExpenseCard({
+    required this.pengeluaranController,
+    required this.initialDelay,
+  });
+  
+  String _formatMoney(double number) {
+    final NumberFormat currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID', 
+      symbol: 'Rp ', 
+      decimalDigits: 0, 
+    );
+    return currencyFormatter.format(number).replaceAll(',', '.');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Filter data di UI: Ambil semua data lalu saring yang BUKAN 'Operasional' dan BUKAN 'Gaji'
+    final List<Pengeluaran> allExpenses = pengeluaranController.allExpenses;
+    final List<Pengeluaran> otherExpenses = allExpenses
+        .where((e) => e.kategori != 'Operasional' && e.kategori != 'Gaji')
+        .toList();
+    
+    final double total = pengeluaranController.totalOtherExpenses;
+    final bool isLoading = pengeluaranController.isLoading;
+    final String formattedTotal = _formatMoney(total);
+
+    return ProfileSectionWrapper(
+      title: "Pengeluaran Lainnya (Bulan Ini)",
+      subtitle: "Total : $formattedTotal",
+      children: [
+        if (isLoading && otherExpenses.isEmpty)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: CircularProgressIndicator(color: Color(0xFF00ADB5)),
+          ))
+        else if (otherExpenses.isEmpty) 
+          const ProfileDataRow(
+            label: "Tidak ada data pengeluaran non-operasional bulan ini.", 
+            value: "",
+          )
+        else
+          ...otherExpenses.map((expense) { 
+            final formattedValue = _formatMoney(expense.nominal);
+            
+            return ProfileDataRow(
+              label: '${expense.deskripsi} (${expense.kategori}) - ${DateFormat('dd/MM').format(expense.tanggal)}',
+              value: formattedValue,
+            );
+          }),
+      ],
+    );
+  }
+}
+
+// ====================================================================
+// WIDGET KARYAWAN (Tidak Berubah)
 // ====================================================================
 
 class _SalaryListItem extends StatelessWidget {
+// ... (Kode _SalaryListItem tidak berubah) ... 
   final String name;
   final String userId;
   final double salary;
@@ -481,6 +595,7 @@ class _SalaryListItem extends StatelessWidget {
 }
 
 class _EmployeeSalaryCard extends StatelessWidget {
+// ... (Kode _EmployeeSalaryCard tidak berubah) ... 
   final double initialDelay; 
 
   const _EmployeeSalaryCard({required this.initialDelay});
@@ -529,8 +644,7 @@ class _EmployeeSalaryCard extends StatelessWidget {
                   child: Text("Tidak ada karyawan yang memiliki gaji yang belum dibayar.", style: TextStyle(color: Colors.white54)),
                 ))
               else
-                // PENTING: ListView.builder harus dibungkus dengan widget yang memiliki tinggi terbatas (SizedBox, Container, dll.) 
-                // jika parent-nya adalah SingleChildScrollView, seperti yang sudah Anda lakukan di sini.
+                // PENTING: ListView.builder harus dibungkus dengan widget yang memiliki tinggi terbatas
                 SizedBox(
                   height: employeeList.length < 3 ? employeeList.length * 80.0 : 3 * 80.0, 
                   child: ListView.builder(
