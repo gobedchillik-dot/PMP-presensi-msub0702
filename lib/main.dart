@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-// 💡 TAMBAHKAN DUA IMPORTS INI
 import 'package:intl/intl.dart'; 
 import 'package:intl/date_symbol_data_local.dart'; 
-// ===================================
 import 'package:tes_flutter/auth/login_page.dart';
 import 'package:tes_flutter/database/controller/absen/payroll_controller.dart';
 import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart'; 
 import 'package:tes_flutter/database/controller/gmv/gmv_controller_extra.dart';
 import 'package:tes_flutter/database/controller/pengeluaran/fitur/pengeluaran_controller_fitur.dart'; 
 import 'firebase_options.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,10 +43,9 @@ class MainApp extends StatelessWidget {
       child: const MaterialApp(
         // 💡 Tambahkan LocalizationsDelegates di MaterialApp
         localizationsDelegates: [
-          // Anda mungkin perlu import flutter_localizations/flutter_localizations.dart
-          // jika Anda menggunakan delegasi default
-          // GlobalMaterialLocalizations.delegate,
-          // GlobalWidgetsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: [
           Locale('en', 'US'),

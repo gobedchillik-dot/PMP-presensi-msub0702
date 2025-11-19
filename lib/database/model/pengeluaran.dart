@@ -6,6 +6,7 @@ class Pengeluaran {
   final String kategori;
   final double nominal;
   final DateTime tanggal;
+  final bool isPaid;
 
   Pengeluaran({
     this.id,
@@ -13,6 +14,7 @@ class Pengeluaran {
     required this.kategori,
     required this.nominal,
     required this.tanggal,
+    required this.isPaid,
   });
 
   // Konstruktor untuk membuat objek dari Map (dari Firestore)
@@ -40,6 +42,7 @@ class Pengeluaran {
       kategori: map['kategori'] as String? ?? 'N/A',
       nominal: nominalValue,
       tanggal: parsedDate,
+      isPaid: map['isPaid'] as bool? ?? false,
     );
   }
 

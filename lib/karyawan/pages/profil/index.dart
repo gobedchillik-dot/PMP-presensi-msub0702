@@ -9,6 +9,7 @@ import '../../../database/model/user.dart';
 import '../../../auth/auth_service.dart';
 import '../../../auth/login_page.dart';
 import 'update.dart';
+import 'dart:convert';
 // Impor Controller Absensi yang berisi status isToday
 import '../../../database/controller/absen/homepage_karyawan_controller.dart'; 
 
@@ -125,20 +126,14 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
                               size: 80,
                               color: Colors.white54,
                             )
-                          : Image.network(
-                              user.faceImage!,
+                          : Image.memory(
+                              base64Decode(user.faceImage!),
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return const Icon(
                                   Icons.person,
                                   size: 80,
                                   color: Colors.white54,
-                                );
-                              },
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return const Center(
-                                  child: CircularProgressIndicator(color: Colors.white),
                                 );
                               },
                             ),
