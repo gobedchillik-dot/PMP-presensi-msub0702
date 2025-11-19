@@ -118,9 +118,33 @@ class _ProfilIndexPageState extends State<ProfilIndexPage> {
                       color: Colors.white12,
                       border: Border.all(color: Colors.white24, width: 2),
                     ),
-                    child: const Icon(Icons.person,
-                        size: 80, color: Colors.white54),
+                    child: ClipOval(
+                      child: (user.faceImage == null || user.faceImage!.isEmpty)
+                          ? const Icon(
+                              Icons.person,
+                              size: 80,
+                              color: Colors.white54,
+                            )
+                          : Image.network(
+                              user.faceImage!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(
+                                  Icons.person,
+                                  size: 80,
+                                  color: Colors.white54,
+                                );
+                              },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(
+                                  child: CircularProgressIndicator(color: Colors.white),
+                                );
+                              },
+                            ),
+                    ),
                   ),
+                    
                   const SizedBox(height: 16),
                   Text(
                     user.email,
