@@ -24,7 +24,6 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
     _headerScrollController = ScrollController();
     _dataScrollController = ScrollController();
 
-    // sinkronisasi scroll horizontal
     _dataScrollController.addListener(() {
       if (_dataScrollController.offset != _headerScrollController.offset) {
         _headerScrollController.jumpTo(_dataScrollController.offset);
@@ -53,7 +52,6 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // HEADER
             AnimatedFadeSlide(
               delay: 0.1,
               child: CustomAppTitle(

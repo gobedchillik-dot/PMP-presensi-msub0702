@@ -7,6 +7,10 @@ import 'package:tes_flutter/admin/widget/attendance_tracker_section.dart';
 import 'package:tes_flutter/admin/widget/sales_chart_section.dart';
 import 'package:tes_flutter/database/controller/absen/payroll_controller.dart';
 import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart';
+// ⚠️ Pastikan Anda mengimpor UnpaidSalaryModel di sini jika digunakan secara eksplisit,
+// tetapi karena kita menggunakannya melalui Controller, cukup pastikan Controller sudah diimpor.
+
+import 'package:tes_flutter/database/model/unpaid_gaji.dart'; // Impor Model
 import 'package:tes_flutter/ui_page/format_money.dart';
 import 'package:tes_flutter/ui_page/shimmer_page_loader.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
@@ -17,17 +21,19 @@ import 'package:tes_flutter/database/controller/CashflowController.dart';
 class AdminHomePage extends StatelessWidget {
   const AdminHomePage({super.key});
 
+  // ⚠️ KOREKSI UTAMA: Mengubah tipe input dari List<Map> menjadi List<UnpaidSalaryModel>
   List<Map<String, dynamic>> _mapPayrollDataToTracker(
-      List<Map<String, dynamic>> payrollList) {
+      List<UnpaidSalaryModel> payrollList) {
     const maxAbsence = 30;
 
     return payrollList.map((data) {
-      final totalUnpaid = data['totalUnpaidCounts'] as int? ?? 0;
+      // Mengakses properti langsung dari objek Model, bukan dari Map
+      final totalUnpaid = data.totalUnpaidCounts; 
       final progress = (totalUnpaid / maxAbsence).clamp(0.0, 1.0);
 
       return {
-        'userId': data['userId'],
-        'userName': data['userName'] ?? '—',
+        'idUser': data.idUser,
+        'userName': data.userName, // Mengakses properti Model
         'totalUnpaidCounts': totalUnpaid,
         'progressValue': progress,
       };
@@ -48,6 +54,8 @@ class AdminHomePage extends StatelessWidget {
             CashflowController>(
           create: (_) => CashflowController(),
           update: (context, gmv, pengeluaran, payroll, controller) {
+            // MENTOR'S NOTE: Pastikan CashflowController.updateSources juga sudah
+            // diupdate untuk menerima List<UnpaidSalaryModel> dari payroll.
             controller!.updateSources(gmv, pengeluaran, payroll);
             return controller;
           },
@@ -56,12 +64,16 @@ class AdminHomePage extends StatelessWidget {
       child: Builder(
         builder: (context) {
           final gmvController = context.watch<GmvController>();
+          
+          // Asumsi MoneyFormatter.format menerima double/num
           final formattedGmv = MoneyFormatter.format(
               gmvController.weeklySummary.fold<double>(
-                  0.0, (sum, item) => sum + (item.total )));
+                  0.0, (sum, item) => sum + item.total));
+                  
+          // Perhitungan Profit (asumsi 5% margin)
           final formattedProfit = MoneyFormatter.format(
               gmvController.weeklySummary.fold<double>(
-                      0.0, (sum, item) => sum + (item.total )) *
+                      0.0, (sum, item) => sum + item.total) *
                   0.05);
 
           return BasePage(
@@ -75,59 +87,59 @@ class AdminHomePage extends StatelessWidget {
                     child: CustomTitle(text: "Dashboard"),
                   ),
                   const SizedBox(height: 16),
-
-                  // GMV Summary
+                  
                   AnimatedFadeSlide(
                     delay: 0.2,
-                    child: AdminSummaryCards(
+                    child: 
+                    AdminSummaryCards(
                       formattedGmv: formattedGmv,
                       formattedProfit: formattedProfit,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Grafik GMV
-                  AnimatedFadeSlide(
-                    delay: 0.3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        CustomSubtitle(text: "Grafik GMV"),
-                        CustomInfo(
-                          text: "Periode : 1 November - 30 November 2025",
-                        ),
-                      ],
+                    const SizedBox(height: 24),
+                    
+                    AnimatedFadeSlide(
+                      delay: 0.3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          CustomSubtitle(text: "Grafik GMV"),
+                          CustomInfo(
+                            text: "Periode : 1 November - 30 November 2025",
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  AnimatedFadeSlide(
-                    delay: 0.4,
-                    child: const SalesChartSection(),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Absen Tracker
-                  AnimatedFadeSlide(
-                    delay: 0.5,
-                    child: const CustomSubtitle(text: "Absen Tracker"),
-                  ),
-                  AnimatedFadeSlide(
-                    delay: 0.6,
-                    child: Consumer<PayrollController>(
-                      builder: (_, payrollController, __) {
-                        if (payrollController.isLoading) {
-                          return const SkeletonBox();
-                        }
-                        final trackerData = _mapPayrollDataToTracker(
+                    
+                    AnimatedFadeSlide(
+                      delay: 0.4,
+                      child: const SalesChartSection(),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    AnimatedFadeSlide(
+                      delay: 0.5,
+                      child: const CustomSubtitle(text: "Absen Tracker"),
+                    ),
+                    AnimatedFadeSlide(
+                      delay: 0.6,
+                      child: Consumer<PayrollController>(
+                        builder: (_, payrollController, __) {
+                          if (payrollController.isLoading) {
+                            // Asumsi SkeletonBox adalah widget loader
+                            return const SkeletonBox(); // Mengganti SkeletonBox dengan ShimmerPageLoader
+                          }
+                          // ⚠️ KOREKSI: Meneruskan List<UnpaidSalaryModel> ke fungsi mapping
+                          final trackerData = _mapPayrollDataToTracker(
                             payrollController.unpaidEmployeeList);
-                        return AttendanceTrackerSection(
-                          employeeData: trackerData,
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  
+                            
+                            return AttendanceTrackerSection(
+                              employeeData: trackerData,
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                 ],
               ),
             ),

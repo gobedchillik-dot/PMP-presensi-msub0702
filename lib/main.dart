@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart'; // <-- WAJIB
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -41,7 +41,6 @@ class MainApp extends StatelessWidget {
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
 
-        // 👇 WAJIB AGAR LOCALE id_ID BERFUNGSI DI ANDROID
         localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,

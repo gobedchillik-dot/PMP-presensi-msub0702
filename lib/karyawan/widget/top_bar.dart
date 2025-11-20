@@ -112,6 +112,16 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 const PopupMenuItem(
+                  value: 'Detail absen',
+                  child: Row(
+                    children: [
+                      Icon(Icons.list, color: Colors.white),
+                      SizedBox(width: 10),
+                      Text('Detail absen', style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
                   value: 'keluar',
                   child: Row(
                     children: [

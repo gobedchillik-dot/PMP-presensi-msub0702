@@ -1,26 +1,33 @@
+// File: lib/admin/widget/employee_salary_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:tes_flutter/admin/pages/keuangan/detail_gaji.dart';
 import 'package:tes_flutter/admin/widget/profil_selection.dart';
 import 'package:tes_flutter/database/controller/absen/payroll_controller.dart';
+// BARU: Impor Model yang dibutuhkan
+import 'package:tes_flutter/database/model/unpaid_gaji.dart'; 
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
+import 'package:tes_flutter/utils/route_generator.dart';
 
 class EmployeeSalaryCard extends StatelessWidget {
   final double initialDelay; 
 
-  const EmployeeSalaryCard({required this.initialDelay});
+  const EmployeeSalaryCard({required this.initialDelay, super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Menggunakan Selector untuk menghindari rebuild jika ada properti lain di PayrollController yang berubah
-    return Selector<PayrollController, (List<Map<String, dynamic>>, double, bool)>(
+    // ⚠️ KOREKSI UTAMA: Selector sekarang langsung meminta List<UnpaidSalaryModel> dari Controller
+    return Selector<PayrollController, (List<UnpaidSalaryModel>, double, bool)>(
       selector: (_, controller) => (
+        // HILANG: Baris .map(...).toList() dihapus!
         controller.unpaidEmployeeList, 
         controller.totalUnpaidSalary, 
         controller.isLoading
       ),
       builder: (context, data, child) {
-        final List<Map<String, dynamic>> employeeList = data.$1;
+        final List<UnpaidSalaryModel> employeeList = data.$1;
         final double totalUnpaidSalary = data.$2;
         final bool isLoading = data.$3;
         
@@ -43,7 +50,7 @@ class EmployeeSalaryCard extends StatelessWidget {
             children: [
               ProfileSectionWrapper(
                 title: "Daftar Gaji Karyawan Belum Dibayar", 
-                subtitle: "Total: $formattedTotal", // Menggunakan total dari selector
+                subtitle: "Total: $formattedTotal",
                 children: const [],
               ),
 
@@ -58,7 +65,6 @@ class EmployeeSalaryCard extends StatelessWidget {
                   child: Text("Tidak ada karyawan yang memiliki gaji yang belum dibayar.", style: TextStyle(color: Colors.white54)),
                 ))
               else
-                // PENTING: ListView.builder harus dibungkus dengan widget yang memiliki tinggi terbatas
                 SizedBox(
                   height: employeeList.length < 3 ? employeeList.length * 80.0 : 3 * 80.0, 
                   child: ListView.builder(
@@ -66,17 +72,13 @@ class EmployeeSalaryCard extends StatelessWidget {
                     physics: const ClampingScrollPhysics(),
                     itemCount: employeeList.length,
                     itemBuilder: (context, index) {
-                      final employeeData = employeeList[index];
+                      final UnpaidSalaryModel employeeData = employeeList[index];
 
                       return AnimatedFadeSlide(
                         delay: initialDelay + (index * 0.1), 
                         duration: const Duration(milliseconds: 600),
                         child: _SalaryListItem(
-                          name: employeeData['userName'] ?? 'N/A',
-                          userId: employeeData['userId'] ?? '',
-                          salary: employeeData['unpaidAmount'] ?? 0.0,
-                          totalCounts: employeeData['totalUnpaidCounts'] ?? 0,
-                          newPeriodStartDate: employeeData['newPeriodStartDate'] ?? DateTime.now(),
+                          payrollData: employeeData, 
                           currencyFormatter: currencyFormatter,
                         ),
                       );
@@ -91,25 +93,23 @@ class EmployeeSalaryCard extends StatelessWidget {
   }
 }
 
+// =======================================================
+// Refaktor Widget Item Daftar (_SalaryListItem tidak berubah)
+// =======================================================
 class _SalaryListItem extends StatelessWidget {
-  final String name;
-  final String userId;
-  final double salary;
-  final int totalCounts;
-  final DateTime newPeriodStartDate;
+  final UnpaidSalaryModel payrollData; 
   final NumberFormat currencyFormatter;
 
   const _SalaryListItem({
-    required this.name, 
-    required this.userId, 
-    required this.salary,
-    required this.totalCounts,
-    required this.newPeriodStartDate,
+    required this.payrollData,
     required this.currencyFormatter,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Kode ini sekarang aman karena payrollData.periodStartDate pasti DateTime
+    final String formattedPeriodDate = DateFormat('d MMM', 'id_ID').format(payrollData.periodStartDate);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
@@ -125,16 +125,14 @@ class _SalaryListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                name,
+                payrollData.userName,
                 style: const TextStyle(
                     color: Colors.white70, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 4),
               // Tampilkan Nominal Gaji
               Text(
-                salary.toInt().toString().isNotEmpty
-                    ? currencyFormatter.format(salary).replaceAll(',', '.')
-                    : 'Rp 0',
+                currencyFormatter.format(payrollData.unpaidAmount).replaceAll(',', '.'),
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -142,7 +140,7 @@ class _SalaryListItem extends StatelessWidget {
               ),
               // Tambahkan keterangan total counts sebagai info
               Text(
-                "Total jam kerja: ${totalCounts*2} jam",
+                "($formattedPeriodDate - Sekarang) | Total jam: ${payrollData.totalUnpaidCounts * 2} jam",
                 style: const TextStyle(color: Colors.white54, fontSize: 10),
               ),
             ],
@@ -152,28 +150,11 @@ class _SalaryListItem extends StatelessWidget {
           SizedBox(
             height: 40,
             child: ElevatedButton(
-              onPressed: () async {
-                final payrollController = Provider.of<PayrollController>(context, listen: false);
-
-                await payrollController.processPayment(
-                  userId: userId,
-                  amount: salary,
-                  totalCounts: totalCounts,
-                  newStartDate: newPeriodStartDate,
-                );
-                
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Memproses pembayaran gaji untuk $name...'),
-                    duration: const Duration(milliseconds: 700),
-                  ),
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Pembayaran gaji berhasil dicatat!'),
-                    duration: Duration(milliseconds: 1500),
-                  ),
+              onPressed: () {
+                // Meneruskan objek Model ke halaman detail
+                Navigator.push(
+                  context, 
+                  createRoute(DetailGajiPage(payrollData: payrollData)), 
                 );
               },
               style: ElevatedButton.styleFrom(

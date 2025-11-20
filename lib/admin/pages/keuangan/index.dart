@@ -40,6 +40,12 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
   );
 
   String formatMoney(double number) {
+    if (number.abs() >= 10000000) {
+      return _compactFormatter.format(number);
+    }
+    return _currencyFormatter.format(number).replaceAll(',', '.');
+  }
+  String kuartalFormatMoney(double number) {
     if (number.abs() >= 1000000) {
       return _compactFormatter.format(number);
     }
@@ -74,7 +80,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
           Row(
             children: [
               Text(
-                formatMoney(totalAmount),
+                kuartalFormatMoney(totalAmount),
                 style: TextStyle(
                   color: color,
                   fontSize: 18,
@@ -229,7 +235,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                 final double totalExpenditure = totalUnpaidSalary + totalOperational + totalOtherExpenses;
                 final double actualProfit = income - totalExpenditure;
 
-                final String formattedGmv = formatMoney(totalGmv);
+                final String formattedGmv = kuartalFormatMoney(totalGmv);
                 final String formattedIncome = formatMoney(income);
                 final String formattedUnpaidSalary = formatMoney(totalUnpaidSalary);
                 final String formattedOperational = formatMoney(totalOperational);
@@ -392,7 +398,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                             ),
                           ),
                           Text(
-                            "Total : ${formatMoney(totalProfitMargin)} (5% dari GMV)",
+                            "Total : ${kuartalFormatMoney(totalProfitMargin)} (5% dari GMV)",
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,

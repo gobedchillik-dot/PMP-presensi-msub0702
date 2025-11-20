@@ -1,14 +1,12 @@
-// lib/pages/profil/index.dart
-
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/admin/widget/data_row.dart';
 import 'package:tes_flutter/admin/widget/profil_selection.dart';
 import 'package:tes_flutter/admin/widget/simple_card.dart';
 import 'package:tes_flutter/admin/widget/tittle_app.dart';
-import '../../home_page.dart'; // Ganti dengan import yang benar ke AdminHomePage atau HomePage
-import '../../base_page.dart'; 
-import '../../../utils/animated_fade_slide.dart'; 
 
+import '../../home_page.dart';
+import '../../base_page.dart';
+import '../../../utils/animated_fade_slide.dart';
 
 class ProfilIndexPage extends StatelessWidget {
   const ProfilIndexPage({super.key});
@@ -16,29 +14,27 @@ class ProfilIndexPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: 'Profil', 
-      child: SingleChildScrollView(// Tambahkan padding jika BasePage belum memilikinya
+      title: 'Profil',
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Header dan tombol Back
-            AnimatedFadeSlide(
+
+            const AnimatedFadeSlide(
               delay: 0.1,
-              child: CustomAppTitle( // ⭐️ MENGGANTIKAN Row yang berulang
+              child: CustomAppTitle(
                 title: "Profil",
-                backToPage: const AdminHomePage(),
+                backToPage: AdminHomePage(),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
-            // 2. Foto Profil & Nama - Delay 0.2
+
             Center(
               child: AnimatedFadeSlide(
                 delay: 0.2,
                 child: Column(
                   children: [
-                    // Lingkaran Foto Profil
                     Container(
                       width: 120,
                       height: 120,
@@ -47,11 +43,7 @@ class ProfilIndexPage extends StatelessWidget {
                         color: Colors.white12,
                         border: Border.all(color: Colors.white24, width: 2),
                       ),
-                      child: const Icon(
-                        Icons.person,
-                        size: 80,
-                        color: Colors.white54,
-                      ),
+                      child: const Icon(Icons.person, size: 80, color: Colors.white54),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -61,36 +53,35 @@ class ProfilIndexPage extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Text(
-                      "Admin",
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
-                    ),
+                    const Text("Admin", style: TextStyle(color: Colors.white70, fontSize: 16)),
                   ],
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
-            // 3. Bio Data Section - Delay 0.3
-            AnimatedFadeSlide(
+
+            const AnimatedFadeSlide(
               delay: 0.3,
-              child: const ProfileSectionWrapper(
+              child: ProfileSectionWrapper(
                 title: "Bio data",
                 children: [
                   ProfileDataRow(label: "Nama lengkap", value: "Admin"),
                   ProfileDataRow(label: "Panggilan", value: "Admin"),
-                  ProfileDataRow(label: "Alamat", value: "Bojong, cilimus, kuningan", isMultiLine: true),
+                  ProfileDataRow(
+                    label: "Alamat",
+                    value: "Bojong, cilimus, kuningan",
+                    isMultiLine: true,
+                  ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
-            // 4. Perbankan Section - Delay 0.4
-            AnimatedFadeSlide(
+
+            const AnimatedFadeSlide(
               delay: 0.4,
-              child: const ProfileSectionWrapper(
+              child: ProfileSectionWrapper(
                 title: "Perbankan",
                 children: [
                   ProfileDataRow(label: "Nomor rekening", value: "xxxxxxxxx"),
@@ -100,11 +91,10 @@ class ProfilIndexPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 32),
-            
-            // 5. Kontak Section - Delay 0.5
-            AnimatedFadeSlide(
+
+            const AnimatedFadeSlide(
               delay: 0.5,
-              child: const ProfileSectionWrapper(
+              child: ProfileSectionWrapper(
                 title: "Kontak",
                 isSimple: true,
                 children: [
@@ -115,10 +105,9 @@ class ProfilIndexPage extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 48),
-            
-            // 6. Tombol Keluar - Delay 0.6
+
             AnimatedFadeSlide(
               delay: 0.6,
               child: SizedBox(
@@ -126,7 +115,10 @@ class ProfilIndexPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Anda telah keluar.'), duration: Duration(milliseconds: 800)),
+                      const SnackBar(
+                        content: Text('Anda telah keluar.'),
+                        duration: Duration(milliseconds: 800),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -138,12 +130,16 @@ class ProfilIndexPage extends StatelessWidget {
                   ),
                   child: const Text(
                     "Keluar",
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),

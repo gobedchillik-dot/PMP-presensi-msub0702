@@ -11,8 +11,8 @@ class UserModel {
   final String panggilan;
   final String alamat;
   final bool isActive;
-  final String? faceId; // 🔹 Token dari Face++
-  final String? faceImage; // 🔹 URL gambar wajah (bukan base64)
+  final String? faceId;
+  final String? faceImage;
 
   UserModel({
     required this.uid,
@@ -46,7 +46,6 @@ class UserModel {
     );
   }
 
-  // 🔹 Konversi ke Map untuk Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'uid': uid,

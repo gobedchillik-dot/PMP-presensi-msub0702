@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'absen_detail.dart'; // Pastikan path ini benar
+import 'absen_detail.dart';
 
 class AbsenModel {
   final String id;
   final String idUser;
-  final Timestamp tanggal; // Tanggal absensi (00:00:00)
-  final int count; // Jumlah absensi hari ini (1, 2, atau 3)
-  final bool status; // True jika minimal 1x absen
+  final Timestamp tanggal;
+  final int count;
+  final bool status;
   final Timestamp lastUpdate;
-  final List<AbsenDetailModel> times; // Detail setiap sesi
+  final List<AbsenDetailModel> times;
 
   AbsenModel({
     required this.id,
@@ -30,7 +30,6 @@ class AbsenModel {
     int countValue = (data['count'] is num) ? (data['count'] as num).toInt() : 0;
     bool statusValue = (data['status'] is bool) ? data['status'] as bool : false;
 
-    // Konversi List of Maps di Firestore menjadi List of AbsenDetailModel
     List<AbsenDetailModel> timesList = [];
     if (data['times'] is List) {
       timesList = (data['times'] as List)
@@ -56,7 +55,6 @@ class AbsenModel {
       'count': count,
       'status': status,
       'lastUpdate': lastUpdate,
-      // Konversi List of Model menjadi List of Maps
       'times': times.map((e) => e.toMap()).toList(), 
     };
   }

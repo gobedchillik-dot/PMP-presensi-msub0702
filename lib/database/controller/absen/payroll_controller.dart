@@ -1,9 +1,12 @@
-// File: lib/database/controller/absen/payroll_controller.dart
+// File: lib/database/controller/absen/payroll_controller.dart (Revisi Lengkap)
 
 import 'dart:async'; 
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tes_flutter/database/model/payroll.dart'; // Pastikan model ini ada
+
+// 🚀 KOREKSI IMPOR: Menggunakan penamaan yang konsisten
+import 'package:tes_flutter/database/model/unpaid_gaji.dart'; 
+import 'package:tes_flutter/database/model/payroll.dart'; // Asumsi model payroll Anda bernama ini
 
 class PayrollController extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -12,40 +15,34 @@ class PayrollController extends ChangeNotifier {
   static const double maxMonthlySalary = 2500000.0;
   static const int workingDaysInMonth = 30;
   static const int maxCountPerDay = 3;
-  // Rumus: (2.500.000 / 30) / 3
+  // Perhitungan gaji per count (misal: per jam kerja, jika 1 hari = 3 count)
   static const double valuePerCount = maxMonthlySalary / workingDaysInMonth / maxCountPerDay;
 
   // --- Stream Subscription ---
   StreamSubscription<QuerySnapshot>? _employeeStreamSubscription; 
   StreamSubscription<QuerySnapshot>? _absenStreamSubscription; 
+  StreamSubscription<QuerySnapshot>? _payrollStreamSubscription; // 🚀 BARU: Listener untuk Payroll
 
   // --- State Variables ---
-  List<Map<String, dynamic>> _unpaidEmployeeList = [];
-  
-  //   VARIABEL BARU UNTUK MENYIMPAN TOTAL GAJI
+  List<UnpaidSalaryModel> _unpaidEmployeeList = []; 
   double _totalUnpaidSalary = 0.0; 
-  
   bool _isLoading = false;
 
   // --- Getters ---
-  List<Map<String, dynamic>> get unpaidEmployeeList => _unpaidEmployeeList;
+  List<UnpaidSalaryModel> get unpaidEmployeeList => _unpaidEmployeeList; 
   bool get isLoading => _isLoading;
-  
-  //   GETTER BARU
   double get totalUnpaidSalary => _totalUnpaidSalary;
 
-  // --- Constructor ---
   PayrollController() {
-    // Memulai langganan data saat controller dibuat
     _listenToUnpaidEmployeeData(); 
     _listenToAbsenChanges(); 
+    _listenToPayrollChanges(); // 🚀 BARU: Daftarkan listener Payroll
   }
 
   // =========================================================================
   // ⭐️ FUNGSI LISTENER (STREAM)
   // =========================================================================
 
-  /// Mendengarkan perubahan pada tbl_user (daftar karyawan)
   void _listenToUnpaidEmployeeData() {
     _isLoading = true;
     notifyListeners();
@@ -57,28 +54,23 @@ class PayrollController extends ChangeNotifier {
         .snapshots()
         .listen(
           (employeeSnapshot) async { 
-            List<Map<String, dynamic>> results = [];
+            List<UnpaidSalaryModel> results = []; 
             List<Future<void>> calculationFutures = [];
-            double tempTotalSalary = 0.0; // Inisialisasi penghitung sementara
+            double tempTotalSalary = 0.0; 
 
             for (var doc in employeeSnapshot.docs) {
               calculationFutures.add(_calculateEmployeeData(doc, results, (amount) {
-                // Callback untuk menambahkan ke total gaji
                 tempTotalSalary += amount; 
               }));
             }
 
-            // Menunggu semua perhitungan selesai secara paralel
             await Future.wait(calculationFutures);
             
-            // PERBARUI STATE TOTAL GAJI
             _totalUnpaidSalary = tempTotalSalary; 
-            
             _unpaidEmployeeList = results;
             _isLoading = false;
             notifyListeners();
           },
-          // Perbaikan ERROR: onError dimasukkan sebagai parameter bernama
           onError: (error) {
             debugPrint("Error listening to unpaid employee data: $error");
             _isLoading = false;
@@ -87,7 +79,6 @@ class PayrollController extends ChangeNotifier {
         );
   }
 
-  /// Mendengarkan perubahan pada tbl_absen (memicu refresh data gaji)
   void _listenToAbsenChanges() {
     _absenStreamSubscription?.cancel();
     
@@ -96,15 +87,32 @@ class PayrollController extends ChangeNotifier {
         .listen(
           (_) {
             debugPrint("Perubahan terdeteksi di tbl_absen. Memuat ulang data gaji...");
-            // Memanggil ulang logika perhitungan karyawan
             _listenToUnpaidEmployeeData(); 
           },
-          // Perbaikan ERROR: onError dimasukkan sebagai parameter bernama
           onError: (error) {
             debugPrint("Error listening to tbl_absen changes: $error");
           },
         );
   }
+
+  // 🚀 FUNGSI BARU: Mendengarkan perubahan di tbl_payroll
+  void _listenToPayrollChanges() {
+    _payrollStreamSubscription?.cancel();
+    
+    _payrollStreamSubscription = _db.collection('tbl_payroll')
+        .snapshots() 
+        .listen(
+          (_) {
+            debugPrint("Perubahan terdeteksi di tbl_payroll (Pembayaran Baru). Memuat ulang data gaji...");
+            // Panggil ulang fungsi utama untuk perhitungan
+            _listenToUnpaidEmployeeData(); 
+          },
+          onError: (error) {
+            debugPrint("Error listening to tbl_payroll changes: $error");
+          },
+        );
+  }
+
 
   // =========================================================================
   // ⭐️ FUNGSI PERHITUNGAN GAJI
@@ -112,138 +120,168 @@ class PayrollController extends ChangeNotifier {
 
   Future<void> _calculateEmployeeData(
       DocumentSnapshot doc, 
-      List<Map<String, dynamic>> results,
-      // Tambahkan callback untuk mengumpulkan total
+      List<UnpaidSalaryModel> results, 
       void Function(double unpaidAmount) onAmountCalculated, 
     ) async {
     final data = doc.data() as Map<String, dynamic>?; 
     if (data == null) return; 
 
-    final userId = doc.id;
-    final userName = data['name'] ?? 'Karyawan Tanpa Nama';
+    final idUser = doc.id; 
+    final userName = data['name'] as String? ?? 'Karyawan Tanpa Nama'; 
 
-    final lastEndDate = await getLastPayrollEndDate(userId);
+    final lastEndDate = await getLastPayrollEndDate(idUser);
     
-    final totalUnpaidCounts = await _calculateUnpaidCounts(userId, lastEndDate);
+    final totalUnpaidCounts = await _calculateUnpaidCounts(idUser, lastEndDate);
     
     final double unpaidAmount = totalUnpaidCounts * valuePerCount;
 
     if (totalUnpaidCounts > 0) {
-      results.add({
-        'userId': userId,
-        'userName': userName,
-        'totalUnpaidCounts': totalUnpaidCounts,
-        'unpaidAmount': unpaidAmount,
-        'newPeriodStartDate': lastEndDate != null 
-            ? lastEndDate.add(const Duration(days: 1)) 
-            : await _getFirstAbsenceDate(userId), 
-      });
-      // Panggil callback untuk menambahkan ke total
-      onAmountCalculated(unpaidAmount);
+      DateTime? periodStartDate;
+      
+      if (lastEndDate != null) {
+        periodStartDate = lastEndDate.add(const Duration(days: 1)); 
+      } else {
+        periodStartDate = await _getFirstAbsenceDate(idUser);
+      }
+      
+      final now = DateTime.now();
+      final periodEndDate = DateTime(now.year, now.month, now.day); 
+
+      if (periodStartDate != null) { 
+        // KONVERSI KE MODEL
+        results.add(
+          UnpaidSalaryModel(
+            idUser: idUser,
+            userName: userName,
+            totalUnpaidCounts: totalUnpaidCounts,
+            unpaidAmount: unpaidAmount,
+            periodStartDate: periodStartDate, 
+            periodEndDate: periodEndDate,     
+          ),
+        );
+        onAmountCalculated(unpaidAmount);
+      }
     }
   }
 
-  /// Override dispose untuk membersihkan semua stream
-  @override
-  void dispose() {
-    _employeeStreamSubscription?.cancel();
-    _absenStreamSubscription?.cancel(); 
-    super.dispose();
-  }
-  
   // =========================================================================
-  // FUNGSI UTILITAS
+  // ⭐️ FUNGSI UTILITAS PENDUKUNG
   // =========================================================================
 
-  /// 1. Mengambil Tanggal Akhir Pembayaran Gaji Terakhir
-  Future<DateTime?> getLastPayrollEndDate(String userId) async {
+  /// Mendapatkan tanggal akhir periode pembayaran gaji terakhir (isPaid: true)
+  Future<DateTime?> getLastPayrollEndDate(String idUser) async {
     try {
       final snapshot = await _db.collection('tbl_payroll')
-          .where('idUser', isEqualTo: userId)
+          .where('idUser', isEqualTo: idUser)
+          .where('isPaid', isEqualTo: true) 
           .orderBy('periodEndDate', descending: true)
           .limit(1)
           .get();
 
-      if (snapshot.docs.isEmpty) {
-        return null; 
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        final Timestamp? timestamp = data['periodEndDate'] as Timestamp?;
+        
+        if (timestamp != null) {
+            return timestamp.toDate();
+        }
       }
-
-      final payrollDoc = AbsenPayrollModel.fromFirestore(snapshot.docs.first);
-      final lastEndDate = payrollDoc.periodEndDate.toDate();
-
-      return DateTime(lastEndDate.year, lastEndDate.month, lastEndDate.day);
-
+      return null;
     } catch (e) {
-      debugPrint("Error fetching last payroll end date for $userId: $e");
+      debugPrint("Gagal mendapatkan last payroll end date: $e");
       return null;
     }
   }
 
-  /// 2. Menghitung Total Jumlah Count Absensi yang Belum Dibayar
-  Future<int> _calculateUnpaidCounts(String userId, DateTime? lastEndDate) async {
-    DateTime startDate;
-    
-    if (lastEndDate == null) {
-      final firstAbsenDate = await _getFirstAbsenceDate(userId);
-      if (firstAbsenDate == null) {
-        return 0;
-      }
-      startDate = firstAbsenDate;
-      
-    } else {
-      startDate = lastEndDate.add(const Duration(days: 1));
+  /// Menghitung total count absen (SUM dari field 'count') yang belum dibayar
+  Future<int> _calculateUnpaidCounts(String idUser, DateTime? lastEndDate) async {
+    Query query = _db.collection('tbl_absen')
+        .where('idUser', isEqualTo: idUser);
+
+    if (lastEndDate != null) {
+      query = query.where('tanggal', isGreaterThan: lastEndDate);
     }
 
-    final now = DateTime.now();
-    final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
-
-    final absenSnapshot = await _db.collection('tbl_absen')
-        .where('idUser', isEqualTo: userId)
-        .where('tanggal', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-        .where('tanggal', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
-        .get();
-
-    int totalUnpaidCounts = 0;
-    for (var doc in absenSnapshot.docs) {
-        // Perbaikan null safety
-      final count = (doc.data()['count'] as num?)?.toInt() ?? 0;
-      totalUnpaidCounts += count; 
-    }
-
-    return totalUnpaidCounts;
-  }
-  
-  /// 3. Fungsi Pembantu untuk mendapatkan tanggal absen paling awal
-  Future<DateTime?> _getFirstAbsenceDate(String userId) async {
     try {
-      final firstAbsenSnapshot = await _db.collection('tbl_absen')
-          .where('idUser', isEqualTo: userId)
+      final snapshot = await query.get();
+      
+      int totalCountSum = 0;
+      
+      for (var doc in snapshot.docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final countValue = (data['count'] as num?)?.toInt() ?? 0;
+          totalCountSum += countValue;
+      }
+      
+      return totalCountSum;
+    } catch (e) {
+      debugPrint("Gagal menghitung unpaid counts: $e");
+      return 0;
+    }
+  }
+
+  /// Mendapatkan tanggal absen pertama jika karyawan belum pernah dibayar (lastEndDate == null)
+  Future<DateTime?> _getFirstAbsenceDate(String idUser) async {
+    try {
+      final snapshot = await _db.collection('tbl_absen')
+          .where('idUser', isEqualTo: idUser)
           .orderBy('tanggal', descending: false)
           .limit(1)
           .get();
-      
-      if (firstAbsenSnapshot.docs.isEmpty) return null;
 
-      // Perbaikan null safety
-      final date = firstAbsenSnapshot.docs.first.data()['tanggal']?.toDate();
-      if (date == null) return null;
-      
-      return DateTime(date.year, date.month, date.day);
-
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        final Timestamp? timestamp = data['tanggal'] as Timestamp?;
+        
+        if (timestamp != null) {
+            final DateTime date = timestamp.toDate();
+            return DateTime(date.year, date.month, date.day); 
+        }
+      }
+      return null;
     } catch (e) {
-        debugPrint("Error fetching first absence date: $e");
-        return null;
+      debugPrint("Gagal mendapatkan first absence date: $e");
+      return null;
     }
   }
 
 
+  // =========================================================================
+  // ⭐️ FUNGSI Aksi Pembayaran
+  // =========================================================================
+
   Future<void> processPayment({
-    required String userId,
-    required double amount,
-    required int totalCounts,
-    required DateTime newStartDate,
+      required UnpaidSalaryModel payrollData, 
   }) async {
-      // Implementasi akan dilakukan di langkah berikutnya
-      return;
+      try {
+          final newPayrollRecord = AbsenPayrollModel(
+            idUser: payrollData.idUser,
+            periodStartDate: Timestamp.fromDate(payrollData.periodStartDate),
+            periodEndDate: Timestamp.fromDate(payrollData.periodEndDate),
+            isPaid: true, 
+            paymentDate: Timestamp.now(),
+            amountPaid: payrollData.unpaidAmount,
+            totalDaysPresent: payrollData.totalUnpaidCounts, 
+          );
+
+          await _db.collection('tbl_payroll').add(newPayrollRecord.toMap());
+          
+          debugPrint("Pembayaran gaji untuk ${payrollData.userName} berhasil dicatat.");
+          
+          // ⚠️ KOREKSI: Panggil ulang pembaruan data setelah aksi pembayaran selesai
+          // Ini berfungsi sebagai fallback cepat, meskipun stream listener juga akan terpicu
+          _listenToUnpaidEmployeeData(); 
+          
+      } catch (e) {
+          throw Exception("Gagal memproses pembayaran: $e");
+      }
+  }
+  
+  @override
+  void dispose() {
+    _employeeStreamSubscription?.cancel();
+    _absenStreamSubscription?.cancel(); 
+    _payrollStreamSubscription?.cancel(); // 🚀 BARU: Batalkan listener Payroll
+    super.dispose();
   }
 }

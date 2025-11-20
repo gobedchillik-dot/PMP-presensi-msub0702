@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/auth_service.dart';
@@ -24,10 +22,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _checkExistingUser(); // ✅ langsung cek sesi aktif dari AuthService
+    _checkExistingUser();
   }
 
-  /// 🔹 Mengecek apakah ada sesi login aktif
   Future<void> _checkExistingUser() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
@@ -62,7 +59,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  /// 🔹 Fungsi login utama
   Future<void> _handleLogin() async {
     if (_emailController.text.trim().isEmpty ||
         _passwordController.text.trim().isEmpty) {
@@ -142,7 +138,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
 
-              // Email
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -165,7 +160,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 16),
 
-              // Password
               TextField(
                 controller: _passwordController,
                 obscureText: true,
@@ -188,7 +182,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
 
-              // Tombol login
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
@@ -201,19 +194,20 @@ class _LoginPageState extends State<LoginPage> {
                   elevation: 5,
                 ),
                 child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 3,
-                        ),
-                      )
-                    : const Text(
-                        "Login",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 3,
+                  ),
+                  )
+                : const Text(
+                    "Login",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16
+                    ),
+                  ),
               ),
             ],
           ),

@@ -43,31 +43,27 @@ Future<Map<String, dynamic>?> signIn(String email, String password) async {
     await _auth.signOut();
   }
 
-  // 🔹 Fungsi untuk mengecek kelengkapan data profil
   static Future<void> checkUserProfileCompleteness(BuildContext context) async {
     final data = await getCurrentUserData();
     if (data == null) return;
 
-    // Field wajib diisi
     final requiredFields = ['name', 'panggilan', 'alamat', 'nohp', 'norek', 'bank'];
 
-    // Cek apakah ada yang kosong (null atau string kosong)
     bool incomplete = requiredFields.any((field) {
       final value = data[field];
       return value == null || value.toString().trim().isEmpty;
     });
 
-    // Jika data belum lengkap, tampilkan alert
     if (incomplete && context.mounted) {
       showDialog(
         context: context,
         builder: (_) => AlertDataWidget(
     onCompletePressed: () {
-      Navigator.pop(context); // Tutup dialog dulu
+      Navigator.pop(context);
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => const ProfilIndexPage(), // Ganti dengan halaman form profil lo
+          builder: (_) => const ProfilIndexPage(),
         ),
       );
     },

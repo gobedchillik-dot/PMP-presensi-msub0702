@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_types_as_parameter_types, unused_catch_choice, avoid_print
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -20,7 +18,6 @@ import 'package:tes_flutter/database/model/payroll.dart';
 class KaryawanHomeController extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // --- State Variables ---
   String _userName = 'Memuat...';
   bool _isLoading = true; 
   List<int> _monthAttendance = []; 
@@ -28,7 +25,6 @@ class KaryawanHomeController extends ChangeNotifier {
   AbsenModel? _todayAttendance; 
   double _estimatedUnpaidSalary = 0.0; 
 
-  // --- Constants Absensi & Gaji ---
   static const int maxAbsencesPerDay = 3; 
   static const double _officeLat = -6.763314;
   static const double _officeLong = 108.480080;
@@ -36,13 +32,11 @@ class KaryawanHomeController extends ChangeNotifier {
   static const String _apiKey = 'vLyZVMDR_GzfyZrBrg-c1079Wcu4Iamw';
   static const String _apiSecret = 'kG8h1bie531eS5lQ4aV6vEDcynPZpWBC';
   
-  // KONSTANTA GAJI
   static const double maxMonthlySalary = 2500000.0;
   static const int workingDaysInMonth = 30;
   static const int maxCountPerDay = 3;
   static const double valuePerCount = maxMonthlySalary / workingDaysInMonth / maxCountPerDay;
 
-  // --- Getters ---
   String get userName => _userName;
   bool get isLoading => _isLoading;
   List<int> get monthAttendance => _monthAttendance; 
@@ -82,7 +76,6 @@ class KaryawanHomeController extends ChangeNotifier {
 
   double get estimatedUnpaidSalary => _estimatedUnpaidSalary; 
 
-  // --- Constructor dan Inisialisasi ---
   KaryawanHomeController() {
     _idUser = AuthService.currentUser?.uid;
     _loadUserName();
@@ -94,7 +87,6 @@ class KaryawanHomeController extends ChangeNotifier {
     }
   }
 
-  // --- Data Loading & Listening ---
   Future<void> _loadUserName() async {
     final user = AuthService.currentUser;
     if (user == null) {
@@ -114,7 +106,6 @@ class KaryawanHomeController extends ChangeNotifier {
     } 
   }
 
-  // Cari dokumen absensi hari ini
   Future<DocumentSnapshot<Map<String, dynamic>>?> _getTodayAttendanceDoc(String userId) async {
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day, 0, 0, 0);
@@ -129,7 +120,6 @@ class KaryawanHomeController extends ChangeNotifier {
     return snapshot.docs.isNotEmpty ? snapshot.docs.first : null;
   }
 
-  // Stream untuk mendapatkan data absensi bulanan secara real-time
   void _listenToAttendance() {
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
@@ -165,7 +155,6 @@ class KaryawanHomeController extends ChangeNotifier {
       _monthAttendance = newAttendanceCounts; 
       _todayAttendance = latestTodayData; 
       
-      // Panggil fungsi hitung gaji setiap kali data absensi di-update
       await _updateEstimatedSalary(); 
       
       if (_isLoading) {
@@ -183,10 +172,6 @@ class KaryawanHomeController extends ChangeNotifier {
     });
   }
   
-  // =======================================================
-  // LOGIKA PERHITUNGAN GAJI
-  // =======================================================
-
   Future<void> _updateEstimatedSalary() async {
     if (_idUser == null) return;
     
@@ -198,7 +183,6 @@ class KaryawanHomeController extends ChangeNotifier {
     notifyListeners();
   }
   
-  // --- FUNGSI UTILITAS GAJI (Perhitungan Waktu) ---
 
   Future<DateTime?> _getLastPayrollEndDate(String userId) async {
     try {
@@ -269,10 +253,7 @@ class KaryawanHomeController extends ChangeNotifier {
     }
   }
 
-
-  // --- Logic Absensi (Diperbaiki) ---
   Future<String?> _detectNewFace(String imageBase64) async {
-    // ... (Logika deteksi wajah)
     final detectResponse = await http.post(
       Uri.parse('https://api-us.faceplusplus.com/facepp/v3/detect'),
       body: {'api_key': _apiKey, 'api_secret': _apiSecret, 'image_base64': imageBase64},
@@ -301,7 +282,6 @@ class KaryawanHomeController extends ChangeNotifier {
     notifyListeners();
     
     try {
-      // 0. Cek batasan 3x
       if (currentAbsenceCount >= maxAbsencesPerDay) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -313,7 +293,6 @@ class KaryawanHomeController extends ChangeNotifier {
         return;
       }
 
-      // 1. Cek izin lokasi
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
         permission = await Geolocator.requestPermission();
@@ -324,7 +303,6 @@ class KaryawanHomeController extends ChangeNotifier {
         return;
       }
 
-      // 2. Ambil lokasi & 3. Deteksi fake GPS & 4. Cek radius
       final position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high));
       if (position.isMocked) {
         if (!context.mounted) return;
@@ -338,7 +316,6 @@ class KaryawanHomeController extends ChangeNotifier {
         return;
       }
 
-      // 5. Ambil selfie & 6. Kompres gambar
       final picker = ImagePicker();
       final image = await picker.pickImage(source: ImageSource.camera);
       if (image == null) return;
@@ -353,7 +330,6 @@ class KaryawanHomeController extends ChangeNotifier {
       final imageBytes = await File(compressedResult.path).readAsBytes();
       final imageBase64 = base64Encode(imageBytes);
 
-      // 7. Ambil data wajah terdaftar
       final userDoc = await _db.collection('tbl_user').doc(_idUser).get();
       final faceId = userDoc.data()?['face_id'];
       if (faceId == null) {
@@ -362,7 +338,6 @@ class KaryawanHomeController extends ChangeNotifier {
         return;
       }
 
-      // 8. Deteksi wajah baru & 9. Bandingkan wajah
       final newFaceToken = await _detectNewFace(imageBase64);
       if (newFaceToken == null) {
         if (!context.mounted) return;
@@ -371,12 +346,10 @@ class KaryawanHomeController extends ChangeNotifier {
       }
       final confidence = await _compareFaces(faceId, newFaceToken);
       
-      // 10. Jika confidence cukup tinggi
       if (confidence != null && confidence >= 70) {
         final now = DateTime.now();
         final startOfDay = DateTime(now.year, now.month, now.day, 0, 0, 0);
         
-        // Buat model detail absensi sesi ini
         final newDetail = AbsenDetailModel(
           timestamp: Timestamp.now(),
           latitude: position.latitude,
@@ -386,18 +359,16 @@ class KaryawanHomeController extends ChangeNotifier {
           time: "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}",
         );
 
-        // Ambil dokumen hari ini
         final todayDoc = await _getTodayAttendanceDoc(_idUser!);
-        int newCount; // 🔥 Inisiasi variabel count baru
+        int newCount; 
 
         if (todayDoc == null) {
-          // Kasus: Absen Sesi 1 (Buat dokumen baru)
-          newCount = 1; // Sesi 1
+          newCount = 1; 
           final newAbsenModel = AbsenModel(
             id: '', 
             idUser: _idUser!,
             tanggal: Timestamp.fromDate(startOfDay),
-            count: newCount, // Gunakan newCount
+            count: newCount,
             status: true,
             lastUpdate: Timestamp.now(),
             times: [newDetail],
@@ -405,13 +376,12 @@ class KaryawanHomeController extends ChangeNotifier {
           await _db.collection('tbl_absen').add(newAbsenModel.toMap());
 
         } else {
-          // Kasus: Absen Sesi 2 atau 3 (Update dokumen yang sudah ada)
           final existingModel = AbsenModel.fromFirestore(todayDoc);
-          newCount = existingModel.count + 1; // 🔥 Hitung nilai yang baru
+          newCount = existingModel.count + 1; 
           final updatedTimes = List<AbsenDetailModel>.from(existingModel.times)..add(newDetail);
 
           final updateData = {
-            'count': newCount, // 🔥 Gunakan newCount eksplisit
+            'count': newCount,
             'status': true,
             'lastUpdate': Timestamp.now(),
             'times': updatedTimes.map((e) => e.toMap()).toList(),
@@ -422,7 +392,6 @@ class KaryawanHomeController extends ChangeNotifier {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            // 🔥 Gunakan newCount yang baru dihitung
             content: Text("Absensi Sesi $newCount berhasil disimpan!"), 
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
@@ -445,8 +414,6 @@ class KaryawanHomeController extends ChangeNotifier {
         SnackBar(content: Text("Gagal absen: $e"), backgroundColor: Colors.redAccent),
       );
     } finally {
-      // Stream akan otomatis memperbarui _todayAttendance dan _isLoading
-      // Tapi kita set isLoading ke false untuk menghindari tampilan loading yang berkepanjangan
       _isLoading = false; 
       notifyListeners();
     }

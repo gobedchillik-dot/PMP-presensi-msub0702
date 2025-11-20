@@ -130,7 +130,7 @@ class _KaryawanHomePageState extends State<KaryawanHomePage> {
           child: ProgressItem(
            name: "Kehadiran Bulan Ini",
            value: controller.daysInMonth > 0
-             ? controller.totalPresentDays / controller.daysInMonth
+             ? (controller.totalPresentDays / controller.daysInMonth) * 2
              : 0,
           ),
          ),
