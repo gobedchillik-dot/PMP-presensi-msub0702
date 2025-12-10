@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:tes_flutter/admin/pages/gmv/index.dart';
+import 'package:tes_flutter/admin/pages/keuangan/index.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
 import 'stat_card.dart';
 
@@ -41,7 +42,10 @@ class AdminSummaryCards extends StatelessWidget {
           color: Colors.greenAccent.shade400,
           icon: Iconsax.money_4,
           onTap: () {
-            // Arahkan ke halaman yang kamu mau
+            Navigator.push(
+              context,
+              createRoute(const KeuanganIndexPage()),
+            );
           },
         ),
       ],

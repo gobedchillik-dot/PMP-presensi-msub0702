@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tes_flutter/karyawan/pages/detail_absen/index.dart';
 import 'package:tes_flutter/utils/route_generator.dart';
 import '../pages/profil/index.dart';
 import 'package:tes_flutter/auth/auth_service.dart';
@@ -98,6 +99,11 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                     );
                 } else if (value == 'keluar') {
                   _handleLogout(context);
+                } else if (value == 'Detail absen') {
+                  Navigator.push(
+                    context,
+                    createRoute(const DetailAbsenPage()),
+                  );
                 }
               },
               itemBuilder: (context) => [

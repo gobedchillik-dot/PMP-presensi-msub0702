@@ -19,7 +19,7 @@ class CustomAppTitle extends StatelessWidget {
         IconButton(
           onPressed: () {
             if (backToPage != null) {
-              Navigator.push(
+              Navigator.pop(
                 context,
                 reverseCreateRoute(backToPage!),
               );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:tes_flutter/admin/pages/keuangan/add.dart';
+import 'package:tes_flutter/admin/pages/keuangan/cashflow_history_page.dart';
 import 'package:tes_flutter/admin/pages/keuangan/edit.dart';
 import 'package:tes_flutter/admin/widget/cashflow.dart';
 import 'package:tes_flutter/admin/widget/data_row.dart';
@@ -276,12 +277,39 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                     const SizedBox(height: 24),
 
                     AnimatedFadeSlide(
-                      delay: 0.2,
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            final String adminName = "Admin";
+                      delay: 0.7,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    createRoute(
+                                        CashflowHistoryPage()));
+                              },
+                              icon: const Icon(Icons.history,
+                                  color: Colors.black),
+                              label: const Text("Histori Cashflow"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color(0xFF00BCD4),
+                                foregroundColor: Colors.black,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      bottomLeft:
+                                          Radius.circular(12)),
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () async{
+                                final String adminName = "Admin";
 
                             await generateCashflowPdf(
                               nama: adminName,
@@ -301,24 +329,26 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                               }).toList(),
                               cashflowList: pdfList, // Gunakan list yang sudah di-prepare
                             );
-                          },
-                          icon:
-                              const Icon(Icons.print, color: Colors.black),
-                          label: const Text(
-                            "Cetak cashflow",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00BCD4),
-                            foregroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              },
+                              icon: const Icon(Icons.print,
+                                  color: Colors.black),
+                              label: const Text("Cetak cashflow"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color(0xFF00BCD4),
+                                foregroundColor: Colors.black,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(12),
+                                      bottomRight:
+                                          Radius.circular(12)),
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                              ),
                             ),
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 14),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 24),

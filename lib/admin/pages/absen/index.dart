@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tes_flutter/admin/base_page.dart';
 import 'package:tes_flutter/admin/home_page.dart';
-import 'package:tes_flutter/admin/widget/attendance_tracker_section.dart';
 import 'package:tes_flutter/admin/widget/tabel_absensi.dart';
 import 'package:tes_flutter/admin/widget/tittle_app.dart';
 import 'package:tes_flutter/ui_page/font_size_patern.dart';
@@ -76,15 +75,6 @@ class _AbsenIndexPageState extends State<AbsenIndexPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
-            AnimatedFadeSlide(
-              delay:0.4,
-              child: CustomSubtitle(text: "Absen tracker")
-            ),
-            AnimatedFadeSlide(
-              delay: 0.5,
-              child: const AttendanceTrackerSection(employeeData: [],),
-            ),
             const SizedBox(height: 24),
           ],
         ),

@@ -108,7 +108,6 @@ class _SalaryListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Kode ini sekarang aman karena payrollData.periodStartDate pasti DateTime
-    final String formattedPeriodDate = DateFormat('d MMM', 'id_ID').format(payrollData.periodStartDate);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -140,7 +139,7 @@ class _SalaryListItem extends StatelessWidget {
               ),
               // Tambahkan keterangan total counts sebagai info
               Text(
-                "($formattedPeriodDate - Sekarang) | Total jam: ${payrollData.totalUnpaidCounts * 2} jam",
+                "Total jam: ${payrollData.totalUnpaidCounts * 2} jam",
                 style: const TextStyle(color: Colors.white54, fontSize: 10),
               ),
             ],

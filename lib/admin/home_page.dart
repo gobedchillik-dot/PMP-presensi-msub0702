@@ -42,6 +42,7 @@ class AdminHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GmvController()),
@@ -105,7 +106,7 @@ class AdminHomePage extends StatelessWidget {
                         children: const [
                           CustomSubtitle(text: "Grafik GMV"),
                           CustomInfo(
-                            text: "Periode : 1 November - 30 November 2025",
+                            text: "Periode : 1 Desember 2025 - 31 Desember 2025",
                           ),
                         ],
                       ),
