@@ -24,7 +24,6 @@ class KaryawanHomeController extends ChangeNotifier {
   List<int> _monthAttendance = [];
   String? _idUser;
   AbsenModel? _todayAttendance;
-  double _estimatedUnpaidSalary = 0.0;
 
   StreamSubscription<QuerySnapshot>? _attendanceSubscription;
   StreamSubscription<QuerySnapshot>? _payrollSubscription;
@@ -278,7 +277,6 @@ class KaryawanHomeController extends ChangeNotifier {
     }
 
     _totalUnpaidCounts = totalUnpaidCounts;
-    _estimatedUnpaidSalary = _totalUnpaidCounts * valuePerCount;
   }
 
   // Tanggal absen pertama
