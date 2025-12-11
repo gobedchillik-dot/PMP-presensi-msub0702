@@ -5,7 +5,7 @@ import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart';
 class FilterBar extends StatelessWidget {
  const FilterBar({super.key});
  
- final filters = const ["Semua", "Hari ini", "7 Hari", "1 Bulan"];
+ final filters = const ["Semua", "Hari ini", "7 Hari", "Bulan ini"];
 
  @override
  Widget build(BuildContext context) {

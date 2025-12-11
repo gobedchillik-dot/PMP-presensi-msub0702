@@ -179,8 +179,20 @@ class _KaryawanIndexPageState extends State<KaryawanIndexPage> {
                                 Expanded(
                                   flex: 4,
                                   child: Text(
-                                    user.email,
+                                    user.email ?? '-',
+                                    textAlign: TextAlign.center,
                                     style: const TextStyle(color: Colors.white),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    user.isActive == true ? "Aktif" : "Non-aktif",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: user.isActive == true
+                                        ? Colors.greenAccent
+                                        : Colors.redAccent),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),

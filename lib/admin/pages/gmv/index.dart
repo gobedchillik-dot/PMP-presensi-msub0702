@@ -56,7 +56,7 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
             const SizedBox(height: 20),
 
             AnimatedFadeSlide(
-              delay: 0.8,
+              delay: 0.2,
               child: Row(
                 children: [
                   Expanded(
@@ -105,7 +105,7 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
             const SizedBox(height: 24),
 
             AnimatedFadeSlide(
-              delay: 0.2,
+              delay: 0.3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -119,7 +119,7 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
             ),
 
             AnimatedFadeSlide(
-              delay: 0.3,
+              delay: 0.4,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -129,13 +129,13 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
               ),
             ),
             const AnimatedFadeSlide(
-              delay: 0.4,
+              delay: 0.5,
               child: SalesChartSection(),
             ),
             const SizedBox(height: 24),
 
             AnimatedFadeSlide(
-              delay: 0.5,
+              delay: 0.6,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -143,7 +143,7 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
                   CustomInfo(text: dateRangeText),
                   const SizedBox(height: 8),
                   const AnimatedFadeSlide(
-                    delay: 0.6,
+                    delay: 0.7,
                     child: TabelGmv(),
                   ),
                 ],
@@ -152,7 +152,7 @@ class _GmvIndexPageState extends State<GmvIndexPage> {
             const SizedBox(height: 24),
 
             AnimatedFadeSlide(
-              delay: 0.7,
+              delay: 0.8,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

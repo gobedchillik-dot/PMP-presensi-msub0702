@@ -3,7 +3,7 @@ import 'package:tes_flutter/utils/route_generator.dart';
 
 class CustomAppTitle extends StatelessWidget {
   final String title;
-  // Halaman tujuan saat tombol kembali ditekan. Jika null, akan menggunakan Navigator.pop.
+  // Halaman tujuan saat tombol kembali ditekan. Jika null, akan menggunakan Navigator.pushReplacement.
   final Widget? backToPage; 
 
   const CustomAppTitle({
@@ -19,7 +19,7 @@ class CustomAppTitle extends StatelessWidget {
         IconButton(
           onPressed: () {
             if (backToPage != null) {
-              Navigator.pop(
+              Navigator.pushReplacement(
                 context,
                 reverseCreateRoute(backToPage!),
               );

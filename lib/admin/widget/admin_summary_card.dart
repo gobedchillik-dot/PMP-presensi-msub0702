@@ -27,7 +27,7 @@ class AdminSummaryCards extends StatelessWidget {
           color: Colors.amberAccent.shade400,
           icon: Iconsax.chart,
           onTap: () {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               createRoute(const GmvIndexPage()),
             );
@@ -42,7 +42,7 @@ class AdminSummaryCards extends StatelessWidget {
           color: Colors.greenAccent.shade400,
           icon: Iconsax.money_4,
           onTap: () {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               createRoute(const KeuanganIndexPage()),
             );

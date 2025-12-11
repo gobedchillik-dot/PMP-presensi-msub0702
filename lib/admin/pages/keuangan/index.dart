@@ -195,7 +195,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
               delay: 0.1,
               child: CustomAppTitle(
                 title: "Keuangan",
-                backToPage: const AdminHomePage(),
+                backToPage: AdminHomePage(),
               ),
             ),
 
@@ -257,7 +257,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AnimatedFadeSlide(
-                      delay: 0.3,
+                      delay: 0.2,
                       child: ProfileSectionWrapper(
                         title: "Rangkuman keuangan",
                         children: [
@@ -277,13 +277,13 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                     const SizedBox(height: 24),
 
                     AnimatedFadeSlide(
-                      delay: 0.7,
+                      delay: 0.3,
                       child: Row(
                         children: [
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                Navigator.push(
+                                Navigator.pushReplacement(
                                     context,
                                     createRoute(
                                         CashflowHistoryPage()));
@@ -489,7 +489,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                Navigator.push(context,
+                                Navigator.pushReplacement(context,
                                     createRoute(const KeuanganEditPage()));
                               },
                               icon: const Icon(Icons.edit,
@@ -513,7 +513,7 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                Navigator.push(context,
+                                Navigator.pushReplacement(context,
                                     createRoute(const KeuanganAddPage()));
                               },
                               icon: const Icon(Icons.add_circle,
@@ -540,14 +540,14 @@ class _KeuanganIndexPageState extends State<KeuanganIndexPage> {
                     const SizedBox(height: 24),
 
                     AnimatedFadeSlide(
-                      delay: 0.7,
+                      delay: 0.8,
                       child:
                           const OperationalExpenseCard(initialDelay: 0.7),
                     ),
                     const SizedBox(height: 24),
 
                     AnimatedFadeSlide(
-                      delay: 0.8,
+                      delay: 0.9,
                       child: const OtherExpenseCard(
                           initialDelay: 0.8),
                     ),

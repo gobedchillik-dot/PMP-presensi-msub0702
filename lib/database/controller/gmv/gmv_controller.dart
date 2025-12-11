@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../model/gmv.dart';
 
+// --- (Model WeeklyGmvSummary tetap sama) ---
 class WeeklyGmvSummary {
   final int mingguKe;
   final double total;
@@ -22,7 +23,8 @@ class GmvController with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collectionName = 'tbl_gmv';
 
-  int _selectedFilterIndex = 3;
+  // _selectedFilterIndex = 3 (Bulan Ini) dijadikan default
+  int _selectedFilterIndex = 3; 
   int get selectedFilterIndex => _selectedFilterIndex;
 
   DateTime? _startDate;
@@ -45,8 +47,8 @@ class GmvController with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   GmvController() {
-    setFilter(_selectedFilterIndex);
-    _initializeWeeklySummaryStream();
+    // ⚠️ KOREKSI: Panggil setFilter saat inisialisasi untuk memicu pengambilan data
+    setFilter(_selectedFilterIndex); 
   }
 
   void _setLoading(bool value) {
@@ -54,28 +56,41 @@ class GmvController with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<WeeklyGmvSummary>> _processWeeklySummary(List<GmvModel> allGmvData) async {
-    final now = DateTime.now();
-    final firstDayOfMonth = DateTime(now.year, now.month, 1);
-    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+  // Fungsi utilitas untuk mendapatkan hari terakhir dalam bulan
+  DateTime _getLastDayOfMonth(DateTime date) {
+    return DateTime(date.year, date.month + 1, 0, 23, 59, 59);
+  }
 
+  // ⚠️ KOREKSI: Fungsi pemrosesan sekarang menerima startDate dan endDate
+  Future<List<WeeklyGmvSummary>> _processWeeklySummary(
+      List<GmvModel> allGmvData, DateTime startPeriod, DateTime endPeriod) async {
+    
+    // Perhitungan mingguan sekarang didasarkan pada rentang startPeriod - endPeriod
     List<WeeklyGmvSummary> summaries = [];
     List<double> weeklyTotals = [];
     final DateFormat formatter = DateFormat('dd MMM');
 
-    for (int i = 1; i <= 4; i++) {
+    // Asumsi: Kita membagi rentang waktu menjadi 4 bagian (untuk tampilan mingguan)
+    // Walaupun logika ini kurang ideal untuk rentang waktu kustom,
+    // kita pertahankan untuk memenuhi kebutuhan tampilan 4-minggu pada grafik.
+    
+    // Hitung durasi total dalam hari
+    final totalDays = endPeriod.difference(startPeriod).inDays + 1;
+    final daysPerInterval = (totalDays / 4).ceil(); // Pembagian rata
+
+    for (int i = 0; i < 4; i++) {
       DateTime start;
       DateTime end;
+      
+      start = startPeriod.add(Duration(days: i * daysPerInterval));
+      end = start.add(Duration(days: daysPerInterval - 1)).copyWith(hour: 23, minute: 59, second: 59);
 
-      if (i < 4) {
-        start = firstDayOfMonth.add(Duration(days: (i - 1) * 7));
-        end = start.add(const Duration(days: 6)).copyWith(hour: 23, minute: 59, second: 59);
-      } else {
-        start = firstDayOfMonth.add(const Duration(days: 21));
-        end = lastDayOfMonth.copyWith(hour: 23, minute: 59, second: 59);
+      // Pastikan interval akhir tidak melewati batas akhir periode
+      if (end.isAfter(endPeriod)) {
+        end = endPeriod;
       }
 
-      if (start.isAfter(lastDayOfMonth)) break;
+      if (start.isAfter(endPeriod)) break; // Berhenti jika sudah melewati periode
 
       final gmvDataThisWeek = allGmvData.where((item) {
         final itemDate = item.tanggal.toDate();
@@ -87,13 +102,13 @@ class GmvController with ChangeNotifier {
       weeklyTotals.add(totalGmv);
 
       bool isUp = false;
-      if (i > 1 && weeklyTotals.length > 1) {
-        isUp = totalGmv > weeklyTotals[i - 2];
+      if (i > 0 && weeklyTotals.length > 1) {
+        isUp = totalGmv > weeklyTotals[i - 1];
       }
 
       summaries.add(
         WeeklyGmvSummary(
-          mingguKe: i,
+          mingguKe: i + 1,
           total: totalGmv,
           isUp: isUp,
           dateRange: '${formatter.format(start)} - ${formatter.format(end)}',
@@ -103,31 +118,39 @@ class GmvController with ChangeNotifier {
 
     return summaries;
   }
-
-  void _initializeWeeklySummaryStream() {
+  
+  // ⚠️ FUNGSI BARU: Fungsi untuk memuat data GMV berdasarkan periode tertentu
+  void fetchGmvDataForPeriod(DateTime start, DateTime end) {
     _gmvSubscription?.cancel();
-
-    final now = DateTime.now();
-    final firstDayOfMonth = DateTime(now.year, now.month, 1);
-    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+    _setLoading(true);
 
     _gmvSubscription = _firestore
         .collection(_collectionName)
-        .where('tanggal', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDayOfMonth))
-        .where('tanggal', isLessThanOrEqualTo: Timestamp.fromDate(lastDayOfMonth))
+        // Gunakan parameter start dan end yang fleksibel
+        .where('tanggal', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('tanggal', isLessThanOrEqualTo: Timestamp.fromDate(end))
         .snapshots()
         .listen((snapshot) async {
           final allGmvData = snapshot.docs.map((doc) {
+            // Perlu memastikan casting aman, asumsikan GmvModel.fromFirestore sudah memadai
             return GmvModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>, null);
           }).toList();
 
-          final newSummaries = await _processWeeklySummary(allGmvData);
+          // Panggil pemrosesan dengan rentang waktu yang sesuai
+          final newSummaries = await _processWeeklySummary(allGmvData, start, end); 
 
           _weeklySummary = newSummaries;
           _weeklySummaryController.sink.add(newSummaries);
+          _setLoading(false); // Selesai memuat
           notifyListeners();
-        }, onError: (error) {});
+        }, onError: (error) {
+           _setLoading(false);
+           // Tambahkan logging error di sini
+        });
   }
+
+  // ⚠️ FUNGSI LAMA DIGANTI
+  // void _initializeWeeklySummaryStream() {} // FUNGSI INI DIHAPUS
 
   Future<bool> store({required double gmv, required DateTime tanggal}) async {
     _setLoading(true);
@@ -135,6 +158,10 @@ class GmvController with ChangeNotifier {
       final newGmv = GmvModel(id: '', gmv: gmv, tanggal: Timestamp.fromDate(tanggal));
       await _firestore.collection(_collectionName).add(newGmv.toFirestore());
       _setLoading(false);
+      // PENTING: Panggil ulang pengambilan data untuk update real-time
+      if (_startDate != null && _endDate != null) {
+         fetchGmvDataForPeriod(_startDate!, _endDate!);
+      }
       return true;
     } catch (_) {
       _setLoading(false);
@@ -142,6 +169,8 @@ class GmvController with ChangeNotifier {
     }
   }
 
+  // --- (update, destroy, filteredGmvStream, allGmvStream, show tetap sama) ---
+  
   Future<bool> update(GmvModel gmvToUpdate) async {
     _setLoading(true);
     try {
@@ -207,30 +236,44 @@ class GmvController with ChangeNotifier {
         .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
   }
 
+  // ⚠️ KOREKSI UTAMA ADA DI FUNGSI INI
   void setFilter(int index) {
     _selectedFilterIndex = index;
     final now = DateTime.now();
 
     switch (index) {
-      case 1:
+      case 1: // Hari Ini
         _startDate = DateTime(now.year, now.month, now.day);
         _endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
         break;
-      case 2:
+      case 2: // 7 Hari Terakhir
         _startDate = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
         _endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
         break;
-      case 3:
-        _startDate = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 29));
-        _endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      case 3: // ⬅️ PERUBAHAN UTAMA: Bulan Ini
+        _startDate = DateTime(now.year, now.month, 1); // Tanggal 1 Bulan Ini
+        _endDate = _getLastDayOfMonth(now);             // Akhir Bulan Ini
         break;
-      case 0:
+      case 0: 
+        final lastMonthStart = DateTime(now.year, now.month - 1, 1); 
+        
+        _startDate = lastMonthStart; // Rentang Awal
+        _endDate = _getLastDayOfMonth(now); // Rentang Akhir (Akhir bulan ini)
         break;
       default:
         break;
     }
 
     notifyListeners();
+    
+    // ⚠️ PENTING: Memicu pengambilan data baru jika tanggal telah diatur
+    if (_startDate != null && _endDate != null) {
+        fetchGmvDataForPeriod(_startDate!, _endDate!);
+    } else if (_selectedFilterIndex == 0) {
+        // Jika filter 'Semua Data', Anda perlu mekanisme fetch semua data
+        // (Namun, untuk grafik 4-mingguan, kita biasanya tetap butuh rentang waktu.
+        // Asumsi kita hanya fokus pada 3 filter utama untuk grafik)
+    }
   }
 
   Future<GmvModel?> show(String id) async {

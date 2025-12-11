@@ -1,4 +1,3 @@
-// lib/admin/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tes_flutter/admin/base_page.dart';
@@ -7,10 +6,7 @@ import 'package:tes_flutter/admin/widget/attendance_tracker_section.dart';
 import 'package:tes_flutter/admin/widget/sales_chart_section.dart';
 import 'package:tes_flutter/database/controller/absen/payroll_controller.dart';
 import 'package:tes_flutter/database/controller/gmv/gmv_controller.dart';
-// ⚠️ Pastikan Anda mengimpor UnpaidSalaryModel di sini jika digunakan secara eksplisit,
-// tetapi karena kita menggunakannya melalui Controller, cukup pastikan Controller sudah diimpor.
-
-import 'package:tes_flutter/database/model/unpaid_gaji.dart'; // Impor Model
+import 'package:tes_flutter/database/model/unpaid_gaji.dart';
 import 'package:tes_flutter/ui_page/format_money.dart';
 import 'package:tes_flutter/ui_page/shimmer_page_loader.dart';
 import 'package:tes_flutter/utils/animated_fade_slide.dart';
@@ -21,19 +17,42 @@ import 'package:tes_flutter/database/controller/CashflowController.dart';
 class AdminHomePage extends StatelessWidget {
   const AdminHomePage({super.key});
 
-  // ⚠️ KOREKSI UTAMA: Mengubah tipe input dari List<Map> menjadi List<UnpaidSalaryModel>
+  // Fungsi utilitas untuk mendapatkan hari terakhir dalam bulan.
+  // Digunakan untuk menentukan tanggal akhir periode.
+  DateTime _getLastDayOfMonth(DateTime date) {
+    // Membuat tanggal pertama bulan berikutnya, kemudian dikurangi satu hari.
+    return DateTime(date.year, date.month + 1, 0);
+  }
+
+  // Fungsi utilitas untuk mendapatkan string periode dinamis.
+  String _getDynamicPeriod() {
+    final now = DateTime.now();
+    final lastDay = _getLastDayOfMonth(now);
+
+    // Menggunakan list nama bulan untuk format yang rapi (karena tidak menggunakan package intl)
+    const List<String> monthNames = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    
+    final currentMonthName = monthNames[now.month];
+    final currentYear = now.year;
+    final lastDayOfMonth = lastDay.day;
+
+    return "Periode : 1 $currentMonthName $currentYear - $lastDayOfMonth $currentMonthName $currentYear";
+  }
+
   List<Map<String, dynamic>> _mapPayrollDataToTracker(
       List<UnpaidSalaryModel> payrollList) {
     const maxAbsence = 30;
 
     return payrollList.map((data) {
-      // Mengakses properti langsung dari objek Model, bukan dari Map
-      final totalUnpaid = data.totalUnpaidCounts; 
+      final totalUnpaid = data.totalUnpaidCounts;
       final progress = (totalUnpaid / maxAbsence).clamp(0.0, 1.0);
 
       return {
         'idUser': data.idUser,
-        'userName': data.userName, // Mengakses properti Model
+        'userName': data.userName,
         'totalUnpaidCounts': totalUnpaid,
         'progressValue': progress,
       };
@@ -42,6 +61,8 @@ class AdminHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ⚠️ MENGAMBIL PERIODE DI SINI
+    final currentPeriod = _getDynamicPeriod(); // <-- Digunakan di bawah
 
     return MultiProvider(
       providers: [
@@ -55,8 +76,6 @@ class AdminHomePage extends StatelessWidget {
             CashflowController>(
           create: (_) => CashflowController(),
           update: (context, gmv, pengeluaran, payroll, controller) {
-            // MENTOR'S NOTE: Pastikan CashflowController.updateSources juga sudah
-            // diupdate untuk menerima List<UnpaidSalaryModel> dari payroll.
             controller!.updateSources(gmv, pengeluaran, payroll);
             return controller;
           },
@@ -66,12 +85,10 @@ class AdminHomePage extends StatelessWidget {
         builder: (context) {
           final gmvController = context.watch<GmvController>();
           
-          // Asumsi MoneyFormatter.format menerima double/num
           final formattedGmv = MoneyFormatter.format(
               gmvController.weeklySummary.fold<double>(
                   0.0, (sum, item) => sum + item.total));
                   
-          // Perhitungan Profit (asumsi 5% margin)
           final formattedProfit = MoneyFormatter.format(
               gmvController.weeklySummary.fold<double>(
                       0.0, (sum, item) => sum + item.total) *
@@ -103,10 +120,11 @@ class AdminHomePage extends StatelessWidget {
                       delay: 0.3,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          CustomSubtitle(text: "Grafik GMV"),
+                        children: [
+                          const CustomSubtitle(text: "Grafik GMV"),
+                          // ➡️ KOREKSI: Menggunakan currentPeriod yang dinamis
                           CustomInfo(
-                            text: "Periode : 1 Desember 2025 - 31 Desember 2025",
+                            text: currentPeriod, 
                           ),
                         ],
                       ),
@@ -127,10 +145,9 @@ class AdminHomePage extends StatelessWidget {
                       child: Consumer<PayrollController>(
                         builder: (_, payrollController, __) {
                           if (payrollController.isLoading) {
-                            // Asumsi SkeletonBox adalah widget loader
-                            return const SkeletonBox(); // Mengganti SkeletonBox dengan ShimmerPageLoader
+                            return const SkeletonBox();
                           }
-                          // ⚠️ KOREKSI: Meneruskan List<UnpaidSalaryModel> ke fungsi mapping
+                          
                           final trackerData = _mapPayrollDataToTracker(
                             payrollController.unpaidEmployeeList);
                             

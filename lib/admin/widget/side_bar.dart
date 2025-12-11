@@ -221,7 +221,7 @@ Navigator.push(
                     await AuthService.signOut(); // ✅ Logout dari Firebase
 
                     if (context.mounted) {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                         context,
                         reverseCreateRoute(const LoginPage()),
                     );
